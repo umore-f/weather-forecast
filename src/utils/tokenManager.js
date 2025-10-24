@@ -16,7 +16,7 @@ class SimpleTokenManager {
     try {
       const privateKey = await importPKCS8(this.config.privateKey, 'EdDSA');
       const iat = Math.floor(Date.now() / 1000) - 30;
-      const exp = iat + 1800;
+      const exp = iat + 3600;
 
       const token = await new SignJWT({
         sub: this.config.projectId,
