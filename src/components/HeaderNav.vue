@@ -1,10 +1,14 @@
 <template>
-  <div><el-button :icon="User" circle /></div>
+  <div>
+    <el-button :icon="User" circle style="width: 40px;height: 40px;; text-align: center;"/>
+    <span>Hello,</span>
+    <span>Jack Grealish</span>
+  </div>
   <div class="header" style="margin-right: 20px;">
     <el-input style="width: 240px;" placeholder="Please input" clearable :prefix-icon="Search" class="myInput"
       v-model="cityName"/>
   </div>
-  <el-button :icon="Bell" circle />
+  <el-button :icon="Bell" circle style="width: 40px;height: 40px;"/>
   <!-- @keyup.enter="searchCityName" -->
 </template>
 <script setup>
@@ -42,5 +46,8 @@ import { Search, Bell, User } from '@element-plus/icons-vue'
 <style scoped>
 div:nth-child(1) {
   margin-right: auto;
+}
+span {
+  line-height: 40px;
 }
 </style>

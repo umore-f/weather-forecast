@@ -1,5 +1,6 @@
 <script setup>
 import HeaderNav from './components/HeaderNav.vue';
+import WeatherCard from './components/WeatherCard.vue';
 </script>
 
 <template>
@@ -8,11 +9,11 @@ import HeaderNav from './components/HeaderNav.vue';
       <el-aside style="background-color: antiquewhite; width: 8vw;">Aside</el-aside>
       <el-main style="background-color: bisque;">
         <el-container>
-          <el-header style="justify-content: end; display: flex;"><HeaderNav/></el-header>
-          <el-main>Main</el-main>
+          <el-header style="justify-content: end; display: flex; align-items: center"><HeaderNav/></el-header>
+          <el-main><WeatherCard/></el-main>
         </el-container>
       </el-main>
-      <el-aside style="background-color: antiquewhite; width: 20vw;">Aside</el-aside>
+      <el-aside style="background-color: antiquewhite; width: 16vw;">Aside</el-aside>
     </el-container>
   </div>
 </template>
