@@ -6,6 +6,7 @@ import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { fileURLToPath, URL } from 'node:url'
 import process from 'node:process'
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // 加载环境变量

@@ -3,6 +3,8 @@ export const cityApi = {
   // 城市搜索
   searchCity(location) {
     if (!location || typeof location !== 'string') {
+      console.log(typeof(location));
+
       console.error('location参数必须是非空字符串')
       return Promise.reject(new Error('城市名称不能为空'))
     }
