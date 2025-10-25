@@ -1,40 +1,35 @@
 <template>
   <div style="height: 95%; background-color: gray;display: flex;justify-content: space-between;">
     <div class="big-card">
-      <div><svg class="big-icon" aria-hidden="true">
-          <use xlink:href="#icon-tianqitubiao_qing"></use>
-        </svg></div>
+      <div>{{ weatherStore.weatherInfo.icon }}</div>
       <div class="main">
-        <span>温度℃</span>
-        <span>体感温度℃</span>
-        <span>晴</span>
+        <span>{{weatherStore.weatherInfo.temp}}℃</span>
+        <span>体感温度{{weatherStore.weatherInfo.feelsLike}}℃</span>
+        <span>{{ weatherStore.weatherInfo.text }}</span>
       </div>
       <div class="footer">
         <span>
           <svg class="small-icon" aria-hidden="true">
             <use xlink:href="#icon-wind"></use>
-          </svg>风速
+          </svg>{{weatherStore.weatherInfo.windSpeed}}公里/小时
         </span>
         <span>
           <svg class="small-icon" aria-hidden="true">
             <use xlink:href="#icon-humidity"></use>
           </svg>
-          潮湿度
+          {{ weatherStore.weatherInfo.humidity }}
         </span>
       </div>
 
     </div>
-    <div class="small-card"></div>
-    <div class="small-card"></div>
-    <div class="small-card"></div>
-    <!-- <div class="small-card"></div>
-    <div class="small-card"></div>
-    <div class="small-card"></div> -->
   </div>
 </template>
 
 <script setup>
 import '@/assets/icon/iconfont.js'
+import {useWeatherStore} from '@/store/weather.js'
+// import { storeToRefs } from 'pinia'
+const weatherStore = useWeatherStore()
 </script>
 
 <style scoped>

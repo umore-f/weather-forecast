@@ -1,6 +1,6 @@
 import httpInstance from "@/utils/http.js"
 export const weatherApi = {
-  // 城市搜索
+  // 获取天气信息
   getWearherInfo(locationId) {
     //  || typeof locationId !== 'number'
     if (!locationId || typeof locationId !== 'number') {
