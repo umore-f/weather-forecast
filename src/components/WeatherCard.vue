@@ -1,7 +1,7 @@
 <template>
   <div style="height: 95%; background-color: gray;display: flex;justify-content: space-between;">
     <div class="big-card">
-      <div>{{ weatherStore.weatherInfo.icon }}</div>
+      <div><i class="qi-100"></i></div>
       <div class="main">
         <span>{{weatherStore.weatherInfo.temp}}℃</span>
         <span>体感温度{{weatherStore.weatherInfo.feelsLike}}℃</span>
