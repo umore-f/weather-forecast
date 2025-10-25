@@ -1,5 +1,5 @@
 <template>
-  <div style="height: 95%; background-color: gray;display: flex;justify-content: space-between;">
+  <div style="height: 95%; background-color: gray;display: flex; justify-content:space-between;">
     <div class="big-card">
       <div class="header">
         <i :class="'qi-' + `${weatherStore.weatherInfo.icon}`" style="display: block;"></i>
@@ -24,7 +24,36 @@
           <span class="text">{{ weatherStore.weatherInfo.humidity }}%</span>
         </div>
       </div>
-
+    </div>
+    <div class="small-card">
+      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
+      <div>{{ weatherStore.wearherHoursInfo[0]?.text }}</div>
+      <div>{{ weatherStore.wearherHoursInfo[0]?.temp }}℃</div>
+    </div>
+    <div class="small-card">
+      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
+      <div>{{ weatherStore.wearherHoursInfo[1]?.text }}</div>
+      <div>{{ weatherStore.wearherHoursInfo[1]?.temp }}℃</div>
+    </div>
+    <div class="small-card">
+      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
+      <div>{{ weatherStore.wearherHoursInfo[2]?.text }}</div>
+      <div>{{ weatherStore.wearherHoursInfo[2]?.temp }}℃</div>
+    </div>
+    <div class="small-card">
+      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
+      <div>{{ weatherStore.wearherHoursInfo[3]?.text }}</div>
+      <div>{{ weatherStore.wearherHoursInfo[3]?.temp }}℃</div>
+    </div>
+    <div class="small-card">
+      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
+      <div>{{ weatherStore.wearherHoursInfo[4]?.text }}</div>
+      <div>{{ weatherStore.wearherHoursInfo[4]?.temp }}℃</div>
+    </div>
+    <div class="small-card">
+      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
+      <div>{{ weatherStore.wearherHoursInfo[5]?.text }}</div>
+      <div>{{ weatherStore.wearherHoursInfo[5]?.temp }}℃</div>
     </div>
   </div>
 </template>
@@ -57,11 +86,14 @@ i {
 }
 
 .big-card {
-  width: 40%;
-  height: 260px;
-  background: rgb(236, 236, 236);
-  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  width: 26%;
+  height: 254px;
   border-radius: 15%;
+  background: white;
+  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgb(190, 190, 190),
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -69,11 +101,16 @@ i {
 }
 
 .small-card {
-  width: 20%;
+  width: 11%;
   height: 260px;
-  background: rgb(236, 236, 236);
-  box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
+  background: white;
+  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgb(190, 190, 190),
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border-radius: 15%;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {

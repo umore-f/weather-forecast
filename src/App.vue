@@ -1,6 +1,7 @@
 <script setup>
 import HeaderNav from './components/HeaderNav.vue';
 import WeatherCard from './components/WeatherCard.vue';
+// import TimeShow from './components/TimeShow.vue';
 </script>
 
 <template>
@@ -13,7 +14,7 @@ import WeatherCard from './components/WeatherCard.vue';
           <el-main><WeatherCard/></el-main>
         </el-container>
       </el-main>
-      <el-aside style="background-color: antiquewhite; width: 16vw;">Aside</el-aside>
+      <el-aside style="background-color: antiquewhite; width: 16vw;"></el-aside>
     </el-container>
   </div>
 </template>
