@@ -6,7 +6,7 @@ import WeatherCard from './components/WeatherCard.vue';
 <template>
   <div class="container">
     <el-container>
-      <el-aside style="background-color: antiquewhite; width: 8vw;">Aside</el-aside>
+      <el-aside style="background-color: antiquewhite; width: 6vw;">Aside</el-aside>
       <el-main style="background-color: bisque;">
         <el-container>
           <el-header style="justify-content: end; display: flex; align-items: center"><HeaderNav/></el-header>
