@@ -1,24 +1,28 @@
 <template>
   <div style="height: 95%; background-color: gray;display: flex;justify-content: space-between;">
     <div class="big-card">
-      <div><i class="qi-100"></i></div>
+      <div class="header">
+        <i :class="'qi-' + `${weatherStore.weatherInfo.icon}`" style="display: block;"></i>
+        <span class="text">{{ weatherStore.weatherInfo.text }}</span>
+      </div>
       <div class="main">
-        <span>{{weatherStore.weatherInfo.temp}}℃</span>
-        <span>体感温度{{weatherStore.weatherInfo.feelsLike}}℃</span>
-        <span>{{ weatherStore.weatherInfo.text }}</span>
+        <span>{{ weatherStore.weatherInfo.temp }}℃</span>
+        <span>{{ weatherStore.weatherInfo.feelsLike }}℃</span>
+
       </div>
       <div class="footer">
-        <span>
-          <svg class="small-icon" aria-hidden="true">
-            <use xlink:href="#icon-wind"></use>
-          </svg>{{weatherStore.weatherInfo.windSpeed}}公里/小时
-        </span>
-        <span>
-          <svg class="small-icon" aria-hidden="true">
-            <use xlink:href="#icon-humidity"></use>
-          </svg>
-          {{ weatherStore.weatherInfo.humidity }}
-        </span>
+        <div class="pressure">
+          <span class="title">大气压</span>
+          <span class="text">{{ weatherStore.weatherInfo.pressure }}mb</span>
+        </div>
+        <div class="vis">
+          <span class="title">能见度</span>
+          <span class="text">{{ weatherStore.weatherInfo.vis }}公里</span>
+        </div>
+        <div class="humidity">
+          <span class="title">相对湿度</span>
+          <span class="text">{{ weatherStore.weatherInfo.humidity }}%</span>
+        </div>
       </div>
 
     </div>
@@ -27,30 +31,33 @@
 
 <script setup>
 import '@/assets/icon/iconfont.js'
-import {useWeatherStore} from '@/store/weather.js'
+import { useWeatherStore } from '@/store/weather.js'
 // import { storeToRefs } from 'pinia'
 const weatherStore = useWeatherStore()
+
+
 </script>
 
 <style scoped>
-.big-icon {
-  width: 6em;
-  height: 6em;
-  vertical-align: -0.15em;
-  fill: currentColor;
-  overflow: hidden;
-}
-
-.small-icon {
+.icon {
   width: 2em;
   height: 2em;
   vertical-align: -0.15em;
   fill: currentColor;
   overflow: hidden;
+  /* background-color: wheat; */
+}
+
+i {
+  font-size: 28px;
+  margin-right: 10px;
+  /* background-color: wheat;
+  color: white; */
+
 }
 
 .big-card {
-  width: 30%;
+  width: 40%;
   height: 260px;
   background: rgb(236, 236, 236);
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
@@ -67,22 +74,94 @@ const weatherStore = useWeatherStore()
   background: rgb(236, 236, 236);
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset;
   border-radius: 15%;
+}
 
+.header {
+  display: flex;
+  justify-content: start;
+  width: 90%;
+}
 
+.header .text {
+  font-size: 28px;
+}
+
+.main {
+  display: flex;
+  width: 90%;
 }
 
 .main span {
-  display: block;
+  display: inline-block;
+  justify-self: start;
 }
+
+.main span:first-child {
+  font-size: 32px;
+  margin-right: 10px;
+}
+
+.main span:last-child {
+  font-size: 16px;
+  background-color: white;
+  height: 24px;
+  line-height: 24px;
+  margin-top: 12px;
+  border-radius: 15%;
+  transition-duration: 0.2s;
+  transition-property: all;
+}
+
+.main span:last-child:hover {
+  transform: scale(1.15);
+}
+
 .footer {
   display: flex;
+  width: 90%;
+  justify-content: space-evenly;
+  align-items: center;
 
-  width: 80%;
 }
-.footer span {
-  display:block
+
+.footer div {
+  width: 30%;
+  height: 60px;
+  border-radius: 15%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  transition-duration: 0.2s;
+  transition-property: all;
 }
-.footer span:first-child{
-  margin-right: auto;
+
+.footer div:hover {
+  transform: scale(1.15);
+
+}
+
+.footer .title {
+  font-size: 12px;
+  display: block;
+
+}
+
+.footer .text {
+  font-size: 16px;
+  display: block;
+}
+
+.pressure {
+  background-color: rgb(63, 49, 49);
+  color: white;
+}
+
+.vis {
+  background-color: rgb(90, 158, 55);
+}
+
+.humidity {
+  background-color: white;
 }
 </style>
