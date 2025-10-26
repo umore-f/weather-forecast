@@ -13,7 +13,7 @@
 </template>
 <script setup>
 import { Search, Bell, User } from '@element-plus/icons-vue'
-import {onMounted, ref} from 'vue'
+import {ref} from 'vue'
 import {useWeatherStore} from '@/store/weather.js'
 const weatherStore = useWeatherStore()
 
@@ -22,7 +22,7 @@ const cityName = ref('')
 function searchCityName() {
   weatherStore.getWeather(cityName.value)
 }
-onMounted(()=>{weatherStore.getWeather('北京')})
+
 
 </script>
 

@@ -1,7 +1,7 @@
 import httpInstance from "@/utils/http.js"
 export const weatherApi = {
   // 当天-获取天气信息
-  getWearherInfo(locationId) {
+  getWeatherInfo(locationId) {
     //  || typeof locationId !== 'number'
     if (!locationId || typeof locationId !== 'number') {
       console.log('当前类型为', typeof (locationId));
@@ -17,7 +17,7 @@ export const weatherApi = {
   },
 
 // 逐小时-获取天气信息
-  getWearherHoursInfo(locationId) {
+  getWeatherHoursInfo(locationId) {
     if (!locationId || typeof locationId !== 'number') {
       console.log('当前类型为', typeof (locationId));
       console.error('天气location参数必须是number')

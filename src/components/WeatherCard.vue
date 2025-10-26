@@ -1,5 +1,5 @@
 <template>
-  <div style="height: 95%; background-color: gray;display: flex; justify-content:space-between;">
+  <div class="weather-card">
     <div class="big-card">
       <div class="header">
         <i :class="'qi-' + `${weatherStore.weatherInfo.icon}`" style="display: block;"></i>
@@ -25,49 +25,48 @@
         </div>
       </div>
     </div>
-    <div class="small-card">
-      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
-      <div>{{ weatherStore.wearherHoursInfo[0]?.text }}</div>
-      <div>{{ weatherStore.wearherHoursInfo[0]?.temp }}℃</div>
-    </div>
-    <div class="small-card">
-      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
-      <div>{{ weatherStore.wearherHoursInfo[1]?.text }}</div>
-      <div>{{ weatherStore.wearherHoursInfo[1]?.temp }}℃</div>
-    </div>
-    <div class="small-card">
-      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
-      <div>{{ weatherStore.wearherHoursInfo[2]?.text }}</div>
-      <div>{{ weatherStore.wearherHoursInfo[2]?.temp }}℃</div>
-    </div>
-    <div class="small-card">
-      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
-      <div>{{ weatherStore.wearherHoursInfo[3]?.text }}</div>
-      <div>{{ weatherStore.wearherHoursInfo[3]?.temp }}℃</div>
-    </div>
-    <div class="small-card">
-      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
-      <div>{{ weatherStore.wearherHoursInfo[4]?.text }}</div>
-      <div>{{ weatherStore.wearherHoursInfo[4]?.temp }}℃</div>
-    </div>
-    <div class="small-card">
-      <div><i :class="'qi-' + `${weatherStore.weatherInfo.icon}`"></i></div>
-      <div>{{ weatherStore.wearherHoursInfo[5]?.text }}</div>
-      <div>{{ weatherStore.wearherHoursInfo[5]?.temp }}℃</div>
-    </div>
+    <SmallWeatherCard v-for="hours in processedWeatherInfo" :hours="hours" :key="hours.fxTime" />
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import SmallWeatherCard from './SmallWeatherCard.vue'
 import '@/assets/icon/iconfont.js'
 import { useWeatherStore } from '@/store/weather.js'
-// import { storeToRefs } from 'pinia'
+import { formatTime } from '@/utils/formatTime.js'
 const weatherStore = useWeatherStore()
-
-
+// 使用计算属性处理时间字段
+const processedWeatherInfo = computed(() => {
+  return weatherStore.weatherHoursInfo.map(hour => {
+    return {
+      ...hour,
+      // 对时间字段进行特殊处理
+      fxTime: formatTime(hour.fxTime),
+      // 或者添加新的处理后的字段
+    }
+  })
+})
 </script>
 
 <style scoped>
+.weather-card {
+  height: 95%;
+  /* background-color: gray; */
+  display: flex;
+  justify-content: space-between;
+  overflow-x: auto;
+  /* 允许水平滚动 */
+  flex-wrap: nowrap;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* 不换行 */
+
+}
+
+/* 隐藏进度条 */
+/* .weather-card::-webkit-scrollbar {
+  display: none;
+} */
 .icon {
   width: 2em;
   height: 2em;
@@ -86,7 +85,8 @@ i {
 }
 
 .big-card {
-  width: 26%;
+  /* height: 95%; */
+  /* width: 26%; */
   height: 254px;
   border-radius: 15%;
   background: white;
@@ -97,21 +97,18 @@ i {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  align-items: center
+  align-items: center;
+  transition-duration: 0.3s;
+  transition-property: all;
+  flex: 0 0 30%;
+  margin: 10px;
 }
 
-.small-card {
-  width: 11%;
-  height: 260px;
-  background: white;
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
-    0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
-  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border-radius: 15%;
-  display: flex;
-  flex-direction: column;
+.big-card:hover {
+  transform: scale(1.05);
 }
+
+
 
 .header {
   display: flex;
@@ -190,15 +187,28 @@ i {
 }
 
 .pressure {
-  background-color: rgb(63, 49, 49);
   color: white;
+  background: rgb(63, 49, 49);;
+  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgb(190, 190, 190),
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .vis {
-  background-color: rgb(90, 158, 55);
+  background: white;
+  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgb(190, 190, 190),
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  color: rgb(90, 158, 55);
 }
 
 .humidity {
-  background-color: white;
+  background: white;
+  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgb(190, 190, 190),
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 </style>
