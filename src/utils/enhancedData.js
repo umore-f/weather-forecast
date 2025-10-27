@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 import { useWeatherStore } from '@/store/weather.js'
-import { formatTime } from '@/utils/formatTime.js'
+import { formatTime, formatDateToMonthDay } from '@/utils/formatTime.js'
 
 
 // 天气类型映射函数
@@ -65,18 +65,19 @@ export function useWeather() {
     if (!weatherStore.weatherDaysInfo || !Array.isArray(weatherStore.weatherDaysInfo)) {
       return []
     }
+    console.log('属性计算了吗');
 
     return weatherStore.weatherDaysInfo.map(item => {
       // 时间格式化
-      const formattedTime = formatTime(item.fxTime)
+      const formattedTime = formatDateToMonthDay(item.fxDate)
 
       // 天气类型和CSS类计算
-      const weatherType = getWeatherTypeByCode(+item.icon)
+      const weatherType = getWeatherTypeByCode(+item.iconDay)
       const weatherClass = weatherClassMap[weatherType] || 'weather-default'
 
       return {
         ...item,
-        fxTime: formattedTime,
+        fxDate: formattedTime,
         weatherClass,
         weatherType
       }

@@ -4,26 +4,41 @@
     <span>Hello,</span>
     <span>Jack Grealish</span>
   </div>
+  <el-switch v-model="computedValue" inline-prompt style=" margin-right: 10px;" active-text="未来七天" inactive-text="今天" />
+
   <div class="header" style="margin-right: 20px;">
     <el-input style="width: 240px;" placeholder="Please input" clearable :prefix-icon="Search" class="myInput"
-      v-model="cityName" @keyup.enter="searchCityName"/>
+      v-model="cityName" @keyup.enter="searchCityName" />
   </div>
   <el-button :icon="Bell" circle style="width: 40px;height: 40px;" />
   <!--  -->
 </template>
 <script setup>
 import { Search, Bell, User } from '@element-plus/icons-vue'
-import {ref} from 'vue'
-import {useWeatherStore} from '@/store/weather.js'
+import { ref, computed} from 'vue'
+import { useWeatherStore } from '@/store/weather.js'
 const weatherStore = useWeatherStore()
 
 const cityName = ref('')
-
 function searchCityName() {
   weatherStore.getWeather(cityName.value)
 }
 
-
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: true
+  }
+});
+const emit = defineEmits(['update:modelValue']);
+const computedValue = computed({
+  get() {
+    return props.modelValue;
+  },
+  set(value) {
+    emit('update:modelValue', value);
+  }
+});
 </script>
 
 <style scoped>

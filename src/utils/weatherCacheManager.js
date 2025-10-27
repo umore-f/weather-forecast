@@ -3,8 +3,8 @@ class WeatherCacheManager {
   constructor() {
     // 缓存配置
     this.CACHE_CONFIG = {
-      WEATHER_NOW: { key: 'weather_now', ttl: 30 * 60 * 1000 }, // 30分钟
-      WEATHER_HOURS: { key: 'weather_hours', ttl: 60 * 60 * 1000 }, // 1小时
+      WEATHER_NOW: { key: 'weather_now', ttl: 10 * 60 * 1000 }, // 10分钟
+      WEATHER_HOURS: { key: 'weather_hours', ttl: 30 * 60 * 1000 }, // 1小时
       WEATHER_DAYS: { key: 'weather_days', ttl: 2 * 60 * 60 * 1000 } // 2小时
     };
 

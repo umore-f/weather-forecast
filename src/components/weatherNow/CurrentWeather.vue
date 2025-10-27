@@ -1,6 +1,11 @@
 <template>
   <div class="weather-card">
     <div class="big-card" :class="enhancedWeatherNowData">
+      <div class="background-design" :class="enhancedWeatherNowData">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
       <div class="header">
         <i :class="'qi-' + `${weatherStore.weatherNowInfo.icon}`" style="display: block;"></i>
         <span class="text">{{ weatherStore.weatherNowInfo.text }}</span>
@@ -25,25 +30,129 @@
         </div>
       </div>
     </div>
-    <SmallWeatherCard v-for="weather in enhancedWeatherHoursData" :weather="weather" :key="weather.fxTime" />
+    <weatherDaysCard v-show="computedValue" v-for="weather in enhancedWeatherDaysData" :weather="weather"
+      :key="weather.fxDate" />
+    <weatherNowCard v-show="!computedValue" v-for="weather in enhancedWeatherHoursData" :weather="weather"
+      :key="weather.fxTime" />
   </div>
 </template>
 
 <script setup>
-// import { computed } from 'vue'
-import SmallWeatherCard from './WeatherCardList.vue'
+import { computed } from 'vue'
+
+import weatherDaysCard from '../weatherDays/WeatherCardList.vue'
+import weatherNowCard from './WeatherCardList.vue'
 import '@/assets/icon/iconfont.js'
 import { useWeatherStore } from '@/store/weather.js'
-// import { formatTime } from '@/utils/formatTime.js'
+
 const weatherStore = useWeatherStore()
 // 使用计算属性处理时间字段
 import { useWeather } from '@/utils/enhancedData'
 
-const { enhancedWeatherHoursData, enhancedWeatherNowData } = useWeather()
+const { enhancedWeatherDaysData, enhancedWeatherNowData, enhancedWeatherHoursData } = useWeather()
 
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: true
+  }
+});
+const emit = defineEmits(['update:modelValue']);
+const computedValue = computed({
+  get() {
+    return props.modelValue;
+  },
+  set(value) {
+    emit('update:modelValue', value);
+  }
+});
 </script>
 
 <style scoped>
+.background-design {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  /* background-color: #ec7263; */
+  overflow: hidden;
+  z-index: -1;
+  transition: all 0.5s ease;
+}
+
+/* 根据天气类型设置不同的背景色 */
+.weather-sunny .background-design {
+  background-color: #ffd89b;
+}
+
+.weather-rainy .background-design {
+  background-color: #2c3e50;
+}
+
+.weather-cloudy .background-design {
+  background-color: #bdc3c7;
+}
+
+.weather-snowy .background-design {
+  background-color: #e6e9f0;
+}
+
+/* 根据天气类型设置不同的圆形颜色 */
+.weather-sunny .circle {
+  background-color: #ffb347;
+}
+
+.weather-rainy .circle {
+  background-color: #3498db;
+}
+
+.weather-cloudy .circle {
+  background-color: #95a5a6;
+}
+
+.weather-snowy .circle {
+  background-color: #ffffff;
+}
+
+
+.circle {
+  /* background-color: #efc745; */
+  z-index: -1;
+  transition: all 0.5s ease;
+}
+
+.circle:nth-child(1) {
+  position: absolute;
+  top: -60%;
+  right: -50%;
+  width: 300px;
+  height: 300px;
+  opacity: 0.4;
+  border-radius: 50%;
+
+}
+
+.circle:nth-child(2) {
+  position: absolute;
+  top: -45%;
+  right: -30%;
+  width: 210px;
+  height: 210px;
+  opacity: 0.4;
+  border-radius: 50%;
+
+}
+
+.circle:nth-child(3) {
+  position: absolute;
+  top: -15%;
+  right: -8%;
+  width: 100px;
+  height: 100px;
+  opacity: 1;
+  border-radius: 50%;
+
+}
+
 .weather-card {
   height: 95%;
   display: flex;
@@ -53,6 +162,7 @@ const { enhancedWeatherHoursData, enhancedWeatherNowData } = useWeather()
   flex-wrap: nowrap;
   /* transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); */
   /* 不换行 */
+
 
 }
 
@@ -89,6 +199,12 @@ i {
   transition-property: all;
   flex: 0 0 31%;
   margin: 10px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.8);
+  /* 半透明背景 */
+  backdrop-filter: blur(5px);
+  /* 毛玻璃效果 */
 }
 
 .big-card:hover {
@@ -201,11 +317,11 @@ i {
 /* ---------- Background ---------- */
 /* 天气背景样式 */
 /* 晴天 - 复杂样式 */
-.weather-sunny {
+/* .weather-sunny {
   background:
     radial-gradient(circle at 20% 80%, rgba(255, 216, 155, 0.7) 0%, transparent 25%),
     radial-gradient(circle at 80% 20%, rgba(255, 237, 155, 0.5) 0%, transparent 25%),
-    linear-gradient(135deg, #ffd89b 0%, #ffed9b 25%, #ffb347 50%, #ff8c00 75%, #ff7700 100%);
+    linear-gradient(300deg, #ffd89b 0%, #ffed9b 25%, #ffb347 50%, #ff8c00 75%, #ff7700 100%);
   color: #5a3e1b;
   position: relative;
   overflow: hidden;
@@ -237,10 +353,10 @@ i {
     radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.3) 0%, transparent 40%);
   border-radius: 50%;
   z-index: 0;
-}
+} */
 
 /* 雨天 - 复杂样式 */
-.weather-rainy {
+/* .weather-rainy {
   background:
     linear-gradient(160deg, #2c3e50 0%, #34495e 30%, #4a6572 70%, #5d6d7e 100%),
     repeating-linear-gradient(45deg,
@@ -278,10 +394,10 @@ i {
     radial-gradient(circle at 80% 20%, rgba(41, 128, 185, 0.2) 0%, transparent 20%),
     radial-gradient(circle at 40% 40%, rgba(52, 152, 219, 0.15) 0%, transparent 30%);
   z-index: 0;
-}
+} */
 
 /* 雪天 - 复杂样式 */
-.weather-snowy {
+/* .weather-snowy {
   background:
     linear-gradient(160deg, #e6e9f0 0%, #eef1f5 30%, #d9e1e8 70%, #c8d6e5 100%),
     radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.8) 0%, transparent 30%),
@@ -323,10 +439,10 @@ i {
   background-size: 20px 20px;
   opacity: 0.3;
   z-index: 0;
-}
+} */
 
 /* 雾天 - 复杂样式 */
-.weather-foggy {
+/* .weather-foggy {
   background:
     linear-gradient(160deg, #636fa4 0%, #8592b3 25%, #a8c0ff 50%, #8592b3 75%, #636fa4 100%);
   color: white;
@@ -354,10 +470,10 @@ i {
   background:
     radial-gradient(circle at 60% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
     radial-gradient(circle at 20% 60%, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
-}
+} */
 
 /* 多云 - 复杂样式 */
-.weather-cloudy {
+/* .weather-cloudy {
   background:
     linear-gradient(160deg, #bdc3c7 0%, #ecf0f1 30%, #bdc3c7 70%, #95a5a6 100%),
     radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.7) 0%, transparent 30%),
@@ -396,10 +512,10 @@ i {
   box-shadow:
     25px 10px 0 0 rgba(255, 255, 255, 0.6),
     -15px 15px 0 0 rgba(255, 255, 255, 0.4);
-}
+} */
 
 /* 雾霾 - 复杂样式 */
-.weather-haze {
+/* .weather-haze {
   background:
     linear-gradient(160deg, #fd746c 0%, #ff9068 25%, #ffa07a 50%, #ffb6a3 75%, #ffccbb 100%),
     radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.2) 0%, transparent 30%);
@@ -436,10 +552,10 @@ i {
     radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 40%),
     radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.15) 0%, transparent 40%);
   z-index: 0;
-}
+} */
 
 /* 默认天气 - 复杂样式 */
-.weather-default {
+/* .weather-default {
   background:
     linear-gradient(160deg, #667eea 0%, #764ba2 25%, #8a64b5 50%, #9b7bd6 75%, #ac92ec 100%),
     radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.3) 0%, transparent 30%),
@@ -463,7 +579,7 @@ i {
       rgba(255, 255, 255, 0.05) 10px,
       rgba(255, 255, 255, 0.05) 20px);
   z-index: 0;
-}
+} */
 
 /* 在所有天气样式的伪元素中添加 */
 .weather-sunny::before,
@@ -484,7 +600,7 @@ i {
 }
 
 /* 动画定义 */
-@keyframes sunGlow {
+/* @keyframes sunGlow {
   0% {
     transform: rotate(0deg);
   }
@@ -552,5 +668,5 @@ i {
   100% {
     background-position: 50px 0;
   }
-}
+} */
 </style>

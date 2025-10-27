@@ -5,10 +5,10 @@
       <el-main style="background-color: bisque;">
         <el-container>
           <el-header style="justify-content: end; display: flex; align-items: center">
-            <HeaderNav />
+            <HeaderNav v-model="model"/>
           </el-header>
           <el-main>
-            <CurrentWeather />
+            <CurrentWeather v-model="model"/>
           </el-main>
         </el-container>
       </el-main>
@@ -20,14 +20,14 @@
 
 <script setup>
 import HeaderNav from '../components/HeaderNav.vue';
-import CurrentWeather from '../components/CurrentWeather.vue';
-import { onMounted } from 'vue'
+import CurrentWeather from '../components/weatherNow/CurrentWeather.vue';
+import { onMounted, ref } from 'vue'
 import { useWeatherStore } from '@/store/weather.js'
 const weatherStore = useWeatherStore()
 onMounted(async () => {
   await weatherStore.getWeather('北京')
-  console.log('数据加载完成后的 weatherHoursInfo:', weatherStore.weatherHoursInfo)
 })
+const model = ref(false)
 </script>
 
 <style lang="scss" scoped></style>
