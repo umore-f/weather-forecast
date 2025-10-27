@@ -25,34 +25,29 @@
         </div>
       </div>
     </div>
-    <SmallWeatherCard v-for="hours in processedWeatherInfo" :hours="hours" :key="hours.fxTime" />
+    <SmallWeatherCard v-for="weather in enhancedWeatherHoursData" :weather="weather" :key="weather.fxTime" />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+// import { computed } from 'vue'
 import SmallWeatherCard from './SmallWeatherCard.vue'
 import '@/assets/icon/iconfont.js'
 import { useWeatherStore } from '@/store/weather.js'
-import { formatTime } from '@/utils/formatTime.js'
+// import { formatTime } from '@/utils/formatTime.js'
 const weatherStore = useWeatherStore()
 // 使用计算属性处理时间字段
-const processedWeatherInfo = computed(() => {
-  return weatherStore.weatherHoursInfo.map(hour => {
-    return {
-      ...hour,
-      // 对时间字段进行特殊处理
-      fxTime: formatTime(hour.fxTime),
-      // 或者添加新的处理后的字段
-    }
-  })
-})
+import { useWeather } from '@/utils/enhancedHoursData'
+
+const { enhancedWeatherHoursData } = useWeather()
+// console.log(enhancedWeatherData.value);
+// enhancedWeatherHoursData
+
 </script>
 
 <style scoped>
 .weather-card {
   height: 95%;
-  /* background-color: gray; */
   display: flex;
   justify-content: space-between;
   overflow-x: auto;
@@ -73,20 +68,14 @@ const processedWeatherInfo = computed(() => {
   vertical-align: -0.15em;
   fill: currentColor;
   overflow: hidden;
-  /* background-color: wheat; */
 }
 
 i {
   font-size: 28px;
   margin-right: 10px;
-  /* background-color: wheat;
-  color: white; */
-
 }
 
 .big-card {
-  /* height: 95%; */
-  /* width: 26%; */
   height: 254px;
   border-radius: 15%;
   background: white;
@@ -100,7 +89,7 @@ i {
   align-items: center;
   transition-duration: 0.3s;
   transition-property: all;
-  flex: 0 0 30%;
+  flex: 0 0 31%;
   margin: 10px;
 }
 
