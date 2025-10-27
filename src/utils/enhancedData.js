@@ -29,7 +29,15 @@ const weatherClassMap = {
 export function useWeather() {
   // 在函数内部调用 store
   const weatherStore = useWeatherStore()
-
+  // 合并后的计算实时天气属性
+  const enhancedWeatherNowData = computed(() => {
+    if (!weatherStore.weatherNowInfo) {
+      return 'weather-default'
+    }
+    const weatherType = getWeatherTypeByCode(+weatherStore.weatherNowInfo.icon)
+    const weatherClass = weatherClassMap[weatherType] || 'weather-default'
+    return weatherClass
+  })
   // 合并后的计算小时天气属性
   const enhancedWeatherHoursData = computed(() => {
     if (!weatherStore.weatherHoursInfo || !Array.isArray(weatherStore.weatherHoursInfo)) {
@@ -74,8 +82,10 @@ export function useWeather() {
       }
     })
   })
+
   return {
     enhancedWeatherHoursData,
-    enhancedWeatherDaysData
+    enhancedWeatherDaysData,
+    enhancedWeatherNowData,
   }
 }

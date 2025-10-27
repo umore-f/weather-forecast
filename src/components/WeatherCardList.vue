@@ -1,6 +1,6 @@
 <template>
   <div @mouseenter="setIsBig(true)" @mouseleave="setIsBig(false)"
-    :class="[weather.weatherClass,{ 'small-card': !isHover, 'magnify-card': isHover}]"
+    :class="[weather.weatherClass, { 'small-card': !isHover, 'magnify-card': isHover }]"
     style="  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
     <!-- 大图样式 -->
     <template v-if="isHover">
@@ -152,14 +152,13 @@ i {
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  /* transition-duration: 0.2s; */
-  /* transition-property: all; */
+  transition-duration: 0.2s;
+  transition-property: all;
 }
 
-/* .footer div:hover {
+.footer div:hover {
   transform: scale(1.15);
-
-} */
+}
 
 .footer .title {
   font-size: 12px;
@@ -234,13 +233,11 @@ i {
 .weather-rainy {
   background:
     linear-gradient(160deg, #2c3e50 0%, #34495e 30%, #4a6572 70%, #5d6d7e 100%),
-    repeating-linear-gradient(
-      45deg,
+    repeating-linear-gradient(45deg,
       transparent,
       transparent 10px,
       rgba(255, 255, 255, 0.1) 10px,
-      rgba(255, 255, 255, 0.1) 20px
-    );
+      rgba(255, 255, 255, 0.1) 20px);
   color: white;
   position: relative;
   overflow: hidden;
@@ -327,7 +324,8 @@ i {
   overflow: hidden;
 }
 
-.weather-foggy::before, .weather-foggy::after {
+.weather-foggy::before,
+.weather-foggy::after {
   content: '';
   position: absolute;
   top: 0;
@@ -359,7 +357,8 @@ i {
   overflow: hidden;
 }
 
-.weather-cloudy::before, .weather-cloudy::after {
+.weather-cloudy::before,
+.weather-cloudy::after {
   content: '';
   position: absolute;
   border-radius: 50%;
@@ -407,13 +406,11 @@ i {
   right: 0;
   bottom: 0;
   background:
-    repeating-linear-gradient(
-      90deg,
+    repeating-linear-gradient(90deg,
       transparent,
       transparent 5px,
       rgba(255, 255, 255, 0.1) 5px,
-      rgba(255, 255, 255, 0.1) 10px
-    );
+      rgba(255, 255, 255, 0.1) 10px);
   animation: hazeMove 20s infinite linear;
   z-index: 0;
 }
@@ -450,46 +447,100 @@ i {
   right: 0;
   bottom: 0;
   background:
-    repeating-linear-gradient(
-      45deg,
+    repeating-linear-gradient(45deg,
       transparent,
       transparent 10px,
       rgba(255, 255, 255, 0.05) 10px,
-      rgba(255, 255, 255, 0.05) 20px
-    );
+      rgba(255, 255, 255, 0.05) 20px);
   z-index: 0;
+}
+
+/* 在所有天气样式的伪元素中添加 */
+.weather-sunny::before,
+.weather-sunny::after,
+.weather-rainy::before,
+.weather-rainy::after,
+.weather-snowy::before,
+.weather-snowy::after,
+.weather-foggy::before,
+.weather-foggy::after,
+.weather-cloudy::before,
+.weather-cloudy::after,
+.weather-haze::before,
+.weather-haze::after,
+.weather-default::before {
+  pointer-events: none;
+  /* 关键：允许鼠标事件穿透 */
 }
 
 /* 动画定义 */
 @keyframes sunGlow {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes rainFall {
-  0% { background-position: 0 0; }
-  100% { background-position: 0 100px; }
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 100px;
+  }
 }
 
 @keyframes snowfall {
-  0% { background-position: 0 0; }
-  100% { background-position: 0 100px; }
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 100px;
+  }
 }
 
 @keyframes fogMove {
-  0% { opacity: 0.3; transform: translateX(0); }
-  50% { opacity: 0.6; }
-  100% { opacity: 0.3; transform: translateX(20px); }
+  0% {
+    opacity: 0.3;
+    transform: translateX(0);
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+
+  100% {
+    opacity: 0.3;
+    transform: translateX(20px);
+  }
 }
 
 @keyframes cloudMove {
-  0% { transform: translateX(0); }
-  50% { transform: translateX(10px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(10px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }
 
 @keyframes hazeMove {
-  0% { background-position: 0 0; }
-  100% { background-position: 50px 0; }
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 50px 0;
+  }
 }
 </style>
