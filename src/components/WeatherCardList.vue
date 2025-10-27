@@ -52,7 +52,6 @@ function setIsBig(state) {
 
 <style scoped>
 .small-card {
-  /* width: 11%; */
   flex: 0 0 14%;
   height: 254px;
   background: white;
@@ -79,20 +78,17 @@ function setIsBig(state) {
   vertical-align: -0.15em;
   fill: currentColor;
   overflow: hidden;
-  /* background-color: wheat; */
+
 }
 
 i {
   font-size: 28px;
   margin-right: 10px;
-  /* background-color: wheat;
-  color: white; */
+
 
 }
 
 .magnify-card {
-  /* height: 95%; */
-  /* width: 26%; */
   height: 254px;
   border-radius: 15%;
   background: white;
@@ -104,15 +100,12 @@ i {
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  /* transition-duration: 0.2s; */
+  transition-duration: 0.2s;
   /* transition-property: all; */
   flex: 0 0 30%;
   margin: 10px;
 }
 
-/* .big-card:hover {
-  transform: scale(1.05);
-} */
 .header {
   display: flex;
   justify-content: start;
@@ -159,14 +152,14 @@ i {
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
-  transition-duration: 0.2s;
-  transition-property: all;
+  /* transition-duration: 0.2s; */
+  /* transition-property: all; */
 }
 
-.footer div:hover {
+/* .footer div:hover {
   transform: scale(1.15);
 
-}
+} */
 
 .footer .title {
   font-size: 12px;
@@ -185,7 +178,7 @@ i {
   box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
     0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
-  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
 }
 
 .humidity {
@@ -193,7 +186,7 @@ i {
   box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
     0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
-  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
 }
 
 /* ---------- Background ---------- */

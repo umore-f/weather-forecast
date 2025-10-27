@@ -1,7 +1,7 @@
 import httpInstance from "@/utils/http.js"
 export const weatherApi = {
-  // 当天-获取天气信息
-  getWeatherInfo(locationId) {
+  // 实时-获取天气信息
+  getWeatherNowInfo(locationId) {
     //  || typeof locationId !== 'number'
     if (!locationId || typeof locationId !== 'number') {
       console.log('当前类型为', typeof (locationId));

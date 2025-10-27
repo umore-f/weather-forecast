@@ -8,7 +8,7 @@
             <HeaderNav />
           </el-header>
           <el-main>
-            <WeatherCard />
+            <CurrentWeather />
           </el-main>
         </el-container>
       </el-main>
@@ -20,7 +20,7 @@
 
 <script setup>
 import HeaderNav from '../components/HeaderNav.vue';
-import WeatherCard from '../components/WeatherCard.vue';
+import CurrentWeather from '../components/CurrentWeather.vue';
 import { onMounted } from 'vue'
 import { useWeatherStore } from '@/store/weather.js'
 const weatherStore = useWeatherStore()

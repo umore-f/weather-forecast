@@ -1,42 +1,57 @@
 import { defineStore } from "pinia";
 import { cityApi } from '@/apis/cityApi';
 import { weatherApi } from '../apis/weatherApi';
-
+import { weatherCacheManager } from '@/utils/weatherCacheManager'
 import { ref, } from 'vue'
 
 export const useWeatherStore = defineStore('weather', () => {
-  // 天气信息
-  // 现在
-  const weatherInfo = ref({})
-  // 未来24小时(暂定)/每小时
+  const weatherNowInfo = ref({})
   const weatherHoursInfo = ref([])
-  // 未来七天
   const weatherDaysInfo = ref([])
-  const getWeather = async (location) => {
-    const resCity = await cityApi.searchCity(location)
-    const cityId = +resCity.data.location[0].id
-    // 获取现在天气状况
-    // 获取24小时天气情况
-    // 获取未来7天天气情况
-    const [resWeather, resWeatherHour, resWeatherDays] = await Promise.all([weatherApi.getWeatherInfo(cityId), weatherApi.getWeatherHoursInfo(cityId), weatherApi.getWeatherDaysInfo(cityId)])
+  const currentCity = ref('')
+  const currentCityId = ref('')
 
-    if (resWeather.data.code === '200') {
-      weatherInfo.value = resWeather.data.now || {}
-    }
-    if (resWeatherHour.data.code === '200') {
-      weatherHoursInfo.value = resWeatherHour.data.hourly || []
-    }
-    if (resWeatherDays.data.code === '200') {
-      weatherDaysInfo.value = resWeatherDays.data.daily || []
-    }
-    else {
-      throw new Error(resWeather.data.message || '获取天气信息失败')
+  const getWeather = async (location) => {
+    try {
+      const apiCallbacks = {
+        searchCity: cityApi.searchCity,
+        getWeatherNowInfo: weatherApi.getWeatherNowInfo,
+        getWeatherHoursInfo: weatherApi.getWeatherHoursInfo,
+        getWeatherDaysInfo: weatherApi.getWeatherDaysInfo
+      };
+
+      const weatherData = await weatherCacheManager.getWeatherWithCache(location, apiCallbacks);
+
+      currentCity.value = location;
+      currentCityId.value = weatherData.cityId;
+      weatherNowInfo.value = weatherData.now || {};
+      weatherHoursInfo.value = weatherData.hours || [];
+      weatherDaysInfo.value = weatherData.days || [];
+
+      console.log(weatherData.fromCache ? '📦 使用缓存数据' : '🌤️ 使用新数据');
+
+    } catch (error) {
+      console.error('获取天气数据失败:', error);
+      throw error;
     }
   }
+
+  const clearCache = () => {
+    weatherCacheManager.clearAllWeatherCache();
+  }
+
+  const getCacheStatus = () => {
+    return weatherCacheManager.getCacheStatus();
+  }
+
   return {
-    weatherInfo,
+    weatherNowInfo,
     weatherHoursInfo,
     weatherDaysInfo,
+    currentCity,
+    currentCityId,
     getWeather,
+    clearCache,
+    getCacheStatus
   }
 })

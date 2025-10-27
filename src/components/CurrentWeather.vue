@@ -2,26 +2,26 @@
   <div class="weather-card">
     <div class="big-card">
       <div class="header">
-        <i :class="'qi-' + `${weatherStore.weatherInfo.icon}`" style="display: block;"></i>
-        <span class="text">{{ weatherStore.weatherInfo.text }}</span>
+        <i :class="'qi-' + `${weatherStore.weatherNowInfo.icon}`" style="display: block;"></i>
+        <span class="text">{{ weatherStore.weatherNowInfo.text }}</span>
       </div>
       <div class="main">
-        <span>{{ weatherStore.weatherInfo.temp }}℃</span>
-        <span>{{ weatherStore.weatherInfo.feelsLike }}℃</span>
+        <span>{{ weatherStore.weatherNowInfo.temp }}℃</span>
+        <span>{{ weatherStore.weatherNowInfo.feelsLike }}℃</span>
 
       </div>
       <div class="footer">
         <div class="pressure">
           <span class="title">大气压</span>
-          <span class="text">{{ weatherStore.weatherInfo.pressure }}mb</span>
+          <span class="text">{{ weatherStore.weatherNowInfo.pressure }}mb</span>
         </div>
         <div class="vis">
           <span class="title">能见度</span>
-          <span class="text">{{ weatherStore.weatherInfo.vis }}公里</span>
+          <span class="text">{{ weatherStore.weatherNowInfo.vis }}公里</span>
         </div>
         <div class="humidity">
           <span class="title">相对湿度</span>
-          <span class="text">{{ weatherStore.weatherInfo.humidity }}%</span>
+          <span class="text">{{ weatherStore.weatherNowInfo.humidity }}%</span>
         </div>
       </div>
     </div>
@@ -31,17 +31,15 @@
 
 <script setup>
 // import { computed } from 'vue'
-import SmallWeatherCard from './SmallWeatherCard.vue'
+import SmallWeatherCard from './WeatherCardList.vue'
 import '@/assets/icon/iconfont.js'
 import { useWeatherStore } from '@/store/weather.js'
 // import { formatTime } from '@/utils/formatTime.js'
 const weatherStore = useWeatherStore()
 // 使用计算属性处理时间字段
-import { useWeather } from '@/utils/enhancedHoursData'
+import { useWeather } from '@/utils/enhancedData'
 
 const { enhancedWeatherHoursData } = useWeather()
-// console.log(enhancedWeatherData.value);
-// enhancedWeatherHoursData
 
 </script>
 
@@ -53,7 +51,7 @@ const { enhancedWeatherHoursData } = useWeather()
   overflow-x: auto;
   /* 允许水平滚动 */
   flex-wrap: nowrap;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); */
   /* 不换行 */
 
 }
@@ -177,19 +175,19 @@ i {
 
 .pressure {
   color: white;
-  background: rgb(63, 49, 49);;
+  background: rgb(63, 49, 49);
+  ;
   box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
     0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
-  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
 
 .vis {
   background: white;
   box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
     0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
-  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   color: rgb(90, 158, 55);
 }
 
@@ -198,6 +196,5 @@ i {
   box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
     0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
-  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 </style>
