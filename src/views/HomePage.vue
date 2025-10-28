@@ -20,7 +20,7 @@
 
 <script setup>
 import HeaderNav from '../components/HeaderNav.vue';
-import CurrentWeather from '../components/weatherNow/CurrentWeather.vue';
+import CurrentWeather from '../components/CurrentWeatherShow.vue';
 import { onMounted, ref } from 'vue'
 import { useWeatherStore } from '@/store/weather.js'
 const weatherStore = useWeatherStore()

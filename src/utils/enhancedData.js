@@ -34,9 +34,16 @@ export function useWeather() {
     if (!weatherStore.weatherNowInfo) {
       return 'weather-default'
     }
-    const weatherType = getWeatherTypeByCode(+weatherStore.weatherNowInfo.icon)
-    const weatherClass = weatherClassMap[weatherType] || 'weather-default'
-    return weatherClass
+    const weatherNowInfo = [weatherStore.weatherNowInfo]
+    return weatherNowInfo.map(item => {
+      const weatherType = getWeatherTypeByCode(+item.icon)
+      const weatherClass = weatherClassMap[weatherType] || 'weather-default'
+      return {
+        ...item,
+        weatherClass,
+        weatherType
+      }
+    })
   })
   // 合并后的计算小时天气属性
   const enhancedWeatherHoursData = computed(() => {

@@ -42,7 +42,6 @@
 
 <script setup>
 import { ref } from 'vue';
-// import {ref} from 'vue'
 defineProps({
   // isHover:number,
   weather: {
@@ -54,6 +53,7 @@ const isHover = ref(false)
 function setIsBig(state) {
   isHover.value = state
 }
+
 </script>
 
 <style scoped>
