@@ -59,7 +59,7 @@ function setIsBig(state) {
 <style scoped>
 .small-card {
   flex: 0 0 14%;
-  height: 254px;
+  height: 200px;
   background: white;
   box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
@@ -95,7 +95,7 @@ i {
 }
 
 .magnify-card {
-  height: 254px;
+  height: 200px;
   border-radius: 15%;
   background: white;
   box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),

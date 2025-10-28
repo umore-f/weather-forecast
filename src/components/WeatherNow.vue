@@ -138,7 +138,7 @@ i {
   margin-right: 10px;
 }
 .big-card {
-  height: 254px;
+  height: 200px;
   border-radius: 15%;
   background: white;
   box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
@@ -171,10 +171,11 @@ i {
   display: flex;
   justify-content: start;
   width: 90%;
+  line-height: 24px;
 }
 
 .header .text {
-  font-size: 28px;
+  font-size: 24px;
 }
 
 .main {
@@ -185,19 +186,19 @@ i {
 .main span {
   display: inline-block;
   justify-self: start;
+  line-height: 24px;
 }
 
 .main span:first-child {
-  font-size: 32px;
+  font-size: 24px;
   margin-right: 10px;
 }
 
 .main span:last-child {
-  font-size: 16px;
+  font-size: 12px;
   background-color: white;
   height: 24px;
   line-height: 24px;
-  margin-top: 12px;
   border-radius: 15%;
   transition-duration: 0.2s;
   transition-property: all;
@@ -216,8 +217,8 @@ i {
 }
 
 .footer div {
-  width: 30%;
-  height: 60px;
+  width: 25%;
+  height: 45px;
   border-radius: 15%;
   text-align: center;
   display: flex;
@@ -239,7 +240,7 @@ i {
 }
 
 .footer .text {
-  font-size: 16px;
+  font-size: 12px;
   display: block;
 }
 
@@ -247,25 +248,25 @@ i {
   color: white;
   background: rgb(63, 49, 49);
   ;
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+  /* box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3); */
 }
 
 
 .vis {
   background: white;
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+  /* box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3); */
   color: rgb(90, 158, 55);
 }
 
 .humidity {
   background: white;
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+  /* box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3); */
 }
 /* 在所有天气样式的伪元素中添加 */
 .weather-sunny::before,

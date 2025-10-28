@@ -53,7 +53,7 @@ function setIsBig(state) {
 <style scoped>
 .small-card {
   flex: 0 0 14%;
-  height: 254px;
+  height: 200px;
   background: white;
   box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
@@ -89,7 +89,7 @@ i {
 }
 
 .magnify-card {
-  height: 254px;
+  height: 200px;
   border-radius: 15%;
   background: white;
   box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
@@ -110,14 +110,10 @@ i {
   display: flex;
   justify-content: start;
   width: 90%;
+  line-height: 24px;
 }
 
 .header .text {
-  font-size: 28px;
-}
-
-.header .time {
-  margin-left: auto;
   font-size: 24px;
 }
 
@@ -129,12 +125,14 @@ i {
 .main span {
   display: inline-block;
   justify-self: start;
+  line-height: 24px;
 }
 
 .main span:first-child {
-  font-size: 32px;
+  font-size: 24px;
   margin-right: 10px;
 }
+
 
 .footer {
   display: flex;
@@ -145,8 +143,8 @@ i {
 }
 
 .footer div {
-  width: 30%;
-  height: 60px;
+  width: 25%;
+  height: 45px;
   border-radius: 15%;
   text-align: center;
   display: flex;
@@ -166,7 +164,7 @@ i {
 }
 
 .footer .text {
-  font-size: 16px;
+  font-size: 12px;
   display: block;
 }
 
@@ -174,17 +172,17 @@ i {
   color: white;
   background: rgb(63, 49, 49);
   ;
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+  /* box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3); */
 
 }
 
 .humidity {
   background: white;
-  box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
+  /* box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
     0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3);
+    0.3em 0.3em 1em rgba(0, 0, 0, 0.3); */
 
 }
 
