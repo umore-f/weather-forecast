@@ -1,3 +1,4 @@
+import { useWeatherDays,useWeatherHours,useWeatherNow } from '@/utils/enhancedData'
 // 天气数据缓存管理器
 class WeatherCacheManager {
   constructor() {
@@ -147,6 +148,7 @@ class WeatherCacheManager {
 
       const results = await Promise.all(promises);
 
+
       // 处理结果
       let resultIndex = 0;
       const weatherData = {
@@ -160,27 +162,27 @@ class WeatherCacheManager {
       if (!cachedNow) {
         const res = results[resultIndex++];
         if (res.data.code === '200') {
-          weatherData.now = res.data.now;
-          this.setCache(cacheKeys.now, res.data.now, this.CACHE_CONFIG.WEATHER_NOW.ttl);
+          // 数据在获取前被处理
+          weatherData.now = useWeatherNow(res.data.now).value;
+          this.setCache(cacheKeys.now, weatherData.now, this.CACHE_CONFIG.WEATHER_NOW.ttl);
         }
       }
 
       if (!cachedHours) {
         const res = results[resultIndex++];
         if (res.data.code === '200') {
-          weatherData.hours = res.data.hourly;
-          this.setCache(cacheKeys.hours, res.data.hourly, this.CACHE_CONFIG.WEATHER_HOURS.ttl);
+          weatherData.hours = useWeatherHours(res.data.hourly).value;
+          this.setCache(cacheKeys.hours, weatherData.hours, this.CACHE_CONFIG.WEATHER_HOURS.ttl);
         }
       }
 
       if (!cachedDays) {
         const res = results[resultIndex];
         if (res.data.code === '200') {
-          weatherData.days = res.data.daily;
-          this.setCache(cacheKeys.days, res.data.daily, this.CACHE_CONFIG.WEATHER_DAYS.ttl);
+          weatherData.days = useWeatherDays(res.data.daily).value;
+          this.setCache(cacheKeys.days, weatherData.days, this.CACHE_CONFIG.WEATHER_DAYS.ttl);
         }
       }
-
       return weatherData;
 
     } catch (error) {

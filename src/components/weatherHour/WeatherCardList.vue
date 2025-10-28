@@ -6,7 +6,7 @@
     <template v-if="isHover">
       <div class="header">
         <i :class="'qi-' + `${weather.icon}`" style="display: block;"></i>
-        <span class="text">{{ weather.text }}</span>
+        <span class="text">{{ weather.text }}</span>&nbsp;
         <span class="time">{{ weather.fxTime }}</span>
       </div>
       <div class="main">

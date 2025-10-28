@@ -26,6 +26,7 @@ import eCharts from '@/components/eCharts.vue';
 import { onMounted, ref } from 'vue'
 import { useWeatherStore } from '@/store/weather.js'
 const weatherStore = useWeatherStore()
+// weatherStore.clearCache()
 onMounted(async () => {
   await weatherStore.getWeather('北京')
 })

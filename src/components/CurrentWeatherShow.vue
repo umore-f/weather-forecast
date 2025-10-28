@@ -1,9 +1,9 @@
 <template>
   <div class="weather-card">
-    <WeatherNowCard :weather="enhancedWeatherNowData[0]"/>
-    <WeatherDaysCard v-show="computedValue" v-for="weather in enhancedWeatherDaysData" :weather="weather"
+    <WeatherNowCard :weather="weatherStore?.weatherNowInfo[0]"/>
+    <WeatherDaysCard v-show="computedValue" v-for="weather in weatherStore.weatherDaysInfo" :weather="weather"
       :key="weather.fxDate" />
-    <WeatherHoursCard v-show="!computedValue" v-for="weather in enhancedWeatherHoursData" :weather="weather"
+    <WeatherHoursCard v-show="!computedValue" v-for="weather in weatherStore.weatherHoursInfo" :weather="weather"
       :key="weather.fxTime" />
   </div>
 </template>
@@ -14,11 +14,11 @@ import WeatherNowCard from './WeatherNow.vue'
 import WeatherDaysCard from './weatherDays/WeatherCardList.vue'
 import WeatherHoursCard from './weatherHour/WeatherCardList.vue'
 import '@/assets/icon/iconfont.js'
+import { useWeatherStore } from '@/store/weather'
+const weatherStore = useWeatherStore()
 
-// 使用计算属性处理时间字段
-import { useWeather } from '@/utils/enhancedData'
 
-const { enhancedWeatherNowData,enhancedWeatherDaysData,enhancedWeatherHoursData } = useWeather()
+
 
 const props = defineProps({
   modelValue: {

@@ -22,6 +22,7 @@ export const useWeatherStore = defineStore('weather', () => {
 
       const weatherData = await weatherCacheManager.getWeatherWithCache(location, apiCallbacks);
 
+
       currentCity.value = location;
       currentCityId.value = weatherData.cityId;
       weatherNowInfo.value = weatherData.now || {};

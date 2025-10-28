@@ -7,10 +7,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed} from 'vue';
 import * as echarts from 'echarts';
-import { useWeather } from '@/utils/enhancedData'
-const {enhancedWeatherDaysData} = useWeather()
+import { useWeatherStore } from '@/store/weather'
+const weatherStore = useWeatherStore()
+const weekdays = computed(()=>weatherStore.weatherDaysInfo.weekDay)
 
-const days = computed(()=>enhancedWeatherDaysData.value.map(item=>item.weekDay))
 
 
 // 获取DOM引用
@@ -19,7 +19,7 @@ let myChart = null;
 
 // 模拟一周的气温数据
 const temperatureData = {
-  days: days.value,
+  days: weekdays.value,
   maxTemp: [22, 25, 28, 30, 26, 24, 23],
   minTemp: [12, 15, 18, 20, 16, 14, 13]
 };

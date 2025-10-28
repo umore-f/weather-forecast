@@ -1,6 +1,6 @@
 import { computed } from 'vue'
-import { useWeatherStore } from '@/store/weather.js'
-import { formatTime, formatDateToMonthDay,getWeekday } from '@/utils/formatTime.js'
+// import { useWeatherStore } from '@/store/weather.js'
+import { formatTime, formatDateToMonthDay, getWeekday } from '@/utils/formatTime.js'
 
 
 // 天气类型映射函数
@@ -26,32 +26,43 @@ const weatherClassMap = {
 }
 
 // 合并后的计算属性
-export function useWeather() {
-  // 在函数内部调用 store
-  const weatherStore = useWeatherStore()
+export function useWeatherNow(now) {
+  console.log("实时天气处理");
+
   // 合并后的计算实时天气属性
   const enhancedWeatherNowData = computed(() => {
-    if (!weatherStore.weatherNowInfo) {
+
+    if (!now) {
       return 'weather-default'
     }
-    const weatherNowInfo = [weatherStore.weatherNowInfo]
+    const weatherNowInfo = [now]
     return weatherNowInfo.map(item => {
+      // 数据是否被处理过
+      const isProcessed = true
       const weatherType = getWeatherTypeByCode(+item.icon)
       const weatherClass = weatherClassMap[weatherType] || 'weather-default'
       return {
         ...item,
         weatherClass,
-        weatherType
+        weatherType,
+        isProcessed
       }
     })
   })
-  // 合并后的计算小时天气属性
+  return enhancedWeatherNowData
+}
+export function useWeatherHours(hours) {
+  console.log("小时天气处理");
+
+   // 合并后的计算小时天气属性
   const enhancedWeatherHoursData = computed(() => {
-    if (!weatherStore.weatherHoursInfo || !Array.isArray(weatherStore.weatherHoursInfo)) {
+    if (!hours || !Array.isArray(hours)) {
       return []
     }
 
-    return weatherStore.weatherHoursInfo.map(item => {
+    return hours.map(item => {
+      // 数据是否被处理过
+      const isProcessed = true
       // 时间格式化
       const formattedTime = formatTime(item.fxTime)
 
@@ -63,16 +74,24 @@ export function useWeather() {
         ...item,
         fxTime: formattedTime,
         weatherClass,
-        weatherType
+        weatherType,
+        isProcessed
       }
     })
   })
+  return enhancedWeatherHoursData
+}
+export function useWeatherDays(days) {
+  console.log("未来7天天气处理");
+
   // 合并后的计算每天天气属性
   const enhancedWeatherDaysData = computed(() => {
-    if (!weatherStore.weatherDaysInfo || !Array.isArray(weatherStore.weatherDaysInfo)) {
+    if (!days || !Array.isArray(days)) {
       return []
     }
-    return weatherStore.weatherDaysInfo.map(item => {
+    return days.map(item => {
+      // 数据是否被处理过
+      const isProcessed = true
       // 时间格式化转换为月-日
       const formattedTime = formatDateToMonthDay(item.fxDate)
       // 时间格式化转换为星期几
@@ -86,14 +105,13 @@ export function useWeather() {
         fxDate: formattedTime,
         weatherClass,
         weatherType,
-        weekDay
+        weekDay,
+        isProcessed
       }
     })
   })
-
-  return {
-    enhancedWeatherHoursData,
-    enhancedWeatherDaysData,
-    enhancedWeatherNowData,
-  }
+  return enhancedWeatherDaysData
 }
+
+
+

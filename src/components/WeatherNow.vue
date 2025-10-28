@@ -1,31 +1,31 @@
 <template>
-  <div class="big-card" :class="weather.weatherClass">
-    <div class="background-design" :class="weather.weatherClass">
+  <div class="big-card" :class="weather?.weatherClass">
+    <div class="background-design" :class="weather?.weatherClass">
       <div class="circle"></div>
       <div class="circle"></div>
       <div class="circle"></div>
     </div>
     <div class="header">
-      <i :class="'qi-' + `${weather.icon}`" style="display: block;"></i>
-      <span class="text">{{ weather.text }}</span>
+      <i :class="'qi-' + `${weather?.icon}`" style="display: block;"></i>
+      <span class="text">{{ weather?.text }}</span>
     </div>
     <div class="main">
-      <span>{{ weather.temp }}℃</span>
-      <span>{{ weather.feelsLike }}℃</span>
+      <span>{{ weather?.temp }}℃</span>
+      <span>{{ weather?.feelsLike }}℃</span>
 
     </div>
     <div class="footer">
       <div class="pressure">
         <span class="title">大气压</span>
-        <span class="text">{{ weather.pressure }}mb</span>
+        <span class="text">{{ weather?.pressure }}mb</span>
       </div>
       <div class="vis">
         <span class="title">能见度</span>
-        <span class="text">{{ weather.vis }}公里</span>
+        <span class="text">{{ weather?.vis }}公里</span>
       </div>
       <div class="humidity">
         <span class="title">相对湿度</span>
-        <span class="text">{{ weather.humidity }}%</span>
+        <span class="text">{{ weather?.humidity }}%</span>
       </div>
     </div>
   </div>
@@ -196,7 +196,7 @@ i {
 
 .main span:last-child {
   font-size: 12px;
-  background-color: white;
+  /* background-color: white; */
   height: 24px;
   line-height: 24px;
   border-radius: 15%;
