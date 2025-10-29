@@ -30,7 +30,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-const airQualityIndex = ref(158)
+import {useAQIStore} from '@/store/AQI'
+const AQIStore = useAQIStore()
+const airQualityIndex = AQIStore.getAIQInfo('北京')
 const pollutants = ref([
   { name: 'PM2.5', value: 65, unit: 'μg/m³', max: 75, percentage: 0, color: '#67C23A' },
   { name: 'PM10', value: 120, unit: 'μg/m³', max: 150, percentage: 0, color: '#67C23A' },
