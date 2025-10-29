@@ -2,7 +2,7 @@
   <div class="container">
     <el-container>
       <el-aside style="background-color: antiquewhite; width: 6vw;">Aside</el-aside>
-      <el-main style="background-color: bisque;">
+      <el-main>
         <el-container>
           <el-header style="justify-content: end; display: flex; align-items: center">
             <HeaderNav v-model="model"/>
@@ -13,7 +13,9 @@
           </el-main>
         </el-container>
       </el-main>
-      <el-aside style="background-color: antiquewhite; width: 16vw;"></el-aside>
+      <el-aside style="background-color: antiquewhite; width: 16vw;">
+        <AirQuality/>
+      </el-aside>
     </el-container>
   </div>
 
@@ -23,6 +25,7 @@
 import HeaderNav from '../components/HeaderNav.vue';
 import CurrentWeather from '../components/CurrentWeatherShow.vue';
 import eCharts from '@/components/eCharts.vue';
+import AirQuality from '@/components/AirQuality.vue';
 import { onMounted, ref } from 'vue'
 import { useWeatherStore } from '@/store/weather.js'
 const weatherStore = useWeatherStore()

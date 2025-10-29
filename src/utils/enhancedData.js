@@ -39,10 +39,12 @@ export function useWeatherNow(now) {
     return weatherNowInfo.map(item => {
       // 数据是否被处理过
       const isProcessed = true
+      const formattedTime = formatTime(item.obsTime)
       const weatherType = getWeatherTypeByCode(+item.icon)
       const weatherClass = weatherClassMap[weatherType] || 'weather-default'
       return {
         ...item,
+        obsTime:formattedTime,
         weatherClass,
         weatherType,
         isProcessed

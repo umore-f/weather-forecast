@@ -9,6 +9,8 @@ import 'qweather-icons/font/qweather-icons.css'
 import { createPinia } from 'pinia'
 // 导入 vue-echarts 组件
 import ECharts from 'vue-echarts';
+// 引入css文件
+import '@/assets/styles/weather-styles.css'
 const pinia = createPinia()
 const app = createApp(App)
 // 循环注册

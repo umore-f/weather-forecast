@@ -1,3 +1,4 @@
+// 时间转换为时-分
 export const formatTime = (apiTimeString) => {
   const date = new Date(apiTimeString);
   if (date instanceof Date && !isNaN(date)) {

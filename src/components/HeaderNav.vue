@@ -1,8 +1,9 @@
 <template>
-  <div>
+  <div style="display: flex;">
     <el-button :icon="User" circle style="width: 40px;height: 40px;; text-align: center;" />
     <span>Hello,</span>
     <span>Jack Grealish</span>
+    <div style="display: flex;"><Location style="width: 24px; height: 24px; margin-left: 12px;"/><span style="display: block; margin-left: 8px;">{{ weatherStore.currentCity }}</span></div>
   </div>
   <el-switch v-model="computedValue" inline-prompt style=" margin-right: 10px;" active-text="未来七天" inactive-text="今天" />
 
@@ -48,5 +49,8 @@ div:nth-child(1) {
 
 span {
   line-height: 40px;
+}
+svg {
+  margin-top: 4px;
 }
 </style>
