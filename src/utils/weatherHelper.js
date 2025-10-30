@@ -1,7 +1,7 @@
 import { useCityStore } from '@/store/city'
 import { useWeatherStore } from '@/store/weather'
 
-
+// 确保城市API先返回
 export const fetchCityAndWeather = async (cityName) => {
   const cityStore = useCityStore()
   const weatherStore = useWeatherStore()
