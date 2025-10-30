@@ -1,11 +1,10 @@
-// 在 utils/weatherHelper.js 或其他工具文件中
 import { useCityStore } from '@/store/city'
 import { useWeatherStore } from '@/store/weather'
+
 
 export const fetchCityAndWeather = async (cityName) => {
   const cityStore = useCityStore()
   const weatherStore = useWeatherStore()
-
   try {
     console.log('🔄 开始获取城市和天气数据...')
 
@@ -21,7 +20,6 @@ export const fetchCityAndWeather = async (cityName) => {
 
     // 2. 获取天气数据
     await weatherStore.getWeather()
-
     console.log('✅ 天气数据获取成功')
 
     return {
@@ -29,7 +27,8 @@ export const fetchCityAndWeather = async (cityName) => {
       weather: {
         now: weatherStore.weatherNowInfo,
         hours: weatherStore.weatherHoursInfo,
-        days: weatherStore.weatherDaysInfo
+        days: weatherStore.weatherDaysInfo,
+        aqi: weatherStore.airQualityInfo
       }
     }
   } catch (error) {

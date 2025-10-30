@@ -1,14 +1,14 @@
 <template>
   <div class="container">
     <el-container>
-      <el-aside style="background-color: antiquewhite; width: 6vw;">Aside</el-aside>
+      <el-aside style="background-color: antiquewhite; width: 6vw;"><AsideNav/></el-aside>
       <el-main>
         <el-container>
           <el-header style="justify-content: end; display: flex; align-items: center">
-            <HeaderNav v-model="model"/>
+            <HeaderNav/>
           </el-header>
           <el-main style="padding-bottom: 5px;">
-            <CurrentWeather v-model="model"/>
+            <CurrentWeather/>
             <eCharts/>
           </el-main>
         </el-container>
@@ -26,19 +26,7 @@ import HeaderNav from '../components/HeaderNav.vue';
 import CurrentWeather from '../components/CurrentWeatherShow.vue';
 import eCharts from '@/components/eCharts.vue';
 import AirQuality from '@/components/AirQuality.vue';
-import { onMounted, ref } from 'vue'
-import { fetchCityAndWeather } from '@/utils/weatherHelper'
-
-const loadWeatherData = async () => {
-  try {
-    const data = await fetchCityAndWeather('北京')
-    console.log('📊 所有数据:', data)
-  } catch (error) {
-    console.error('加载数据失败:', error)
-  }
-}
-onMounted(()=>loadWeatherData())
-const model = ref(false)
+import AsideNav from '@/components/AsideNav.vue';
 </script>
 
 <style lang="scss" scoped></style>

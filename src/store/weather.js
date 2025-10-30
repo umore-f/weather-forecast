@@ -8,8 +8,7 @@ export const useWeatherStore = defineStore('weather', () => {
   const weatherNowInfo = ref([])
   const weatherHoursInfo = ref([])
   const weatherDaysInfo = ref([])
-  // const currentCity = ref('')
-  // const currentCityId = ref('')
+  const airQualityInfo = ref([])
   const getWeather = async () => {
     try {
       const apiCallbacks = {
@@ -18,18 +17,16 @@ export const useWeatherStore = defineStore('weather', () => {
         getWeatherHoursInfo: weatherApi.getWeatherHoursInfo,
         getWeatherDaysInfo: weatherApi.getWeatherDaysInfo,
         getAQINowInfo:AQIApi.getAQIInfo
-      };
+      }
 
       const weatherData = await weatherCacheManager.getWeatherWithCache(apiCallbacks);
 
 
-      // currentCity.value = location;
-      // currentCityId.value = weatherData.cityId;
-      // 此时的Now数据已经包含空气质量数据
+
       weatherNowInfo.value = weatherData.now || [];
       weatherHoursInfo.value = weatherData.hours || [];
       weatherDaysInfo.value = weatherData.days || [];
-
+      airQualityInfo.value = weatherData.aqi || [];
 
       console.log(weatherData.fromCache ? '📦 使用缓存数据' : '🌤️ 使用新数据');
 
@@ -51,8 +48,9 @@ export const useWeatherStore = defineStore('weather', () => {
     weatherNowInfo,
     weatherHoursInfo,
     weatherDaysInfo,
+    airQualityInfo,
     getWeather,
     clearCache,
-    getCacheStatus
+    getCacheStatus,
   }
 })

@@ -1,5 +1,7 @@
 import { useWeatherDays, useWeatherHours, useWeatherNow } from '@/utils/enhancedData'
 import { useCityStore } from '@/store/city'
+
+
 // import { computed } from 'vue'
 // import { storeToRefs } from 'pinia'
 // 天气数据缓存管理器
@@ -9,7 +11,8 @@ class WeatherCacheManager {
     this.CACHE_CONFIG = {
       WEATHER_NOW: { key: 'weather_now', ttl: 10 * 60 * 1000 }, // 10分钟
       WEATHER_HOURS: { key: 'weather_hours', ttl: 30 * 60 * 1000 }, // 1小时
-      WEATHER_DAYS: { key: 'weather_days', ttl: 2 * 60 * 60 * 1000 } // 2小时
+      WEATHER_DAYS: { key: 'weather_days', ttl: 2 * 60 * 60 * 1000 }, // 2小时
+      AIR_QUALITY: { key: 'air_quality', ttl: 30 * 60 * 1000 }, // 30分钟
     };
 
     // 初始化时清理过期缓存
@@ -92,7 +95,6 @@ class WeatherCacheManager {
   getCityCacheKey(baseKey, cityId) {
     return `${baseKey}_${cityId}`;
   }
-
   /**
    * 获取天气数据（带缓存）
    * @param {string} location - 城市名称
@@ -128,22 +130,27 @@ class WeatherCacheManager {
       const cacheKeys = {
         now: this.getCityCacheKey(this.CACHE_CONFIG.WEATHER_NOW.key, cityId),
         hours: this.getCityCacheKey(this.CACHE_CONFIG.WEATHER_HOURS.key, cityId),
-        days: this.getCityCacheKey(this.CACHE_CONFIG.WEATHER_DAYS.key, cityId)
+        days: this.getCityCacheKey(this.CACHE_CONFIG.WEATHER_DAYS.key, cityId),
+        aqi: this.getCityCacheKey(this.CACHE_CONFIG.AIR_QUALITY.key, cityId),
       };
 
       // 检查天气数据缓存
       const cachedNow = this.getCache(cacheKeys.now);
       const cachedHours = this.getCache(cacheKeys.hours);
       const cachedDays = this.getCache(cacheKeys.days);
-
+      const cachedAqi = this.getCache(cacheKeys.aqi)
       // 如果所有天气数据都有缓存，直接使用
-      if (cachedNow && cachedHours && cachedDays) {
+      if (cachedNow && cachedHours && cachedDays && cachedAqi) {
         console.log('📦 使用缓存的天气数据');
+
+
         return {
           cityId,
           now: cachedNow,
           hours: cachedHours,
           days: cachedDays,
+          aqi: cachedAqi,
+
           fromCache: true
         };
       }
@@ -162,6 +169,9 @@ class WeatherCacheManager {
       if (!cachedDays) {
         promises.push(apiCallbacks.getWeatherDaysInfo(cityId));
       }
+      if (!cachedAqi) {
+        promises.push(apiCallbacks.getAQINowInfo(currentLat, currentLon))
+      }
 
       const results = await Promise.all(promises);
 
@@ -173,6 +183,7 @@ class WeatherCacheManager {
         now: cachedNow,
         hours: cachedHours,
         days: cachedDays,
+        aqi: cachedAqi,
         fromCache: false
       };
 
@@ -184,10 +195,10 @@ class WeatherCacheManager {
             const weatherNowData = useWeatherNow(res.data.now);
             // 检查数据是否存在
             if (weatherNowData?.value) {
-              // 正确的数组合并方式
-              weatherData.now =weatherNowData.value;
+              weatherData.now = weatherNowData.value;
               this.setCache(cacheKeys.now, weatherData.now, this.CACHE_CONFIG.WEATHER_NOW.ttl);
               console.log('✅ 实时天气数据缓存成功');
+
             } else {
               console.warn('⚠️ 实时天气数据不完整:', {
                 weatherNow: weatherNowData?.value,
@@ -207,7 +218,7 @@ class WeatherCacheManager {
             if (hoursData?.value) {
               weatherData.hours = hoursData.value;
               this.setCache(cacheKeys.hours, weatherData.hours, this.CACHE_CONFIG.WEATHER_HOURS.ttl);
-              console.log('✅ 小时天气数据缓存成功');
+
             }
           } catch (error) {
             console.error('❌ 处理小时天气数据失败:', error);
@@ -215,17 +226,31 @@ class WeatherCacheManager {
         }
       }
       if (!cachedDays) {
-        const res = results[resultIndex];
+        const res = results[resultIndex++];
         if (res?.data?.code === '200' && res.data.daily) {
           try {
             const daysData = useWeatherDays(res.data.daily);
             if (daysData?.value) {
               weatherData.days = daysData.value;
               this.setCache(cacheKeys.days, weatherData.days, this.CACHE_CONFIG.WEATHER_DAYS.ttl);
-              console.log('✅ 每日天气数据缓存成功');
+
             }
           } catch (error) {
             console.error('❌ 处理每日天气数据失败:', error);
+          }
+        }
+      }
+      // 处理空气质量数据
+      if (!cachedAqi) {
+        const res = results[resultIndex];
+        if (res) {
+          try {
+            // 直接存储 AQI 数据
+            weatherData.aqi = res.data.list;
+            this.setCache(cacheKeys.aqi, weatherData.aqi, this.CACHE_CONFIG.AIR_QUALITY.ttl);
+    
+          } catch (error) {
+            console.error('❌ 处理空气质量数据失败:', error);
           }
         }
       }

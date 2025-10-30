@@ -1,41 +1,56 @@
 <template>
-  <div class="weather-card" @mousedown="startDrag" @mousemove="onDrag" @mouseup="endDrag" @mouseleave="endDrag"
-    @touchstart="startDrag" @touchmove="onDrag" @touchend="endDrag">
-    <WeatherNowCard :weather="weatherStore?.weatherNowInfo[0]" />
-    <WeatherDaysCard v-show="computedValue" v-for="weather in weatherStore.weatherDaysInfo" :weather="weather"
-      :key="weather.fxDate" />
-    <WeatherHoursCard v-show="!computedValue" v-for="weather in weatherStore.weatherHoursInfo" :weather="weather"
-      :key="weather.fxTime" />
+  <div v-loading="!weatherDataReady" element-loading-text="加载天气数据中...">
+    <div class="weather-card" @mousedown="startDrag" @mousemove="onDrag" @mouseup="endDrag" @mouseleave="endDrag"
+      @touchstart="startDrag" @touchmove="onDrag" @touchend="endDrag">
+      <WeatherNowCard :weather="weatherStore?.weatherNowInfo[0]" />
+      <WeatherDaysCard v-show="showValue" v-for="weather in weatherStore.weatherDaysInfo" :weather="weather"
+        :key="weather.fxDate" />
+      <WeatherHoursCard v-show="!showValue" v-for="weather in weatherStore.weatherHoursInfo" :weather="weather"
+        :key="weather.fxTime" />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, ref} from 'vue'
+import { ref, onMounted } from 'vue'
 import WeatherNowCard from './WeatherNow.vue'
 import WeatherDaysCard from './DaysCardList.vue'
 import WeatherHoursCard from './HourCardList.vue'
 import '@/assets/icon/iconfont.js'
 import { useWeatherStore } from '@/store/weather'
+import { fetchCityAndWeather } from '@/utils/weatherHelper'
+import emitter from '@/utils/emitter'
 const weatherStore = useWeatherStore()
-
-
-
-
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: true
+// import {useWeatherStore} from '@/store/weather'
+// const weatherStore = useWeatherStore()
+// weatherStore.clearCache()
+const weatherDataReady = ref(true)
+const loadWeatherData = async (cityName) => {
+  console.log('1. 开始加载，设置 weatherDataReady 为 false');
+  weatherDataReady.value = false;
+  try {
+    console.log('2. 调用 fetchCityAndWeather');
+    const data = await fetchCityAndWeather(cityName);
+    console.log('3. 获取数据完成', data);
+    // 检查数据
+    const hasData = weatherStore.weatherNowInfo?.length > 0 ||
+                   weatherStore.weatherDaysInfo?.length > 0 ||
+                   weatherStore.weatherHoursInfo?.length > 0;
+    console.log('4. 数据存在性:', hasData);
+    weatherDataReady.value = true;
+    console.log('5. 设置 weatherDataReady 为 true');
+  } catch (error) {
+    console.error('加载数据失败:', error);
+    weatherDataReady.value = true;
+    console.log('6. 出错，设置 weatherDataReady 为 true');
   }
-});
-const emit = defineEmits(['update:modelValue']);
-const computedValue = computed({
-  get() {
-    return props.modelValue;
-  },
-  set(value) {
-    emit('update:modelValue', value);
-  }
-});
+}
+onMounted(() => loadWeatherData('北京'))
+let showValue = ref()
+emitter.on('showOne',(value)=>{
+  showValue.value = value
+})
+
 const isDragging = ref(false);
 const startX = ref(0);
 const startScrollLeft = ref(0);

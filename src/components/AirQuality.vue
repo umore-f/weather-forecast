@@ -2,7 +2,7 @@
   <div class="air-quality-container">
     <div class="dashboard-section">
       <div class="dashboard-content">
-        <el-progress type="dashboard" :percentage="aqiPercentage" :color="aqiColor" :width="200">
+        <el-progress type="dashboard" :percentage="aqiPercentage" :color="aqiColor" :width="200" :stroke-width="20">
           <template #default>
             <div class="aqi-value">
               <div class="aqi-number">{{ airQualityIndex }}</div>
@@ -21,11 +21,8 @@
           <span class="pollutant-value">{{ pollutant.value }} <span class="unit">{{ pollutant.unit }}</span></span>
         </div>
         <div class="pollutant-progress">
-          <el-progress
-            :percentage="pollutant.percentage"
-            :color="pollutant.color"
-            :show-text="false"
-            :stroke-width="12">
+          <el-progress :percentage="pollutant.percentage" :color="pollutant.color" :show-text="false"
+            :stroke-width="10">
           </el-progress>
         </div>
       </div>
@@ -35,12 +32,11 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useAQIStore } from '@/store/AQI'
-
-const AQIStore = useAQIStore()
-
-// 使用计算属性获取空气质量指数
-const airQualityIndex = computed(() => (AQIStore.AQIInfo[0]?.components?.pm2_5) || 0)
+import { useWeatherStore } from '@/store/weather'
+const weatherStore = useWeatherStore()
+console.log('🔍 Store 实例 ID:', weatherStore.$id)
+console.log('🔍 是否是同一个实例:', weatherStore === useWeatherStore())
+const airQualityIndex = computed(() =>  weatherStore.airQualityInfo?.[0]?.components.pm2_5)
 
 // 污染物配置
 const pollutantConfigs = [
@@ -78,7 +74,7 @@ const aqiColor = computed(() => {
 // 更新污染物数据的函数
 const updatePollutants = () => {
   pollutantList.value = pollutantConfigs.map(config => {
-    const value = AQIStore.AQIInfo[0]?.components?.[config.key] || 0;
+    const value = weatherStore.airQualityInfo?.[0]?.components?.[config.key] || 0;
     const percentage = Math.min(100, (value / config.max) * 100);
 
     let color = '#67C23A'; // 绿色
@@ -104,7 +100,7 @@ onMounted(() => {
 
 // 监听 AQIStore 数据变化
 watch(
-  () => AQIStore.AQIInfo,
+  () => weatherStore.airQualityInfo,
   () => {
     updatePollutants();
   },
@@ -118,14 +114,14 @@ watch(
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding-top: 20px;
   max-width: 800px;
 }
 
 .dashboard-section {
   display: flex;
   justify-content: center;
-  margin-bottom: 30px;
+
 }
 
 .dashboard-content {
@@ -155,7 +151,7 @@ watch(
 .pollutants-section {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 5px;
 }
 
 .pollutant-item {

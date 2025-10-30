@@ -5,10 +5,10 @@
     <span>Jack Grealish</span>
     <div style="display: flex;">
       <Location style="width: 24px; height: 24px; margin-left: 12px;" /><span
-        style="display: block; margin-left: 8px;">{{ weatherStore.currentCity }}</span>
+        style="display: block; margin-left: 8px;">{{ cityStore.cityInfo.name }}</span>
     </div>
   </div>
-  <el-switch v-model="computedValue" inline-prompt style=" margin-right: 10px;" active-text="未来七天" inactive-text="今天" />
+  <el-switch @click="emitter.emit('showOne',show)" v-model="show" inline-prompt style=" margin-right: 10px;" active-text="未来七天" inactive-text="今天" />
 
   <div class="header" style="margin-right: 20px;">
     <el-input style="width: 240px;" placeholder="Please input" clearable :prefix-icon="Search" class="myInput"
@@ -19,11 +19,11 @@
 </template>
 <script setup>
 import { Search, Bell, User } from '@element-plus/icons-vue'
-import { ref, computed } from 'vue'
-import { useWeatherStore } from '@/store/weather.js'
-const weatherStore = useWeatherStore()
+import { ref,} from 'vue'
+import {useCityStore} from '@/store/city'
+const cityStore = useCityStore()
 import { fetchCityAndWeather } from '@/utils/weatherHelper'
-
+import emitter from '@/utils/emitter'
 async function searchCityName() {
   try {
     const data = await fetchCityAndWeather(cityName.value)
@@ -33,22 +33,7 @@ async function searchCityName() {
   }
 }
 const cityName = ref('')
-
-const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    default: true
-  }
-});
-const emit = defineEmits(['update:modelValue']);
-const computedValue = computed({
-  get() {
-    return props.modelValue;
-  },
-  set(value) {
-    emit('update:modelValue', value);
-  }
-});
+let show = ref(false)
 </script>
 
 <style scoped>
