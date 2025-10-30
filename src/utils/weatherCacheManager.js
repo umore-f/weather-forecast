@@ -1,4 +1,7 @@
-import { useWeatherDays,useWeatherHours,useWeatherNow } from '@/utils/enhancedData'
+import { useWeatherDays, useWeatherHours, useWeatherNow } from '@/utils/enhancedData'
+import { useCityStore } from '@/store/city'
+// import { computed } from 'vue'
+// import { storeToRefs } from 'pinia'
 // 天气数据缓存管理器
 class WeatherCacheManager {
   constructor() {
@@ -100,13 +103,27 @@ class WeatherCacheManager {
    * @param {Function} apiCallbacks.getWeatherDaysInfo - 获取天天气函数
    * @returns {Promise<Object>} 天气数据对象
    */
-  async getWeatherWithCache(location, apiCallbacks) {
+  async getWeatherWithCache(apiCallbacks) {
     try {
       // 1. 获取城市ID - 每次都从API获取，不缓存（遵守和风天气规定）
-      console.log('🔍 查询城市数据（实时）');
-      const resCity = await apiCallbacks.searchCity(location);
-      const cityId = +resCity.data.location[0].id;
+      // console.log('🔍 查询城市数据（实时）');
+      // const resCity = await apiCallbacks.searchCity(cityName);
+      // const cityId = +resCity.data.location[0].id;
+      const cityStore = useCityStore()
+      // 检查城市数据是否存在
+      // 检查计算属性是否存在
+      // 直接检查 cityInfo 对象
+      if (!cityStore.cityInfo || !cityStore.cityInfo.id) {
+        console.warn('❌ 城市数据未设置，请先选择城市')
+        console.log('🔍 cityInfo:', cityStore.cityInfo)
+        throw new Error('城市数据未设置')
+      }
 
+      const cityId = +cityStore.cityInfo.id
+      const currentLat = Number(Number(cityStore.cityInfo.lat).toFixed(2))
+      const currentLon = Number(Number(cityStore.cityInfo.lon).toFixed(2))
+
+      console.log('📍 使用城市数据:', { cityId, currentLat, currentLon })
       // 2. 获取天气数据 - 使用缓存
       const cacheKeys = {
         now: this.getCityCacheKey(this.CACHE_CONFIG.WEATHER_NOW.key, cityId),
@@ -161,26 +178,55 @@ class WeatherCacheManager {
 
       if (!cachedNow) {
         const res = results[resultIndex++];
-        if (res.data.code === '200') {
-          // 数据在获取前被处理
-          weatherData.now = useWeatherNow(res.data.now).value;
-          this.setCache(cacheKeys.now, weatherData.now, this.CACHE_CONFIG.WEATHER_NOW.ttl);
+        if (res?.data?.code === '200') {
+          try {
+            // 确保数据存在再处理
+            const weatherNowData = useWeatherNow(res.data.now);
+            // 检查数据是否存在
+            if (weatherNowData?.value) {
+              // 正确的数组合并方式
+              weatherData.now =weatherNowData.value;
+              this.setCache(cacheKeys.now, weatherData.now, this.CACHE_CONFIG.WEATHER_NOW.ttl);
+              console.log('✅ 实时天气数据缓存成功');
+            } else {
+              console.warn('⚠️ 实时天气数据不完整:', {
+                weatherNow: weatherNowData?.value,
+              });
+            }
+          } catch (error) {
+            console.error('❌ 处理实时天气数据失败:', error);
+          }
         }
       }
 
       if (!cachedHours) {
         const res = results[resultIndex++];
-        if (res.data.code === '200') {
-          weatherData.hours = useWeatherHours(res.data.hourly).value;
-          this.setCache(cacheKeys.hours, weatherData.hours, this.CACHE_CONFIG.WEATHER_HOURS.ttl);
+        if (res?.data?.code === '200' && res.data.hourly) {
+          try {
+            const hoursData = useWeatherHours(res.data.hourly);
+            if (hoursData?.value) {
+              weatherData.hours = hoursData.value;
+              this.setCache(cacheKeys.hours, weatherData.hours, this.CACHE_CONFIG.WEATHER_HOURS.ttl);
+              console.log('✅ 小时天气数据缓存成功');
+            }
+          } catch (error) {
+            console.error('❌ 处理小时天气数据失败:', error);
+          }
         }
       }
-
       if (!cachedDays) {
         const res = results[resultIndex];
-        if (res.data.code === '200') {
-          weatherData.days = useWeatherDays(res.data.daily).value;
-          this.setCache(cacheKeys.days, weatherData.days, this.CACHE_CONFIG.WEATHER_DAYS.ttl);
+        if (res?.data?.code === '200' && res.data.daily) {
+          try {
+            const daysData = useWeatherDays(res.data.daily);
+            if (daysData?.value) {
+              weatherData.days = daysData.value;
+              this.setCache(cacheKeys.days, weatherData.days, this.CACHE_CONFIG.WEATHER_DAYS.ttl);
+              console.log('✅ 每日天气数据缓存成功');
+            }
+          } catch (error) {
+            console.error('❌ 处理每日天气数据失败:', error);
+          }
         }
       }
       return weatherData;

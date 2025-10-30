@@ -19,6 +19,8 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 
 app.use(pinia)
+
 // 全局注册图表组件，在模板中可以使用 <v-chart> 标签
+
 app.component('v-chart', ECharts);
 app.mount('#app')

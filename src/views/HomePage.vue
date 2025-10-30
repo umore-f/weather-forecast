@@ -27,12 +27,17 @@ import CurrentWeather from '../components/CurrentWeatherShow.vue';
 import eCharts from '@/components/eCharts.vue';
 import AirQuality from '@/components/AirQuality.vue';
 import { onMounted, ref } from 'vue'
-import { useWeatherStore } from '@/store/weather.js'
-const weatherStore = useWeatherStore()
-// weatherStore.clearCache()
-onMounted(async () => {
-  await weatherStore.getWeather('北京')
-})
+import { fetchCityAndWeather } from '@/utils/weatherHelper'
+
+const loadWeatherData = async () => {
+  try {
+    const data = await fetchCityAndWeather('北京')
+    console.log('📊 所有数据:', data)
+  } catch (error) {
+    console.error('加载数据失败:', error)
+  }
+}
+onMounted(()=>loadWeatherData())
 const model = ref(false)
 </script>
 

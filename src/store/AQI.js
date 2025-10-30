@@ -1,15 +1,14 @@
 import { defineStore } from "pinia"
 import { ref } from 'vue'
-import { cityApi } from '@/apis/cityApi'
 import { AQIApi } from '@/apis/AQIApi'
+import { useCityStore } from '@/store/city'
+
 export const useAQIStore = defineStore("AQI", () => {
   const AQIInfo = ref([])
-  const getAIQInfo = async (location) => {
-    const resCity = await cityApi.searchCity(location);
-    const cityLat = +(Number(resCity.data.location[0].lat).toFixed(2));
-    const cityLon = +(Number(resCity.data.location[0].lon).toFixed(2));
-    const resAQI = await AQIApi.getAQIInfo(cityLat, cityLon)
-    AQIInfo.value = resAQI.indexes
+  const cityStore = useCityStore()
+  const getAIQInfo = async () => {
+    const res = await AQIApi.getAQIInfo(+cityStore.lat,+cityStore.lon)
+    AQIInfo.value = res.data.list
   }
   return {
     getAIQInfo,

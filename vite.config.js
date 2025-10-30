@@ -30,13 +30,29 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy: {
-        // 将 /api 开头的请求代理到和风天气
-        '/api': {
-          target: `https://${env.VITE_API_HOST || 'api.qweather.com'}`, // 使用环境变量或默认值
+        // 和风天气代理
+        '/qweather': {
+          target: `https://${env.VITE_API_HOST || 'api.qweather.com'}`,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, '') // 可选，移除/api前缀
+          rewrite: (path) => path.replace(/^\/qweather/, '')
+        },
+        // OpenWeatherMap 代理
+        '/openweather': {
+          target: 'http://api.openweathermap.org',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/openweather/, '')
         }
       }
     }
+    // server: {
+    //   proxy: {
+    //     // 将 /api 开头的请求代理到和风天气
+    //     '/api': {
+    //       target: `https://${env.VITE_API_HOST || 'api.qweather.com'}`, // 使用环境变量或默认值
+    //       changeOrigin: true,
+    //       rewrite: (path) => path.replace(/^\/api/, '') // 可选，移除/api前缀
+    //     }
+    //   },
+    // }
   }
 })

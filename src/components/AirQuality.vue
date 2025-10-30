@@ -15,34 +15,47 @@
     </div>
 
     <div class="pollutants-section">
-      <div v-for="pollutant in pollutants" :key="pollutant.name" class="pollutant-item">
-        <div class="pollutant-label">{{ pollutant.name }}</div>
-        <div class="pollutant-value">{{ pollutant.value }} {{ pollutant.unit }}</div>
+      <div v-for="pollutant in pollutantList" :key="pollutant.name" class="pollutant-item">
+        <div class="pollutant-info">
+          <span class="pollutant-label">{{ pollutant.name }}</span>
+          <span class="pollutant-value">{{ pollutant.value }} <span class="unit">{{ pollutant.unit }}</span></span>
+        </div>
         <div class="pollutant-progress">
-          <el-progress :percentage="pollutant.percentage" :color="pollutant.color" :show-text="false">
+          <el-progress
+            :percentage="pollutant.percentage"
+            :color="pollutant.color"
+            :show-text="false"
+            :stroke-width="12">
           </el-progress>
         </div>
       </div>
     </div>
   </div>
-
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import {useAQIStore} from '@/store/AQI'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useAQIStore } from '@/store/AQI'
+
 const AQIStore = useAQIStore()
-const airQualityIndex = AQIStore.getAIQInfo('北京')
-const pollutants = ref([
-  { name: 'PM2.5', value: 65, unit: 'μg/m³', max: 75, percentage: 0, color: '#67C23A' },
-  { name: 'PM10', value: 120, unit: 'μg/m³', max: 150, percentage: 0, color: '#67C23A' },
-  { name: 'SO₂', value: 45, unit: 'μg/m³', max: 80, percentage: 0, color: '#E6A23C' },
-  { name: 'NO₂', value: 85, unit: 'μg/m³', max: 100, percentage: 0, color: '#F56C6C' },
-  { name: 'O₃', value: 160, unit: 'μg/m³', max: 200, percentage: 0, color: '#F56C6C' }
-])
+
+// 使用计算属性获取空气质量指数
+const airQualityIndex = computed(() => (AQIStore.AQIInfo[0]?.components?.pm2_5) || 0)
+
+// 污染物配置
+const pollutantConfigs = [
+  { name: 'PM2.5', key: 'pm2_5', unit: 'μg/m³', max: 75 },
+  { name: 'PM10', key: 'pm10', unit: 'μg/m³', max: 150 },
+  { name: 'SO₂', key: 'so2', unit: 'μg/m³', max: 80 },
+  { name: 'NO₂', key: 'no2', unit: 'μg/m³', max: 100 },
+  { name: 'O₃', key: 'o3', unit: 'μg/m³', max: 200 }
+]
+
+// 污染物列表
+const pollutantList = ref([])
+
 // 计算属性
 const aqiPercentage = computed(() => {
-  // 将AQI转换为百分比 (假设AQI最大值为300)
   return Math.min(100, (airQualityIndex.value / 300) * 100);
 });
 
@@ -55,29 +68,64 @@ const aqiDescription = computed(() => {
 });
 
 const aqiColor = computed(() => {
-  if (airQualityIndex.value <= 50) return '#67C23A'; // 绿色
-  if (airQualityIndex.value <= 100) return '#E6A23C'; // 黄色
-  if (airQualityIndex.value <= 150) return '#F56C6C'; // 红色
-  if (airQualityIndex.value <= 200) return '#8B0000'; // 深红色
-  return '#4B0082'; // 紫色
+  if (airQualityIndex.value <= 50) return '#67C23A';
+  if (airQualityIndex.value <= 100) return '#E6A23C';
+  if (airQualityIndex.value <= 150) return '#F56C6C';
+  if (airQualityIndex.value <= 200) return '#8B0000';
+  return '#4B0082';
 });
 
+// 更新污染物数据的函数
+const updatePollutants = () => {
+  pollutantList.value = pollutantConfigs.map(config => {
+    const value = AQIStore.AQIInfo[0]?.components?.[config.key] || 0;
+    const percentage = Math.min(100, (value / config.max) * 100);
 
+    let color = '#67C23A'; // 绿色
+    if (percentage >= 80) {
+      color = '#F56C6C'; // 红色
+    } else if (percentage >= 60) {
+      color = '#E6A23C'; // 黄色
+    }
+
+    return {
+      ...config,
+      value,
+      percentage,
+      color
+    };
+  });
+};
+
+// 生命周期钩子
+onMounted(() => {
+  updatePollutants();
+});
+
+// 监听 AQIStore 数据变化
+watch(
+  () => AQIStore.AQIInfo,
+  () => {
+    updatePollutants();
+  },
+  { deep: true }
+);
 </script>
 
 <style scoped>
 .air-quality-container {
-  /* max-width: 900px; */
   margin: 0 auto;
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  padding: 10px;
+  padding: 20px;
+  max-width: 800px;
 }
 
 .dashboard-section {
   display: flex;
   justify-content: center;
+  margin-bottom: 30px;
 }
 
 .dashboard-content {
@@ -105,43 +153,42 @@ const aqiColor = computed(() => {
 }
 
 .pollutants-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .pollutant-item {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pollutant-info {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
 }
 
 .pollutant-label {
-  width: 120px;
   font-size: 14px;
+  font-weight: 500;
+  color: #333;
 }
 
 .pollutant-value {
-  width: 80px;
-  text-align: right;
   font-size: 14px;
-  margin-right: 10px;
+  color: #666;
+}
+
+.unit {
+  font-size: 12px;
+  color: #999;
 }
 
 .pollutant-progress {
-  flex: 1;
+  width: 100%;
 }
-
-.header {
-  text-align: center;
-  margin-bottom: 12px;
-}
-
-.header h1 {
-  color: #409EFF;
-  margin-bottom: 10px;
-}
-
 
 .quality-indicator {
   margin-top: 10px;

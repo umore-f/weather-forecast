@@ -12,8 +12,8 @@
 <script setup>
 import { computed, ref} from 'vue'
 import WeatherNowCard from './WeatherNow.vue'
-import WeatherDaysCard from './weatherDays/WeatherCardList.vue'
-import WeatherHoursCard from './weatherHour/WeatherCardList.vue'
+import WeatherDaysCard from './DaysCardList.vue'
+import WeatherHoursCard from './HourCardList.vue'
 import '@/assets/icon/iconfont.js'
 import { useWeatherStore } from '@/store/weather'
 const weatherStore = useWeatherStore()
