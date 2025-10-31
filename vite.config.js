@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
     base: '',
     build: {
       outDir: 'dist',
-
+      target: 'esnext',
       // 优化 chunk 大小，避免 Vercel 限制
       rollupOptions: {
         external: [],
