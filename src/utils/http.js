@@ -1,31 +1,44 @@
 import axios from "axios";
 import { tokenManager } from './tokenManager.js';
+// 根据环境选择 baseURL
+const getBaseURL = () => {
+  // 开发环境：使用代理路径
+  if (import.meta.env.DEV) {
+    return {
+      qweather: '/qweather',
+      openweather: '/openweather'
+    };
+  }
+  // 生产环境：使用真实 API
+  else {
+    return {
+      qweather: `https://${import.meta.env.VITE_API_HOST}`,
+      openweather: 'https://api.openweathermap.org/data/2.5'
+    };
+  }
+};
+
+const baseURLs = getBaseURL();
+
 // 和风天气API
 const httpInstance = axios.create({
-  baseURL: `/qweather`,
-  timeout: 10000, // 建议设置更长的超时时间
+  baseURL: baseURLs.qweather,
+  timeout: 10000,
 });
-// open weatherAPI()
+
+// OpenWeather API
 const openWeatherAPI = axios.create({
-  baseURL: '/openweather/data/2.5',
+  baseURL: baseURLs.openweather,
   timeout: 10000,
   params: {
     appid: import.meta.env.VITE_OPENWEATHER_API_KEY
   }
-})
-// 添加请求拦截器 - 动态添加API-key
-openWeatherAPI.interceptors.request.use(async function (config) {
-  try {
-    console.log(`OPEN_WEATHER🚀`);
-  } catch (error) {
-    console.error('❌请求头出现问题:', error);
-    // 可以选择在这里处理Token获取失败的情况
-  }
+});
 
-  return config;
-}, function (error) {
-  console.error('❌ 请求配置错误:', error);
-  return Promise.reject(error);
+console.log('🌍 当前环境:', {
+  环境: import.meta.env.DEV ? '开发' : '生产',
+  和风天气: httpInstance.defaults.baseURL,
+  OpenWeather: openWeatherAPI.defaults.baseURL
 });
 
 // 添加响应拦截器
