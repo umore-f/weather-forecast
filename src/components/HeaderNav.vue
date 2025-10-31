@@ -5,7 +5,7 @@
     <span>Jack Grealish</span>
     <div style="display: flex;">
       <Location style="width: 24px; height: 24px; margin-left: 12px;" /><span
-        style="display: block; margin-left: 8px;">{{ cityStore.cityInfo.name }}</span>
+        style="display: block; margin-left: 8px;">{{ cityStore?.cityInfo?.name || '0'}}</span>
     </div>
   </div>
   <el-switch @click="emitter.emit('showOne', show)" v-model="show" inline-prompt style=" margin-right: 10px;"
@@ -16,7 +16,6 @@
       v-model="cityName" @keyup.enter="handleSearch" />
   </div>
   <el-button :icon="Bell" circle style="width: 40px;height: 40px;" />
-  <!--  -->
 </template>
 <script setup>
 import { Search, Bell, User } from '@element-plus/icons-vue'
@@ -65,7 +64,6 @@ async function handleSearch() {
     // 无论成功失败，都解除加载状态
     isLoading.value = false
     emitter.emit('loadingShow', false)
-    // emitter.emit('weatherDataReady', hasWeatherData.value)
   }
 }
 </script>

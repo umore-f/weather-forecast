@@ -11,7 +11,7 @@ import { useWeatherStore } from '@/store/weather'
 const weatherStore = useWeatherStore()
 const weekDays = computed(() => weatherStore.weatherDaysInfo.map(item => item.weekDay))
 const processWeekDays = computed(() => {
-  const days = [...weekDays.value] // 创建副本
+  const days = [...weekDays.value]
   days[0] = '今天'
   return days
 })
@@ -19,7 +19,7 @@ const maxTempList = computed(() => weatherStore.weatherDaysInfo.map(item => pars
 const minTempList = computed(() => weatherStore.weatherDaysInfo.map(item => parseFloat(item.tempMin)))
 const maxTemp = computed(() => Math.max(...maxTempList.value))
 const minTemp = computed(() => Math.min(...minTempList.value))
-// 23 45 7 899 980 9 8 67
+
 
 // 获取DOM引用
 const chartDiv = ref(null);
@@ -49,12 +49,12 @@ const getChartOption = () => ({
     trigger: 'axis',
     length: 60,
     axisPointer: {
-      type: 'line', // 指示器类型，可以是 'line'、'shadow'、'cross' 等
+      type: 'line',
       lineStyle: {
-        color: '#ffc107', // 改变线条颜色（可以使用最高气温的黄色）
-        width: 1, // 线条宽度
-        type: 'dashed', // 线条类型：'solid'、'dashed'、'dotted'
-        opacity: 0.7 // 透明度
+        color: '#ffc107',
+        width: 1,
+        type: 'dashed',
+        opacity: 0.7
       }
     },
     formatter: function (params) {

@@ -1,35 +1,35 @@
 <template>
   <div @mouseenter="setIsBig(true)" @mouseleave="setIsBig(false)"
-    :class="[weather.weatherClass, { 'small-card': !isHover, 'magnify-card': isHover }]"
+    :class="[weather?.weatherClass, { 'small-card': !isHover, 'magnify-card': isHover }]"
     style="  transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
     <!-- 大图样式 -->
     <template v-if="isHover">
       <div class="header">
-        <i :class="'qi-' + `${weather.icon}`" style="display: block;"></i>
-        <span class="text">{{ weather.text }}</span>&nbsp;
-        <span class="time">{{ weather.fxTime }}</span>
+        <i :class="'qi-' + `${weather?.icon || '0'}`" style="display: block;"></i>
+        <span class="text">{{ weather?.text || '0'}}</span>&nbsp;
+        <span class="time">{{ weather?.fxTime || '0'}}</span>
       </div>
       <div class="main">
-        <span>{{ weather.temp }}℃</span>
+        <span>{{ weather?.temp || '0'}}℃</span>
 
       </div>
       <div class="footer">
         <div class="pressure">
           <span class="title">大气压</span>
-          <span class="text">{{ weather.windSpeed }}公里/时</span>
+          <span class="text">{{ weather?.windSpeed || '0'}}公里/时</span>
         </div>
         <div class="humidity">
           <span class="title">相对湿度</span>
-          <span class="text">{{ weather.humidity }}%</span>
+          <span class="text">{{ weather?.humidity || '0'}}%</span>
         </div>
       </div>
     </template>
     <!-- 小图样式 -->
     <template v-else>
-      <div><i :class="'qi-' + `${weather.icon}`"></i></div>
-      <div>{{ weather.text }}</div>
-      <div>{{ weather.temp }}℃</div>
-      <span>{{ weather.fxTime }}</span>
+      <div><i :class="'qi-' + `${weather?.icon}`"></i></div>
+      <div>{{ weather?.text || '0'}}</div>
+      <div>{{ weather?.temp || '0'}}℃</div>
+      <span>{{ weather?.fxTime || '0'}}</span>
     </template>
   </div>
 </template>

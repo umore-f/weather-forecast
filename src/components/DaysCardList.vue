@@ -1,41 +1,41 @@
 <template>
   <div @mouseenter="setIsBig(true)" @mouseleave="setIsBig(false)"
-    :class="[weather.weatherClass, { 'small-card': !isHover, 'magnify-card': isHover }]"
+    :class="[weather?.weatherClass, { 'small-card': !isHover, 'magnify-card': isHover }]"
     style="  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
     <!-- 大图样式 -->
     <template v-if="isHover">
       <div class="header">
-        <i :class="'qi-' + `${weather.iconDay}`" style="display: block;"></i>
-        <span class="text">{{ weather.textDay }}</span>
-        <span class="time">{{ weather.fxDate }}&nbsp;{{ weather.weekDay }}</span>
+        <i :class="'qi-' + `${weather?.iconDay || '0'}`" style="display: block;"></i>
+        <span class="text">{{ weather?.textDay || '0'}}</span>
+        <span class="time">{{ weather?.fxDate || '0'}}&nbsp;{{ weather?.weekDay || '0'}}</span>
       </div>
       <div class="main">
-        <span>↑{{ weather.tempMax }}℃</span>
-        <span>{{ weather.tempMin }}℃↓</span>
+        <span>↑{{ weather?.tempMax || '0'}}℃</span>
+        <span>{{ weather?.tempMin || '0'}}℃↓</span>
       </div>
       <div class="footer">
         <div class="pressure">
           <span class="title">风速</span>
-          <span class="text">{{ weather.windSpeedDay }}公里/时</span>
+          <span class="text">{{ weather?.windSpeedDay || '0'}}公里/时</span>
         </div>
         <div class="vis">
           <span class="title">能见度</span>
-          <span class="text">{{ weather.vis }}公里</span>
+          <span class="text">{{ weather?.vis || '0'}}公里</span>
         </div>
         <div class="humidity">
           <span class="title">相对湿度</span>
-          <span class="text">{{ weather.humidity }}%</span>
+          <span class="text">{{ weather?.humidity || '0'}}%</span>
         </div>
       </div>
     </template>
     <!-- 小图样式 -->
     <template v-else>
-      <div>{{ weather.fxDate }}</div>
-      <div><i :class="'qi-' + `${weather.iconDay}`"></i></div>
-      <div>{{ weather.textDay }}</div>
-      <div>↑{{ weather.tempMax }}℃</div>
-      <div>↓{{ weather.tempMin }}℃</div>
-      <span>{{ weather.fxData }}</span>
+      <div>{{ weather?.fxDate || '0'}}</div>
+      <div><i :class="'qi-' + `${weather?.iconDay || '0'}`"></i></div>
+      <div>{{ weather?.textDay || '0'}}</div>
+      <div>↑{{ weather?.tempMax || '0'}}℃</div>
+      <div>↓{{ weather?.tempMin || '0'}}℃</div>
+      <span>{{ weather?.fxData || '0'}}</span>
     </template>
   </div>
 </template>
@@ -60,10 +60,6 @@ function setIsBig(state) {
 .small-card {
   flex: 0 0 14%;
   height: 200px;
-  /* background: white; */
-  /* box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
-    0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3); */
   transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   border-radius: 15%;
   display: flex;
@@ -97,17 +93,12 @@ i {
 .magnify-card {
   height: 200px;
   border-radius: 15%;
-  /* background: white; */
-  /* box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
-    0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3); */
   transition: border-radius 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
   transition-duration: 0.2s;
-  /* transition-property: all; */
   flex: 0 0 30%;
   margin: 10px;
 }
@@ -156,7 +147,6 @@ i {
 
 .main span:last-child {
   font-size: 12px;
-  /* background-color: white; */
   height: 24px;
   line-height: 24px;
   border-radius: 15%;

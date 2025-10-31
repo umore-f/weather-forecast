@@ -5,9 +5,9 @@
         <el-progress type="dashboard" :percentage="aqiPercentage" :color="aqiColor" :width="200" :stroke-width="20">
           <template #default>
             <div class="aqi-value">
-              <div class="aqi-number">{{ airQualityIndex }}</div>
+              <div class="aqi-number">{{ airQualityIndex || "0" }}</div>
               <div class="aqi-label">空气指数</div>
-              <div class="quality-indicator" :style="{ color: aqiColor }">{{ aqiDescription }}</div>
+              <div class="quality-indicator" :style="{ color: aqiColor }">{{ aqiDescription|| '0' }}</div>
             </div>
           </template>
         </el-progress>
@@ -17,8 +17,8 @@
     <div class="pollutants-section">
       <div v-for="pollutant in pollutantList" :key="pollutant.name" class="pollutant-item">
         <div class="pollutant-info">
-          <span class="pollutant-label">{{ pollutant.name }}</span>
-          <span class="pollutant-value">{{ pollutant.value }} <span class="unit">{{ pollutant.unit }}</span></span>
+          <span class="pollutant-label">{{ pollutant.name || '0'}}</span>
+          <span class="pollutant-value">{{ pollutant.value || '0'}} <span class="unit">{{ pollutant.unit || '0'}}</span></span>
         </div>
         <div class="pollutant-progress">
           <el-progress :percentage="pollutant.percentage" :color="pollutant.color" :show-text="false"
@@ -34,8 +34,6 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useWeatherStore } from '@/store/weather'
 const weatherStore = useWeatherStore()
-console.log('🔍 Store 实例 ID:', weatherStore.$id)
-console.log('🔍 是否是同一个实例:', weatherStore === useWeatherStore())
 const airQualityIndex = computed(() =>  weatherStore.airQualityInfo?.[0]?.components.pm2_5)
 
 // 污染物配置
