@@ -11,7 +11,6 @@ import process from 'node:process'
 export default defineConfig(({ mode }) => {
   // 加载环境变量
   const env = loadEnv(mode, process.cwd(), '')
-
   return {
     plugins: [
       vue(),
@@ -23,12 +22,29 @@ export default defineConfig(({ mode }) => {
         resolvers: [ElementPlusResolver()],
       }),
     ],
+    // 重要：对于 Vercel 部署，使用相对路径
+    base: '',
+    build: {
+      outDir: 'dist',
+      // 优化 chunk 大小，避免 Vercel 限制
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['vue', 'pinia'],
+            charts: ['echarts', 'vue-echarts'],
+            ui: ['element-plus', '@element-plus/icons-vue']
+          }
+        }
+      }
+    },
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       },
     },
     server: {
+      host: true,
+      port: 3000,
       proxy: {
         // 和风天气代理
         '/qweather': {
@@ -44,15 +60,5 @@ export default defineConfig(({ mode }) => {
         }
       }
     }
-    // server: {
-    //   proxy: {
-    //     // 将 /api 开头的请求代理到和风天气
-    //     '/api': {
-    //       target: `https://${env.VITE_API_HOST || 'api.qweather.com'}`, // 使用环境变量或默认值
-    //       changeOrigin: true,
-    //       rewrite: (path) => path.replace(/^\/api/, '') // 可选，移除/api前缀
-    //     }
-    //   },
-    // }
   }
 })
