@@ -91,6 +91,11 @@ class SimpleTokenManager {
   }
 
   async getToken() {
+    // 在调用前添加环境检测
+    if (!window.crypto || !window.crypto.subtle) {
+      console.error("Web Crypto API 不可用！需要 HTTPS 环境");
+      // 降级方案：改用服务器端生成 token
+    }
     console.log('🔑 获取 Token...');
     if (this.isTokenValid()) {
       console.log('✅ 使用缓存 Token');

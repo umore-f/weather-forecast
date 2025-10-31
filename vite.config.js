@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     // 重要：对于 Vercel 部署，使用相对路径
-    base: './',
+    base: '/',
     build: {
       outDir: 'dist',
       target: 'esnext',
