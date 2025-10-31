@@ -26,16 +26,24 @@ export default defineConfig(({ mode }) => {
     base: '',
     build: {
       outDir: 'dist',
+
       // 优化 chunk 大小，避免 Vercel 限制
       rollupOptions: {
+        external: [],
         output: {
+          format: 'es',
+          inlineDynamicImports: false,
           manualChunks: {
             vendor: ['vue', 'pinia'],
             charts: ['echarts', 'vue-echarts'],
             ui: ['element-plus', '@element-plus/icons-vue']
           }
         }
-      }
+      },
+      optimizeDeps: {
+        include: ['jose', 'jose/dist/browser/index'],
+        exclude: []
+      },
     },
     resolve: {
       alias: {
@@ -56,7 +64,7 @@ export default defineConfig(({ mode }) => {
         '/openweather': {
           target: 'http://api.openweathermap.org',
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/openweather/, '')
+          rewrite: (path) => path.replace(/^\/openweather/, '/data/2.5')
         }
       }
     }
