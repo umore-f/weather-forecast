@@ -27,17 +27,9 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       target: 'esnext',
-      // 优化 chunk 大小，避免 Vercel 限制
       rollupOptions: {
-        external: [],
         output: {
-          format: 'es',
-          inlineDynamicImports: false,
-          manualChunks: {
-            vendor: ['vue', 'pinia'],
-            charts: ['echarts', 'vue-echarts'],
-            ui: ['element-plus', '@element-plus/icons-vue']
-          }
+          manualChunks: undefined // 让 Vite 自动处理代码分割
         }
       },
       optimizeDeps: {

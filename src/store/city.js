@@ -1,17 +1,22 @@
 import { defineStore } from "pinia";
-import {ref} from 'vue'
-import {cityApi} from '@/apis/cityApi'
-export const useCityStore = defineStore('city',()=>{
+import { ref } from 'vue'
+import { cityApi } from '@/apis/cityApi'
+export const useCityStore = defineStore('city', () => {
 
-const cityInfo = ref({})
-const getCityInfo = async (cityName)=>{
-  const res = await cityApi.searchCity(cityName)
-  cityInfo.value = res.data.location[0]
-  console.log('@@@@@city的数据',res.data.location[0]);
-}
-
-return {
-  cityInfo,
-  getCityInfo
-}
+  const cityInfo = ref({})
+  const hotCity = ref([])
+  const getCityInfo = async (cityName) => {
+    const res = await cityApi.searchCity(cityName)
+    cityInfo.value = res.data.location[0]
+  }
+  const getHotCity = async () => {
+    const res = await cityApi.searchHotCity()
+    hotCity.value = res.data.topCityList
+  }
+  return {
+    cityInfo,
+    hotCity,
+    getCityInfo,
+    getHotCity,
+  }
 })

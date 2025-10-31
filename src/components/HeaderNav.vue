@@ -7,26 +7,25 @@
       <Location style="width: 24px; height: 24px; margin-left: 12px;" /><span
         style="display: block; margin-left: 8px;">{{ cityStore?.cityInfo?.name || '0'}}</span>
     </div>
-  </div>
-  <el-switch @click="emitter.emit('showOne', show)" v-model="show" inline-prompt style=" margin-right: 10px;"
+  </div><el-switch @click="emitter.emit('showOne', show)" v-model="show" inline-prompt style=" margin-right: 10px;"
     active-text="七天" inactive-text="今天" />
 
   <div class="header" style="margin-right: 20px;">
-    <el-input style="width: 240px;" placeholder="Please input" clearable :prefix-icon="Search" class="myInput"
-      v-model="cityName" @keyup.enter="handleSearch" />
+    <el-autocomplete style="width: 240px;" placeholder="Please input" clearable :prefix-icon="Search" class="myInput"
+      v-model="cityName" @keyup.enter="handleSearch" :fetch-suggestions="getHot"><template #header>热门城市</template></el-autocomplete>
   </div>
   <el-button :icon="Bell" circle style="width: 40px;height: 40px;" />
 </template>
 <script setup>
 import { Search, Bell, User } from '@element-plus/icons-vue'
 import { ref,computed,nextTick} from 'vue'
-import { useCityStore } from '@/store/city'
-const cityStore = useCityStore()
 import { fetchCityAndWeather } from '@/utils/weatherHelper'
 import { useWeatherStore } from '@/store/weather'
 import emitter from '@/utils/emitter'
 const weatherStore = useWeatherStore()
 const cityName = ref('')
+import { useCityStore } from '@/store/city'
+const cityStore = useCityStore()
 let show = ref(false)
 // 创建加载状态
 const isLoading = ref(false)
