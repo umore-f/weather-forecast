@@ -12,8 +12,8 @@ const getBaseURL = () => {
   // 生产环境：使用真实 API
   else {
     return {
-      qweather: 'https://weather-forecast-backend-h7pge6809-umore-fs-projects.vercel.app/api/weather/qweather',
-      openweather: 'https://weather-forecast-backend-h7pge6809-umore-fs-projects.vercel.app/api/weather/openweather'
+      qweather: 'https://weather-forecast-backend-itfj-cjqueglc4-umore-fs-projects.vercel.app/api/weather/qweather',
+      openweather: 'https://weather-forecast-backend-itfj-cjqueglc4-umore-fs-projects.vercel.app/api/weather/openweather'
     };
   }
 };
