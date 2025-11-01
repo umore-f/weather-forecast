@@ -12,8 +12,8 @@ const getBaseURL = () => {
   // 生产环境：使用真实 API
   else {
     return {
-      qweather: `https://${import.meta.env.VITE_API_HOST}`,
-      openweather: 'https://api.openweathermap.org/data/2.5'
+      qweather: 'https://weather-forecast-backend-h7pge6809-umore-fs-projects.vercel.app/api/weather/qweather',
+      openweather: 'https://weather-forecast-backend-h7pge6809-umore-fs-projects.vercel.app/api/weather/openweather'
     };
   }
 };
@@ -41,6 +41,7 @@ console.log('🌍 当前环境:', {
   OpenWeather: openWeatherAPI.defaults.baseURL
 });
 
+// open-weather
 // 添加响应拦截器
 openWeatherAPI.interceptors.response.use(function (response) {
   console.log(`✅ 请求成功: ${response.status} ${response.config.url}`);
@@ -56,7 +57,7 @@ openWeatherAPI.interceptors.response.use(function (response) {
   return Promise.reject(error);
 });
 
-
+// 和风天气
 // 添加请求拦截器 - 动态添加Token
 httpInstance.interceptors.request.use(async function (config) {
   try {
