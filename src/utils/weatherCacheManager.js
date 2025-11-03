@@ -1,4 +1,4 @@
-import { useWeatherDays, useWeatherHours, useWeatherNow } from '@/utils/enhancedData'
+import { useWeatherDays, useWeatherHours, useWeatherNow } from '@/composables/enhancedData/enhancedData'
 import { useCityStore } from '@/store/city'
 
 
@@ -248,7 +248,7 @@ class WeatherCacheManager {
             // 直接存储 AQI 数据
             weatherData.aqi = res.data.list;
             this.setCache(cacheKeys.aqi, weatherData.aqi, this.CACHE_CONFIG.AIR_QUALITY.ttl);
-    
+
           } catch (error) {
             console.error('❌ 处理空气质量数据失败:', error);
           }

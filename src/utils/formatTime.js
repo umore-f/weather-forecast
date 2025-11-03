@@ -1,5 +1,6 @@
 // 时间转换为时-分
-export const formatTime = (apiTimeString) => {
+// 小时天气
+export const getHourMin = (apiTimeString) => {
   const date = new Date(apiTimeString);
   if (date instanceof Date && !isNaN(date)) {
     return date.toLocaleTimeString('zh-CN',{ hour: '2-digit', minute: '2-digit' })
@@ -8,12 +9,14 @@ export const formatTime = (apiTimeString) => {
   }
 }
 // 将日期字符串或Date对象转换为星期几
+// 未来几天天气,获取周几
 export const getWeekday = (date, locale = 'zh-CN', format = 'long') => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return new Intl.DateTimeFormat(locale, { weekday: format }).format(dateObj);
 }
 
-export const formatDateToMonthDay = (apiTimeString) => {
+// 未来几天天气,获取月份和日期
+export const getMonthDay = (apiTimeString) => {
   const date = new Date(apiTimeString);
   if (date instanceof Date && !isNaN(date)) {
     // 获取月份和日期，月份需要+1（因为getMonth()返回0-11）

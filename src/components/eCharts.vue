@@ -7,16 +7,18 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import * as echarts from 'echarts';
-import { useWeatherStore } from '@/store/weather'
-const weatherStore = useWeatherStore()
-const weekDays = computed(() => weatherStore.weatherDaysInfo.map(item => item.weekDay))
+import {useWeatherDaysStore} from '@/store/index'
+// import { useWeatherStore } from '@/store/weather'
+// const weatherStore = useWeatherStore()
+const daysStore = useWeatherDaysStore()
+const weekDays = computed(() => daysStore.days.map(item => item.weekDay))
 const processWeekDays = computed(() => {
   const days = [...weekDays.value]
   days[0] = '今天'
   return days
 })
-const maxTempList = computed(() => weatherStore.weatherDaysInfo.map(item => parseFloat(item.tempMax)))
-const minTempList = computed(() => weatherStore.weatherDaysInfo.map(item => parseFloat(item.tempMin)))
+const maxTempList = computed(() => daysStore.days.map(item => parseFloat(item.tempMax)))
+const minTempList = computed(() => daysStore.days.map(item => parseFloat(item.tempMin)))
 const maxTemp = computed(() => Math.max(...maxTempList.value))
 const minTemp = computed(() => Math.min(...minTempList.value))
 

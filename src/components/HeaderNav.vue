@@ -5,36 +5,52 @@
     <span>Jack Grealish</span>
     <div style="display: flex;">
       <Location style="width: 24px; height: 24px; margin-left: 12px;" /><span
-        style="display: block; margin-left: 8px;">{{ cityStore?.cityInfo?.name || '0'}}</span>
+        style="display: block; margin-left: 8px;">{{ cityStore?.cityInfo?.name || '0' }}</span>
     </div>
   </div><el-switch @click="emitter.emit('showOne', show)" v-model="show" inline-prompt style=" margin-right: 10px;"
     active-text="七天" inactive-text="今天" />
 
   <div class="header" style="margin-right: 20px;">
     <el-autocomplete style="width: 240px;" placeholder="Please input" clearable :prefix-icon="Search" class="myInput"
-      v-model="cityName" @keyup.enter="handleSearch" :fetch-suggestions="getHot"><template #header>热门城市</template></el-autocomplete>
+      v-model="cityName" @keyup.enter="handleSearch" @select="handleSearch" :fetch-suggestions="getHot"><template
+        #header>热门城市</template></el-autocomplete>
   </div>
   <el-button :icon="Bell" circle style="width: 40px;height: 40px;" />
 </template>
 <script setup>
 import { Search, Bell, User } from '@element-plus/icons-vue'
-import { ref,computed,nextTick} from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 import { fetchCityAndWeather } from '@/utils/weatherHelper'
-import { useWeatherStore } from '@/store/weather'
+import {useCityStore,useWeatherNowStore,useWeatherHoursStore,useWeatherDaysStore} from '@/store/index'
 import emitter from '@/utils/emitter'
-const weatherStore = useWeatherStore()
+const nowStore = useWeatherNowStore()
+const hoursStore = useWeatherHoursStore()
+const daysStore = useWeatherDaysStore()
+
 const cityName = ref('')
-import { useCityStore } from '@/store/city'
+
 const cityStore = useCityStore()
+// 显示热门城市方法
+const getHot = (queryString, cb) => {
+  const cityNames = cityStore.hotCity.map(item => item.name);
+  const results = queryString
+    ? cityNames.filter(item =>
+      item.toLowerCase().includes(queryString.toLowerCase())
+    )
+    : cityNames;
+  const formattedResults = results.map(name => ({ value: name }));
+  cb(formattedResults);
+}
+
 let show = ref(false)
 // 创建加载状态
 const isLoading = ref(false)
 
 // 检查是否有数据的计算属性
 const hasWeatherData = computed(() => {
-  return weatherStore.weatherNowInfo?.length > 0 ||
-    weatherStore.weatherDaysInfo?.length > 0 ||
-    weatherStore.weatherHoursInfo?.length > 0
+  return nowStore.now.length > 0 ||
+    hoursStore.hours.weatherDaysInfo?.length > 0 ||
+    daysStore.days.weatherHoursInfo?.length > 0
 })
 
 async function handleSearch() {
@@ -63,8 +79,10 @@ async function handleSearch() {
     // 无论成功失败，都解除加载状态
     isLoading.value = false
     emitter.emit('loadingShow', false)
+    cityName.value = ""
   }
 }
+onMounted(() => cityStore.getHotCity())
 </script>
 
 <style scoped>

@@ -2,25 +2,29 @@
   <div v-loading.fullscreen.lock="!showLoading" element-loading-text="加载天气数据中...">
     <div class="weather-card" @mousedown="startDrag" @mousemove="onDrag" @mouseup="endDrag" @mouseleave="endDrag"
       @touchstart="startDrag" @touchmove="onDrag" @touchend="endDrag">
-      <WeatherNowCard :weather="weatherStore?.weatherNowInfo[0]" />
-      <WeatherDaysCard v-show="showValue" v-for="weather in weatherStore.weatherDaysInfo" :weather="weather"
-        :key="weather.fxDate" />
-      <WeatherHoursCard v-show="!showValue" v-for="weather in weatherStore.weatherHoursInfo" :weather="weather"
-        :key="weather.fxTime" />
+      <WeatherNowCard :weather="nowStore.now[0]" />
+      <WeatherDaysCard v-show="showValue" v-for="weather in daysStore.days" :weather="weather"
+        :key="weather?.fxDate" />
+      <WeatherHoursCard v-show="!showValue" v-for="weather in hoursStore.hours" :weather="weather"
+        :key="weather?.fxTime" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import WeatherNowCard from './WeatherNow.vue'
 import WeatherDaysCard from './DaysCardList.vue'
 import WeatherHoursCard from './HourCardList.vue'
 import '@/assets/icon/iconfont.js'
-import { useWeatherStore } from '@/store/weather'
 import { fetchCityAndWeather } from '@/utils/weatherHelper'
 import emitter from '@/utils/emitter'
-const weatherStore = useWeatherStore()
+import {useWeatherNowStore,useWeatherHoursStore,useWeatherDaysStore} from '@/store/index'
+const nowStore = useWeatherNowStore()
+const hoursStore = useWeatherHoursStore()
+const daysStore = useWeatherDaysStore()
+computed(()=>console.log(nowStore))
+
 const showLoading = ref(true)
 const loadWeatherData = async (cityName) => {
   showLoading.value = false;
@@ -28,9 +32,9 @@ const loadWeatherData = async (cityName) => {
     const data = await fetchCityAndWeather(cityName);
     console.log(data);
     const hasData = computed(() => {
-     return weatherStore.weatherNowInfo?.length > 0 ||
-        weatherStore.weatherDaysInfo?.length > 0 ||
-        weatherStore.weatherHoursInfo?.length > 0
+      return data.days?.length > 0 ||
+        data.hours?.length > 0 ||
+        data.now?.length > 0
     })
     showLoading.value = hasData;
     console.log(hasData.value);
@@ -42,13 +46,18 @@ const loadWeatherData = async (cityName) => {
 }
 onMounted(() => loadWeatherData('北京'))
 let showValue = ref()
-emitter.on('showOne', (value) => {
-  showValue.value = value
-})
-emitter.on('loadingShow', (isLoading) => {
-  showLoading.value = !isLoading
-})
 
+onMounted(() => {
+  emitter.on('showOne', (value) => {
+    showValue.value = value
+  })
+  emitter.on('loadingShow', (isLoading) => {
+    showLoading.value = !isLoading
+  })
+})
+onUnmounted(()=>{
+  emitter.off('loadingShow','showOne')
+})
 // 滑动效果
 const isDragging = ref(false);
 const startX = ref(0);
