@@ -1,5 +1,5 @@
 <template>
-  <div v-loading.fullscreen.lock="!showLoading" element-loading-text="加载天气数据中...">
+  <div v-loading="!showLoading" element-loading-text="加载天气数据中...">
     <div class="weather-card" @mousedown="startDrag" @mousemove="onDrag" @mouseup="endDrag" @mouseleave="endDrag"
       @touchstart="startDrag" @touchmove="onDrag" @touchend="endDrag">
       <WeatherNowCard :weather="nowStore.now[0]" />

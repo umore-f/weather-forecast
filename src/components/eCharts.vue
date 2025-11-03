@@ -8,8 +8,7 @@
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import * as echarts from 'echarts';
 import {useWeatherDaysStore} from '@/store/index'
-// import { useWeatherStore } from '@/store/weather'
-// const weatherStore = useWeatherStore()
+
 const daysStore = useWeatherDaysStore()
 const weekDays = computed(() => daysStore.days.map(item => item.weekDay))
 const processWeekDays = computed(() => {

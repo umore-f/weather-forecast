@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import {getDays} from '@/composables/weatherCachedManager/daysEnCached'
 export const useWeatherDaysStore = defineStore('weatherDays',()=>{
-  const days = ref({})
+  const days = ref([])
   const getDaysData = async ()=>{
     const daysData = await getDays()
     days.value = daysData.days

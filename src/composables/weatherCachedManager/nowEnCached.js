@@ -10,7 +10,7 @@ export const getNow = async () => {
   // 获取本地存储的键
   const cacheKeys = { now: getCityCacheKey(CACHE_CONFIG.WEATHER_NOW.key, cityId) }
   // 尝试获取值
-  const cachedNow = getCache(cacheKeys.days);
+  const cachedNow = getCache(cacheKeys.now);
   // 如果存在就使用本地存储
   if(cachedNow) return {now: cachedNow,fromCache: true}
   // 本地不存在

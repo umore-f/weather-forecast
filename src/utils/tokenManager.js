@@ -10,9 +10,16 @@ class SimpleTokenManager {
     };
     this.currentToken = null;
     this.tokenExpiry = null;
-    // 添加环境变量验证
-    this.validateConfig();
+    this.tokenGenerationPromise = null;
+    this.initialized = false; // 添加初始化标志
+
+    // 延迟验证，避免在导入时就生成 token
+    setTimeout(() => {
+      this.validateConfig();
+      this.initialized = true;
+    }, 0);
   }
+
   validateConfig() {
     const missingVars = [];
 
@@ -29,80 +36,124 @@ class SimpleTokenManager {
   }
 
   async generateToken() {
-    try {
-      console.log('🔧 开始生成 Token...', {
-        hasPrivateKey: !!this.config.privateKey,
-        keyId: this.config.keyId,
-        projectId: this.config.projectId
-      });
-
-      // 检查私钥格式
-      if (!this.config.privateKey.startsWith('-----BEGIN PRIVATE KEY-----')) {
-        console.error('❌ 私钥格式可能不正确');
-      }
-
-      const privateKey = await importPKCS8(this.config.privateKey, 'EdDSA');
-      console.log('✅ 私钥导入成功');
-
-      const iat = Math.floor(Date.now() / 1000) - 30;
-      const exp = iat + 3600;
-
-      console.log('📝 创建 JWT payload:', { iat, exp });
-
-      const token = await new SignJWT({
-        sub: this.config.projectId,
-        iat: iat,
-        exp: exp
-      })
-        .setProtectedHeader({
-          alg: 'EdDSA',
-          kid: this.config.keyId
-        })
-        .sign(privateKey);
-
-      this.currentToken = token;
-      this.tokenExpiry = exp * 1000;
-
-      console.log('✅ Token生成成功', {
-        tokenLength: token.length,
-        expiry: new Date(this.tokenExpiry).toISOString()
-      });
-
-      return token;
-    } catch (error) {
-      console.error('❌ Token生成失败:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-      throw error;
+    // 如果已经在生成 token，返回同一个 Promise
+    if (this.tokenGenerationPromise) {
+      console.log('⏳ Token 正在生成中，等待结果...');
+      return this.tokenGenerationPromise;
     }
+
+    console.log('🔧 开始生成 Token...');
+
+    this.tokenGenerationPromise = (async () => {
+      try {
+        const privateKey = await importPKCS8(this.config.privateKey, 'EdDSA');
+        console.log('✅ 私钥导入成功');
+
+        const iat = Math.floor(Date.now() / 1000) - 30;
+        const exp = iat + 3600;
+
+        console.log('📝 创建 JWT payload:', { iat, exp });
+
+        const token = await new SignJWT({
+          sub: this.config.projectId,
+          iat: iat,
+          exp: exp
+        })
+          .setProtectedHeader({
+            alg: 'EdDSA',
+            kid: this.config.keyId
+          })
+          .sign(privateKey);
+
+        this.currentToken = token;
+        this.tokenExpiry = exp * 1000;
+
+        console.log('✅ Token生成成功', {
+          tokenLength: token.length,
+          expiry: new Date(this.tokenExpiry).toISOString()
+        });
+
+        return token;
+      } catch (error) {
+        console.error('❌ Token生成失败:', error.message);
+        // 生成失败时清空缓存
+        this.currentToken = null;
+        this.tokenExpiry = null;
+        throw error;
+      } finally {
+        // 无论成功失败，都清除生成中的 Promise
+        this.tokenGenerationPromise = null;
+      }
+    })();
+
+    return this.tokenGenerationPromise;
   }
 
   isTokenValid() {
-    const isValid = this.currentToken && Date.now() < this.tokenExpiry;
+    // 如果没有初始化完成，认为 token 无效
+    if (!this.initialized) {
+      console.log('🔍 管理器未初始化，Token 无效');
+      return false;
+    }
+
+    // 添加 5 分钟缓冲时间，避免在临界点过期
+    const bufferTime = 5 * 60 * 1000; // 5分钟
+    const isValid = this.currentToken && (Date.now() < (this.tokenExpiry - bufferTime));
+
     console.log('🔍 Token有效性检查:', {
       hasToken: !!this.currentToken,
       expiry: this.tokenExpiry ? new Date(this.tokenExpiry).toISOString() : null,
       currentTime: new Date().toISOString(),
-      isValid
+      isValid,
+      bufferTime: `${bufferTime / 1000 / 60}分钟`
     });
+
     return isValid;
   }
 
   async getToken() {
-    // 在调用前添加环境检测
-    if (!window.crypto || !window.crypto.subtle) {
-      console.error("Web Crypto API 不可用！需要 HTTPS 环境");
-      // 降级方案：改用服务器端生成 token
+    // 等待初始化完成
+    if (!this.initialized) {
+      console.log('⏳ 等待 Token 管理器初始化...');
+      // 简单的等待初始化完成
+      await new Promise(resolve => {
+        const checkInitialized = () => {
+          if (this.initialized) {
+            resolve();
+          } else {
+            setTimeout(checkInitialized, 10);
+          }
+        };
+        checkInitialized();
+      });
     }
-    console.log('🔑 获取 Token...');
+
     if (this.isTokenValid()) {
       console.log('✅ 使用缓存 Token');
       return this.currentToken;
     }
-    console.log('🔄 生成新 Token');
+
+    console.log('🔄 Token 无效或即将过期，生成新 Token');
     return await this.generateToken();
+  }
+
+  // 清理 token 缓存（用于登出等情况）
+  clearToken() {
+    this.currentToken = null;
+    this.tokenExpiry = null;
+    this.tokenGenerationPromise = null;
+    console.log('🗑️ Token 缓存已清除');
+  }
+
+  // 获取 token 信息（用于调试）
+  getTokenInfo() {
+    return {
+      hasToken: !!this.currentToken,
+      expiry: this.tokenExpiry ? new Date(this.tokenExpiry).toISOString() : null,
+      isValid: this.isTokenValid(),
+      isGenerating: !!this.tokenGenerationPromise,
+      initialized: this.initialized
+    };
   }
 }
 

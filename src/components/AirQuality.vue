@@ -1,5 +1,5 @@
 <template>
-  <div class="air-quality-container">
+  <div class="air-quality-container" v-loading="!aqiLoadingShow" element-loading-text="加载天气数据中...">
     <div class="dashboard-section">
       <div class="dashboard-content">
         <el-progress type="dashboard" :percentage="aqiPercentage" :color="aqiColor" :width="200" :stroke-width="20">
@@ -31,10 +31,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useWeatherStore } from '@/store/weather'
-const weatherStore = useWeatherStore()
-const airQualityIndex = computed(() =>  weatherStore.airQualityInfo?.[0]?.components.pm2_5)
+import { ref, computed, onMounted, watch, onUnmounted} from 'vue'
+import {useAqiStore} from '@/store/index'
+import emitter from '@/utils/emitter'
+const aqiStore = useAqiStore()
+const airQualityIndex = computed(() =>  aqiStore.aqi?.[0]?.components.pm2_5)
+const aqiLoadingShow = ref(true)
+onMounted(() => {
+  emitter.on('aqiLoadingShow', (isLoading) => {
+    aqiLoadingShow.value = !isLoading
+  })
+})
+onUnmounted(()=>{
+  emitter.off('aqiLoadingShow')
+})
 
 // 污染物配置
 const pollutantConfigs = [
@@ -72,7 +82,7 @@ const aqiColor = computed(() => {
 // 更新污染物数据的函数
 const updatePollutants = () => {
   pollutantList.value = pollutantConfigs.map(config => {
-    const value = weatherStore.airQualityInfo?.[0]?.components?.[config.key] || 0;
+    const value = aqiStore.aqi?.[0]?.components?.[config.key] || 0;
     const percentage = Math.min(100, (value / config.max) * 100);
 
     let color = '#67C23A'; // 绿色
@@ -98,7 +108,7 @@ onMounted(() => {
 
 // 监听 AQIStore 数据变化
 watch(
-  () => weatherStore.airQualityInfo,
+  () => aqiStore.aqi,
   () => {
     updatePollutants();
   },

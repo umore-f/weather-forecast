@@ -11,7 +11,7 @@ export const getHours = async () => {
   // 获取本地存储的键
   const cacheKeys = { hours: getCityCacheKey(CACHE_CONFIG.WEATHER_HOURS.key, cityId) }
   // 尝试获取值
-  const cachedHours = getCache(cacheKeys.days);
+  const cachedHours = getCache(cacheKeys.hours);
   // 如果存在就使用本地存储
   if (cachedHours) return { hours: cachedHours, fromCache: true }
   // 本地不存在

@@ -2,7 +2,8 @@ import {
   useCityStore,
   useWeatherNowStore,
   useWeatherHoursStore,
-  useWeatherDaysStore
+  useWeatherDaysStore,
+  useAqiStore
 } from '@/store/index'
 
 // 确保城市API先返回
@@ -25,37 +26,31 @@ export const fetchCityAndWeather = async (cityName) => {
 
     // 2. 获取天气数据
     // await Promise.all([nowStore.getNowData(),hoursStore.getHoursData(),daysStore.getDaysData()])
-    // console.log('✅ 天气数据获取成功')
-    // 2. 获取天气数据 - 分别调用以定位问题
-    try {
-      await nowStore.getNowData()
-      console.log('✅ 实时天气获取成功')
-    } catch (error) {
-      console.error('❌ 实时天气获取失败:', error)
-    }
-
-    try {
-      await hoursStore.getHoursData()
-      console.log('✅ 小时预报获取成功')
-    } catch (error) {
-      console.error('❌ 小时预报获取失败:', error)
-    }
-
-    try {
-      await daysStore.getDaysData()
-      console.log('✅ 天预报获取成功')
-    } catch (error) {
-      console.error('❌ 天预报获取失败:', error)
-    }
-
+    await Promise.all([
+      nowStore.getNowData(),
+      hoursStore.getHoursData(),
+      daysStore.getDaysData(),])
     return {
       city: cityStore.cityInfo,
       now: nowStore.now,
       hours: hoursStore.hours,
-      days: daysStore.days
+      days: daysStore.days,
     }
+
   } catch (error) {
     console.error('❌ 获取数据失败:', error)
+    throw error
+  }
+}
+
+// 单独加载AQI数据
+export const fetchAqiData = async () => {
+  try {
+    const aqiStore = useAqiStore()
+    await aqiStore.getAqiData()
+    return aqiStore.aqi
+  } catch (error) {
+    console.error('❌ 获取AQI数据失败:', error)
     throw error
   }
 }

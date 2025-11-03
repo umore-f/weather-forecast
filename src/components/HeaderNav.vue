@@ -19,13 +19,13 @@
 </template>
 <script setup>
 import { Search, Bell, User } from '@element-plus/icons-vue'
-import { ref, computed, nextTick, onMounted } from 'vue'
-import { fetchCityAndWeather } from '@/utils/weatherHelper'
+import { ref,nextTick, onMounted } from 'vue'
+import { fetchCityAndWeather,fetchAqiData } from '@/utils/weatherHelper'
 import {useCityStore,useWeatherNowStore,useWeatherHoursStore,useWeatherDaysStore} from '@/store/index'
 import emitter from '@/utils/emitter'
-const nowStore = useWeatherNowStore()
-const hoursStore = useWeatherHoursStore()
-const daysStore = useWeatherDaysStore()
+// const nowStore = useWeatherNowStore()
+// const hoursStore = useWeatherHoursStore()
+// const daysStore = useWeatherDaysStore()
 
 const cityName = ref('')
 
@@ -45,40 +45,31 @@ const getHot = (queryString, cb) => {
 let show = ref(false)
 // 创建加载状态
 const isLoading = ref(false)
-
-// 检查是否有数据的计算属性
-const hasWeatherData = computed(() => {
-  return nowStore.now.length > 0 ||
-    hoursStore.hours.weatherDaysInfo?.length > 0 ||
-    daysStore.days.weatherHoursInfo?.length > 0
-})
+const aqiLoadingShow = ref(false)
 
 async function handleSearch() {
   if (!cityName.value.trim()) return
 
   isLoading.value = true
+  aqiLoadingShow.value = true
   // 发出开始加载的信号
   emitter.emit('loadingShow', true)
-
+  emitter.emit('aqiLoadingShow',true)
   try {
-    const data = await fetchCityAndWeather(cityName.value)
-    console.log('📊 所有数据:', data)
-
+    await fetchCityAndWeather(cityName.value)
     // 等待数据更新后检查
     await nextTick()
-
-    if (hasWeatherData.value) {
-      console.log('✅ 数据加载完成，有天气数据')
-    } else {
-      console.log('⚠️ 数据加载完成，但没有天气数据')
-    }
-
+    emitter.emit('loadingShow', false)
+    await fetchAqiData()
+    await nextTick()
+    emitter.emit('aqiLoadingShow',false)
   } catch (error) {
     console.error('加载数据失败:', error)
   } finally {
     // 无论成功失败，都解除加载状态
     isLoading.value = false
     emitter.emit('loadingShow', false)
+    emitter.emit('aqiLoadingShow',false)
     cityName.value = ""
   }
 }
