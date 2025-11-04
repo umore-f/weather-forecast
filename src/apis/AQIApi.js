@@ -1,4 +1,4 @@
-import {openWeatherAPI} from '@/utils/http'
+import {openWeatherAPI} from './http'
 export const AQIApi = {
   getAQIInfo(lat, lon) {
     console.log(lat, lon);

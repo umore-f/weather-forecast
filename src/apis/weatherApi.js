@@ -1,4 +1,4 @@
-import httpInstance from "@/utils/http.js"
+import httpInstance from "./http"
 export const weatherApi = {
   // 实时-获取天气信息
   getWeatherNowInfo(locationId) {

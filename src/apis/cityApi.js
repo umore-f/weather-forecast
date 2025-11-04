@@ -1,4 +1,4 @@
-import httpInstance from "@/utils/http.js"
+import httpInstance from "./http"
 export const cityApi = {
   // 城市搜索
   searchCity(location) {

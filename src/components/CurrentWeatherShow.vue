@@ -23,7 +23,6 @@ import {useWeatherNowStore,useWeatherHoursStore,useWeatherDaysStore} from '@/sto
 const nowStore = useWeatherNowStore()
 const hoursStore = useWeatherHoursStore()
 const daysStore = useWeatherDaysStore()
-computed(()=>console.log(nowStore))
 
 const showLoading = ref(true)
 const loadWeatherData = async (cityName) => {
@@ -37,7 +36,6 @@ const loadWeatherData = async (cityName) => {
         data.now?.length > 0
     })
     showLoading.value = hasData;
-    console.log(hasData.value);
 
   } catch (error) {
     console.error('加载数据失败:', error);

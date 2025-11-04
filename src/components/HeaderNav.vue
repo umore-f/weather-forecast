@@ -21,7 +21,7 @@
 import { Search, Bell, User } from '@element-plus/icons-vue'
 import { ref,nextTick, onMounted } from 'vue'
 import { fetchCityAndWeather,fetchAqiData } from '@/utils/weatherHelper'
-import {useCityStore,useWeatherNowStore,useWeatherHoursStore,useWeatherDaysStore} from '@/store/index'
+import {useCityStore} from '@/store/index'
 import emitter from '@/utils/emitter'
 // const nowStore = useWeatherNowStore()
 // const hoursStore = useWeatherHoursStore()
@@ -73,7 +73,32 @@ async function handleSearch() {
     cityName.value = ""
   }
 }
+async function initHandleSearch() {
+  isLoading.value = true
+  aqiLoadingShow.value = true
+  // 发出开始加载的信号
+  emitter.emit('loadingShow', true)
+  emitter.emit('aqiLoadingShow',true)
+  try {
+    await fetchCityAndWeather('北京')
+    // 等待数据更新后检查
+    await nextTick()
+    emitter.emit('loadingShow', false)
+    await fetchAqiData()
+    await nextTick()
+    emitter.emit('aqiLoadingShow',false)
+  } catch (error) {
+    console.error('加载数据失败:', error)
+  } finally {
+    // 无论成功失败，都解除加载状态
+    isLoading.value = false
+    emitter.emit('loadingShow', false)
+    emitter.emit('aqiLoadingShow',false)
+    cityName.value = ""
+  }
+}
 onMounted(() => cityStore.getHotCity())
+onMounted(()=>initHandleSearch())
 </script>
 
 <style scoped>

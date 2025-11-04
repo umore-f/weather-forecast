@@ -1,5 +1,5 @@
 import axios from "axios";
-import { tokenManager } from './tokenManager.js';
+import { tokenManager } from '@/utils/tokenManager';
 // 根据环境选择 baseURL
 const getBaseURL = () => {
   // 开发环境：使用代理路径
