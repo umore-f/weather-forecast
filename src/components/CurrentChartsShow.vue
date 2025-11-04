@@ -1,7 +1,10 @@
 <template>
   <div v-loading="!showLoading" element-loading-text="加载天气数据中...">
-    <DaysChart v-show="showValue"/>
-    <HoursChart v-show="!showValue"/>
+    <keep-alive>
+      <DaysChart v-if="showValue" />
+      <HoursChart v-else />
+    </keep-alive>
+
   </div>
 </template>
 
@@ -21,8 +24,8 @@ onMounted(() => {
     showValue.value = value
   })
 })
-onUnmounted(()=>{
-  emitter.off('loadingShow','showOne')
+onUnmounted(() => {
+  emitter.off('loadingShow', 'showOne')
 })
 </script>
 

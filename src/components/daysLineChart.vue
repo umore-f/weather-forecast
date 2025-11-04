@@ -5,8 +5,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
-import * as echarts from 'echarts';
+import { ref, onMounted, onUnmounted, computed, nextTick} from 'vue';
+import echarts from '@/utils/echarts';
 import {useWeatherDaysStore} from '@/store/index'
 
 const daysStore = useWeatherDaysStore()
@@ -76,10 +76,10 @@ const getChartOption = () => ({
   },
   // 网格配置
   grid: {
-    left: 24,
+    left: 25,
     right: 15,
     top: 10,
-    bottom: -5,
+    bottom: 0,
     containLabel: true
   },
   // X轴配置
@@ -190,30 +190,21 @@ const getChartOption = () => ({
     }
   ]
 });
-// 在组件挂载后初始化图表
 onMounted(() => {
-  // 初始化图表
-  myChart = echarts.init(chartDiv.value);
-  // 只有在有数据时才设置图表
-  if (temperatureData.value.days && temperatureData.value.days.length > 0) {
-    myChart.setOption(getChartOption());
-  }
-
-  // 窗口大小变化时重绘图表
-  window.addEventListener('resize', handleResize);
+  // 使用 nextTick 确保 DOM 已经渲染
+  nextTick(() => {
+    myChart = echarts.init(chartDiv.value);
+    if (temperatureData.value.days && temperatureData.value.days.length > 0) {
+      myChart.setOption(getChartOption());
+    }
+    window.addEventListener('resize', handleResize);
+  });
 });
 
-// 处理窗口大小变化
 const handleResize = () => {
   myChart && myChart.resize();
 };
-// 监听 temperatureData 变化，当有数据时更新图表
-watch(temperatureData, (newData) => {
-  if (newData.days && newData.days.length > 0 && myChart) {
-    myChart.setOption(getChartOption());
-  }
-}, { deep: true });
-// 组件卸载前清理资源
+
 onUnmounted(() => {
   if (myChart) {
     window.removeEventListener('resize', handleResize);

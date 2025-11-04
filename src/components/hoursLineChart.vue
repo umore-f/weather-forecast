@@ -6,7 +6,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
-import * as echarts from 'echarts';
+import echarts from '@/utils/echarts';
 import { useWeatherHoursStore } from '@/store/index'
 
 const hoursStore = useWeatherHoursStore()
@@ -33,7 +33,7 @@ const getChartOption = () => {
   return {
     // 标题配置
     title: {
-      text: '一天气温变化',
+      text: '24小时气温变化',
       top: '0px',
       left: 'center',
       textStyle: {

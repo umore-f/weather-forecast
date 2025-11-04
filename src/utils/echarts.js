@@ -1,14 +1,52 @@
-import { use } from 'echarts/core'; // 从 vue-echarts 文档推荐的核心方式引入
-import { CanvasRenderer } from 'echarts/renderers'; // 渲染器
-import { BarChart, LineChart } from 'echarts/charts'; // 图表类型
-import { GridComponent, TooltipComponent, TitleComponent } from 'echarts/components'; // 组件
-
-// 注册必要的模块
-use([
-  CanvasRenderer,
-  BarChart,
+// src/utils/echarts-config.js
+import * as echarts from 'echarts/core';
+import {
   LineChart,
-  GridComponent,
+  BarChart,
+  ScatterChart,
+  PieChart,
+  GaugeChart,
+  // 其他图表类型
+} from 'echarts/charts';
+import {
+  TitleComponent,
   TooltipComponent,
-  TitleComponent
+  GridComponent,
+  PolarComponent,
+  // AngleAxisComponent,
+  // RadiusAxisComponent,
+  LegendComponent,
+  DataZoomComponent,
+  VisualMapComponent,
+  // 其他组件
+} from 'echarts/components';
+import {
+  CanvasRenderer,
+  // SVGRenderer
+} from 'echarts/renderers';
+// import {
+//   // 主题
+//   LightTheme
+// } from 'echarts/themes';
+
+// 注册组件
+echarts.use([
+  LineChart,
+  BarChart,
+  ScatterChart,
+  PieChart,
+  GaugeChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  PolarComponent,
+  // AngleAxisComponent,
+  // RadiusAxisComponent,
+  LegendComponent,
+  DataZoomComponent,
+  VisualMapComponent,
+  CanvasRenderer,
+  // LightTheme
 ]);
+
+export default echarts;
