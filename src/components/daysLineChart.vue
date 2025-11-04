@@ -76,7 +76,7 @@ const getChartOption = () => ({
   },
   // 网格配置
   grid: {
-    left: 25,
+    left: 24,
     right: 15,
     top: 10,
     bottom: -5,

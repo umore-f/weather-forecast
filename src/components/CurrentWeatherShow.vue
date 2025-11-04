@@ -12,12 +12,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import WeatherNowCard from './WeatherNow.vue'
 import WeatherDaysCard from './DaysCardList.vue'
 import WeatherHoursCard from './HourCardList.vue'
 import '@/assets/icon/iconfont.js'
-import { fetchCityAndWeather } from '@/utils/weatherHelper'
+// import { fetchCityAndWeather } from '@/utils/weatherHelper'
 import emitter from '@/utils/emitter'
 import {useWeatherNowStore,useWeatherHoursStore,useWeatherDaysStore} from '@/store/index'
 const nowStore = useWeatherNowStore()
@@ -25,24 +25,24 @@ const hoursStore = useWeatherHoursStore()
 const daysStore = useWeatherDaysStore()
 
 const showLoading = ref(true)
-const loadWeatherData = async (cityName) => {
-  showLoading.value = false;
-  try {
-    const data = await fetchCityAndWeather(cityName);
-    console.log(data);
-    const hasData = computed(() => {
-      return data.days?.length > 0 ||
-        data.hours?.length > 0 ||
-        data.now?.length > 0
-    })
-    showLoading.value = hasData;
+// const loadWeatherData = async (cityName) => {
+//   showLoading.value = false;
+//   try {
+//     const data = await fetchCityAndWeather(cityName);
+//     console.log(data);
+//     const hasData = computed(() => {
+//       return data.days?.length > 0 ||
+//         data.hours?.length > 0 ||
+//         data.now?.length > 0
+//     })
+//     showLoading.value = hasData;
 
-  } catch (error) {
-    console.error('加载数据失败:', error);
-    showLoading.value = true;
-  }
-}
-onMounted(() => loadWeatherData('北京'))
+//   } catch (error) {
+//     console.error('加载数据失败:', error);
+//     showLoading.value = true;
+//   }
+// }
+// onMounted(() => loadWeatherData('北京'))
 let showValue = ref()
 
 onMounted(() => {

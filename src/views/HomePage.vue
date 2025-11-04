@@ -9,7 +9,7 @@
           </el-header>
           <el-main style="padding-bottom: 5px;">
             <CurrentWeather/>
-            <eCharts/>
+            <CurrentCharts/>
           </el-main>
         </el-container>
       </el-main>
@@ -25,7 +25,7 @@
 <script setup>
 import HeaderNav from '../components/HeaderNav.vue';
 import CurrentWeather from '../components/CurrentWeatherShow.vue';
-import eCharts from '@/components/eCharts.vue';
+import CurrentCharts from '@/components/CurrentChartsShow.vue';
 // import AirQuality from '@/components/AirQuality.vue';
 import AsideNav from '@/components/AsideNav.vue';
 import Loading from '@/components/Loading.vue';
