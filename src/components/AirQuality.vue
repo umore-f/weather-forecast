@@ -1,8 +1,8 @@
 <template>
-  <div class="air-quality-container" v-loading="!aqiLoadingShow" element-loading-text="加载天气数据中...">
+  <div class="air-quality-container" v-loading="!aqiLoadingShow" element-loading-text="加载空气质量数据中...">
     <div class="dashboard-section">
       <div class="dashboard-content">
-        <el-progress type="dashboard" :percentage="aqiPercentage" :color="aqiColor" :width="200" :stroke-width="20">
+        <el-progress type="dashboard" :percentage="aqiPercentage" :color="aqiColor" :width="160" :stroke-width="16">
           <template #default>
             <div class="aqi-value">
               <div class="aqi-number">{{ airQualityIndex || "0" }}</div>
@@ -35,7 +35,7 @@ import { ref, computed, onMounted, watch, onUnmounted} from 'vue'
 import {useAqiStore} from '@/store/index'
 import emitter from '@/utils/emitter'
 const aqiStore = useAqiStore()
-const airQualityIndex = computed(() =>  aqiStore.aqi?.[0]?.components.pm2_5)
+const airQualityIndex = computed(() =>  aqiStore.aqi?.[0]?.components.pm2_5.toFixed(0))
 const aqiLoadingShow = ref(true)
 onMounted(() => {
   emitter.on('aqiLoadingShow', (isLoading) => {
@@ -118,7 +118,9 @@ watch(
 
 <style scoped>
 .air-quality-container {
+  width: 90%;
   margin: 0 auto;
+  margin-top: 15px;
   background: white;
   border-radius: 8px;
   padding-top: 20px;
@@ -128,7 +130,7 @@ watch(
 .dashboard-section {
   display: flex;
   justify-content: center;
-
+  /* margin-top: -10px; */
 }
 
 .dashboard-content {
@@ -145,7 +147,7 @@ watch(
 }
 
 .aqi-number {
-  font-size: 36px;
+  font-size: 24px;
   font-weight: bold;
   margin-bottom: 5px;
 }
@@ -164,7 +166,7 @@ watch(
 .pollutant-item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+
 }
 
 .pollutant-info {

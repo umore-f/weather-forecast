@@ -34,17 +34,17 @@ const getChartOption = () => {
     // 标题配置
     title: {
       text: '24小时气温变化',
-      top: '0px',
+      top: '10px',
       left: 'center',
       textStyle: {
-        fontSize: 18,
-        fontWeight: 'bold'
+        fontSize: 16,
+        fontWeight: 'normal'
       }
     },
     // 提示框配置
+    // 提示框配置
     tooltip: {
       trigger: 'axis',
-      length: 60,
       axisPointer: {
         type: 'line',
         lineStyle: {
@@ -58,24 +58,53 @@ const getChartOption = () => {
         let result = `${params[0].axisValue}<br/>`;
         params.forEach(param => {
           const color = param.color;
+          const unit = param.seriesName === '气温' ? '°C' : '%';
           result += `<span style="display:inline-block;margin-right:5px;border-radius:10px;width:9px;height:9px;background-color:${color}"></span>`;
-          result += `${param.seriesName}: ${param.value}°C<br/>`;
+          result += `${param.seriesName}: ${param.value}${unit}<br/>`;
         });
         return result;
       }
     },
     // 图例配置
     legend: {
-      data: ['气温'],
-      top: 10,
+      data: [
+        {
+          name: '气温',
+          icon: 'circle',
+          itemStyle: {
+            color: '#ffc107'
+          }
+        },
+        {
+          name: '降雨概率',
+          icon: 'rect',
+          itemStyle: {
+            color: '#1890ff'
+          }
+        }
+      ],
+      top: 15,
       left: 25,
+      orient: 'horizontal', // 水平排列
+      itemWidth: 12,
+      itemHeight: 12,
+      itemGap: 20, // 图例间距
+      textStyle: {
+        fontSize: 12,
+        color: '#666'
+      },
+      formatter: function (name) {
+        // 为图例添加单位
+        const unit = name === '气温' ? ' (°C)' : ' (%)';
+        return name + unit;
+      }
     },
     // 网格配置
     grid: {
       left: 25,
       right: 15,
       top: 10,
-      bottom: -5,
+      bottom: 0,
       containLabel: true
     },
     // X轴配置
@@ -102,7 +131,7 @@ const getChartOption = () => {
     },
     // Y轴配置
     // Y轴配置 - 隐藏Y轴
-    yAxis: {
+    yAxis: [{
       type: 'value',
       name: '温度℃',
       min: minTemp.value - 5,
@@ -121,7 +150,29 @@ const getChartOption = () => {
         show: false // 隐藏网格线
       }
     },
-     // 数据区域缩放组件
+    {
+      // 右侧Y轴 - 降雨概率
+      type: 'value',
+      name: '降雨概率%',
+      min: 0,
+      max: 100,
+      position: 'right',
+      axisLine: {
+        show: false,
+        lineStyle: {
+          color: '#1890ff'
+        }
+      },
+      axisLabel: {
+        show: false,
+        color: '#1890ff',
+        formatter: '{value}%'
+      },
+      splitLine: {
+        show: false // 右侧Y轴不显示网格线
+      }
+    }],
+    // 数据区域缩放组件
     dataZoom: [
       // {
       //   type: 'slider', // 滑动条型数据区域缩放组件
@@ -174,16 +225,32 @@ const getChartOption = () => {
           fontSize: 12,
           fontWeight: 'bold'
         },
-        // areaStyle: {
-        //   color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [ // 修改为水平渐变 (x1, y1, x2, y2)
-        //     { offset: 0, color: 'rgba(255, 107, 107, 0.4)' }, // 左侧浅色
-        //     { offset: 0.5, color: 'rgba(255, 107, 107, 0.7)' }, // 中间深色
-        //     { offset: 1, color: 'rgba(255, 107, 107, 0.4)' } // 右侧浅色
-        //   ])
-        // },
         smooth: true,
 
       },
+      {
+        // 柱状图 - 降雨概率
+        name: '降雨概率',
+        type: 'bar',
+        data: temperatureData.value.rain,
+        yAxisIndex: 1, // 使用第二个Y轴（右侧）
+        barWidth: '60%', // 柱子的宽度
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: '#1890ff' },
+            { offset: 1, color: '#69c0ff' }
+          ]),
+          borderRadius: [2, 2, 0, 0] // 柱子上方圆角
+        },
+        label: {
+          show: true,
+          position: 'top',
+          formatter: '{c}%',
+          color: '#1890ff',
+          fontSize: 11
+        },
+        zlevel: 1 // 确保柱状图在折线图下方
+      }
     ]
   }
 };
@@ -228,8 +295,10 @@ onUnmounted(() => {
   display: flex;
   justify-content: center;
   padding: 10px;
-  border-radius: 8px;
-  background: transparent;
+  border-radius: 15px;
+  background: white;
+  border: 2px solid #c3c6ce;
+  margin-top: 15px;
 }
 
 .chart-container {

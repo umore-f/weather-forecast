@@ -15,7 +15,7 @@
       </el-main>
       <el-aside style="width: 16vw; display: flex;flex-direction:column;justify-content: space-between;align-items: center;">
         <AirQuality/>
-        <SunRise/>
+        <DetailMessage/>
       </el-aside>
     </el-container>
   </div>
@@ -26,9 +26,9 @@
 import HeaderNav from '../components/HeaderNav.vue';
 import CurrentWeather from '../components/CurrentWeatherShow.vue';
 import CurrentCharts from '@/components/CurrentChartsShow.vue';
-// import AirQuality from '@/components/AirQuality.vue';
+import AirQuality from '@/components/AirQuality.vue';
 import AsideNav from '@/components/AsideNav.vue';
-import SunRise from '@/components/sunRise.vue';
+import DetailMessage from '@/components/detailMessage.vue';
 </script>
 
 <style lang="scss" scoped></style>

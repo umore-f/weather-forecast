@@ -10,8 +10,8 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
-import DaysChart from './daysLineChart.vue'
-import HoursChart from './hoursLineChart.vue'
+import DaysChart from './DaysLineChart.vue'
+import HoursChart from './HoursLineChart.vue'
 import emitter from '@/utils/emitter'
 const showLoading = ref(true)
 let showValue = ref()
@@ -29,4 +29,6 @@ onUnmounted(() => {
 })
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped>
+
+</style>
