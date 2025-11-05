@@ -5,7 +5,7 @@
 ## 项目演示视频
 
 <video controls width="640">
-  <source src="./src/assets/video/天气项目v 1.0 - Google Chrome 2025-11-05 18-10-49.mp4" type="video/mp4">
+  <source src="https://github.com/umore-f/weather-forecast/blob/main/src/assets/video/%E5%A4%A9%E6%B0%94%E9%A1%B9%E7%9B%AEv%201.0%20-%20Google%20Chrome%202025-11-05%2018-10-49.mp4" type="video/mp4">
   您的浏览器不支持 HTML5 视频标签。
 </video>
 
