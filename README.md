@@ -2,6 +2,12 @@
 ## 旨在做到以下内容:
 
 ![首页图片](./src/assets//image/天气系统1.png)
+## 项目演示视频
+
+<video controls width="640">
+  <source src="./src/assets/video/天气项目v_1.0 - Google Chrome 2025-11-05 18-10-49.mp4" type="video/mp4">
+  您的浏览器不支持 HTML5 视频标签。
+</video>
 ## 1.已实现的内容v_1.0:
 1.城市搜索 - 支持搜索全球城市
 2.实时天气信息
