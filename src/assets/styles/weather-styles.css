@@ -105,34 +105,6 @@
     inset 2px 2px 0 rgba(255, 255, 255, 0.4);
 }
 
-/* .weather-cloudy::before {
-  content: '';
-  position: absolute;
-  top: 20%;
-  left: 10%;
-  width: 120px;
-  height: 50px;
-  background: white;
-  border: 3px solid #000;
-  border-radius: 25px;
-  box-shadow: 3px 3px 0 #000;
-  z-index: 0;
-}
-
-.weather-cloudy::after {
-  content: '';
-  position: absolute;
-  top: 40%;
-  right: 15%;
-  width: 100px;
-  height: 40px;
-  background: white;
-  border: 3px solid #000;
-  border-radius: 20px;
-  box-shadow: 3px 3px 0 #000;
-  z-index: 0;
-} */
-
 /* MBE风格雾霾 */
 .weather-haze {
   background: linear-gradient(160deg, #ff9068 0%, #ffb6a3 100%);
@@ -145,19 +117,6 @@
     inset 2px 2px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* .weather-haze::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
-    linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.25) 50%, transparent 100%);
-  border: 2px solid #000;
-  z-index: 0;
-} */
 
 /* MBE风格默认天气 */
 .weather-default {
@@ -250,17 +209,4 @@
     font-size: 2.5rem;
   }
 
-  /* .weather-cloudy::before {
-    width: 80px;
-    height: 35px;
-    top: 15%;
-    left: 5%;
-  }
-
-  .weather-cloudy::after {
-    width: 70px;
-    height: 30px;
-    top: 35%;
-    right: 10%;
-  } */
 }

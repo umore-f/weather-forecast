@@ -109,9 +109,10 @@ const getWeatherClass = () => {
   background: rgba(255, 255, 255, 0.3);
   border: 2px solid #000;
   border-radius: 50%;
-  box-shadow: 3px 3px 0 #000;
+  box-shadow: 2px 2px 0 #000;
   padding: 0.5rem;
   transition: all 0.2s ease;
+  margin-right: 2px;
 }
 
 .mbe-icon-container:hover {
