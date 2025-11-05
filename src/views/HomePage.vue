@@ -23,11 +23,11 @@
 </template>
 
 <script setup>
-import HeaderNav from '../components/HeaderNav.vue';
-import CurrentWeather from '../components/CurrentWeatherShow.vue';
-import CurrentCharts from '../components/CurrentChartsShow.vue';
-import AirQuality from '../components/AirQuality.vue';
-import AsideNav from '../components/AsideNav.vue';
+import HeaderNav from '../components/HeaderNav2.vue';
+import CurrentWeather from '../components/CurrentWeatherShow2.vue';
+import CurrentCharts from '../components/CurrentChartsShow2.vue';
+import AirQuality from '../components/AirQuality2.vue';
+import AsideNav from '../components/AsideNav2.vue';
 import DetailMessage from '../components/DetailMessage2.vue';
 </script>
 

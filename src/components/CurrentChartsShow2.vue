@@ -11,7 +11,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
 import DaysChart from './DaysLineChart2.vue'
-import HoursChart from './HoursLineChart.vue'
+import HoursChart from './HoursLineChart2.vue'
 import emitter from '@/utils/emitter'
 const showLoading = ref(true)
 let showValue = ref()

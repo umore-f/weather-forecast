@@ -13,9 +13,9 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import WeatherNowCard from './WeatherNow.vue'
-import WeatherDaysCard from './DaysCardList.vue'
-import WeatherHoursCard from './HourCardList.vue'
+import WeatherNowCard from './WeatherNow2.vue'
+import WeatherDaysCard from './DaysCardList2.vue'
+import WeatherHoursCard from './HourCardList2.vue'
 import '@/assets/icon/iconfont.js'
 // import { fetchCityAndWeather } from '@/utils/weatherHelper'
 import emitter from '@/utils/emitter'
