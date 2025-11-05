@@ -1,4 +1,4 @@
-import { getWeatherTypeByCode, weatherClassMap } from './weatherType'
+import { getWeatherTypeByCode, weatherClassMap, getWeatherIconByCode } from './weatherType'
 import { getHourMin } from '@/utils/formatTime'
 // import { computed } from 'vue';
 export function getHoursEnData(hours) {
@@ -13,8 +13,9 @@ export function getHoursEnData(hours) {
     // 时间格式化
     const formattedTime = getHourMin(item.fxTime)
 
-    // 天气类型和CSS类计算
+    // 天气类型,天气图表和CSS类计算
     const weatherType = getWeatherTypeByCode(+item.icon)
+    const weatherIcon = getWeatherIconByCode(+item.icon)
     const weatherClass = weatherClassMap[weatherType] || 'weather-default'
 
     return {
@@ -22,6 +23,7 @@ export function getHoursEnData(hours) {
       fxTime: formattedTime,
       weatherClass,
       weatherType,
+      weatherIcon,
       isProcessed
     }
   })

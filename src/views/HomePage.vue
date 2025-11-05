@@ -28,7 +28,7 @@ import CurrentWeather from '../components/CurrentWeatherShow.vue';
 import CurrentCharts from '@/components/CurrentChartsShow.vue';
 import AirQuality from '@/components/AirQuality.vue';
 import AsideNav from '@/components/AsideNav.vue';
-import DetailMessage from '@/components/detailMessage.vue';
+import DetailMessage from '@/components/DetailMessage.vue';
 </script>
 
 <style lang="scss" scoped></style>

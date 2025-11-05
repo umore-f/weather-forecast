@@ -1,26 +1,29 @@
 <template>
-  <div class="big-card" :class="weather?.weatherClass">
+  <div class="big-card weather-widget" :class="weather?.weatherClass">
     <div class="header">
-      <i :class="'qi-' + `${weather?.icon|| '0'}`" style="display: block;"></i>
-      <span class="text">{{ weather?.text || '0'}}</span>
+      <!-- <i :class="'qi-' + `${weather?.icon || '0'}`" style="display: block;"></i> -->
+      <svg class="icon" aria-hidden="true">
+        <use :xlink:href="'#icon-' + `${weather?.weatherIcon}`"></use>
+      </svg>
+      <span class="text">{{ weather?.text || '0' }}</span>
     </div>
     <div class="main">
-      <span>{{ weather?.temp || '0'}}℃</span>
-      <span>体感温度:{{ weather?.feelsLike || '0'}}℃</span>
+      <span>{{ weather?.temp || '0' }}℃</span>
+      <span>体感温度:{{ weather?.feelsLike || '0' }}℃</span>
 
     </div>
     <div class="footer">
       <div class="pressure">
         <span class="title">风速</span>
-        <span class="text">{{ weather?.windSpeed || '0'}}公里/时</span>
+        <span class="text">{{ weather?.windSpeed || '0' }}公里/时</span>
       </div>
       <div class="vis">
         <span class="title">能见度</span>
-        <span class="text">{{ weather?.vis || '0'}}公里</span>
+        <span class="text">{{ weather?.vis || '0' }}公里</span>
       </div>
       <div class="humidity">
         <span class="title">相对湿度</span>
-        <span class="text">{{ weather?.humidity || '0'}}%</span>
+        <span class="text">{{ weather?.humidity || '0' }}%</span>
       </div>
     </div>
   </div>
@@ -37,18 +40,23 @@ defineProps({
 </script>
 
 <style scoped>
+/*  */
 .icon {
-  width: 2em;
-  height: 2em;
+  width: 4em;
+  height: 4em;
   vertical-align: -0.15em;
   fill: currentColor;
   overflow: hidden;
 }
 
-i {
+/* 和风天气样式 */
+/* i {
   font-size: 28px;
   margin-right: 10px;
-}
+} */
+/* svg {
+  font-size: 16px;
+} */
 
 .big-card {
   height: 200px;
@@ -81,6 +89,7 @@ i {
 
 .header .text {
   font-size: 24px;
+  line-height: 24px;
 }
 
 .main {
@@ -114,7 +123,7 @@ i {
 
 .footer {
   display: flex;
-  width: 90%;
+  width: 95%;
   justify-content: space-evenly;
   align-items: center;
 }
@@ -144,5 +153,4 @@ i {
   font-size: 12px;
   display: block;
 }
-
 </style>

@@ -1,45 +1,27 @@
-/* ---------- Background ---------- */
-/* 天气背景样式 */
-/* 晴天 - 复杂样式 */
+/* ---------- MBE风格天气背景（无动画） ---------- */
+
+/* MBE风格晴天 */
 .weather-sunny {
   background: linear-gradient(300deg, #FFE259 0%, #FFA751 100%);
   color: #5a3e1b;
   position: relative;
   overflow: hidden;
+  border: 3px solid #000;
+  box-shadow:
+    4px 4px 0 #000,
+    inset 2px 2px 0 rgba(255, 255, 255, 0.3);
 }
 
-.weather-sunny::before {
-  content: '';
-  position: absolute;
-  top: 20%;
-  right: 15%;
-  width: 80px;
-  height: 80px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  animation: sunPulse 8s infinite alternate, sunRotate 20s infinite linear;
-  z-index: 0;
-}
-
-.weather-sunny::after {
-  content: '';
-  position: absolute;
-  top: 15%;
-  right: 10%;
-  width: 120px;
-  height: 120px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  animation: sunRay 12s infinite linear;
-  z-index: 0;
-}
-
-/* 雨天 - 增强动画 */
+/* MBE风格雨天 */
 .weather-rainy {
   background: linear-gradient(160deg, #4a6572 0%, #34495e 100%);
   color: white;
   position: relative;
   overflow: hidden;
+  border: 3px solid #000;
+  box-shadow:
+    4px 4px 0 #000,
+    inset 2px 2px 0 rgba(255, 255, 255, 0.1);
 }
 
 .weather-rainy::before {
@@ -50,35 +32,22 @@
   right: 0;
   bottom: 0;
   background:
-    linear-gradient(to bottom, transparent 90%, rgba(52, 152, 219, 0.2) 100%),
-    linear-gradient(to bottom, transparent 80%, rgba(52, 152, 219, 0.15) 100%),
-    linear-gradient(to bottom, transparent 70%, rgba(52, 152, 219, 0.1) 100%);
-  animation: rainFall 1.5s infinite linear, rainSway 4s infinite ease-in-out;
+    linear-gradient(to bottom, transparent 90%, rgba(52, 152, 219, 0.3) 100%),
+    linear-gradient(to bottom, transparent 80%, rgba(52, 152, 219, 0.25) 100%),
+    linear-gradient(to bottom, transparent 70%, rgba(52, 152, 219, 0.2) 100%);
   z-index: 0;
 }
 
-.weather-rainy::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 2px, transparent 3px),
-    radial-gradient(circle at 60% 70%, rgba(255, 255, 255, 0.1) 2px, transparent 3px),
-    radial-gradient(circle at 80% 40%, rgba(255, 255, 255, 0.1) 2px, transparent 3px);
-  background-size: 200px 200px;
-  animation: rainDrops 15s infinite linear;
-  z-index: 0;
-}
-
-/* 雪天 - 增强动画 */
+/* MBE风格雪天 */
 .weather-snowy {
   background: linear-gradient(160deg, #e6e9f0 0%, #d9e1e8 100%);
   color: #2c3e50;
   position: relative;
   overflow: hidden;
+  border: 3px solid #000;
+  box-shadow:
+    4px 4px 0 #000,
+    inset 2px 2px 0 rgba(255, 255, 255, 0.4);
 }
 
 .weather-snowy::before {
@@ -89,38 +58,25 @@
   right: 0;
   bottom: 0;
   background-image:
-    radial-gradient(circle at 20% 20%, white 1px, transparent 2px),
-    radial-gradient(circle at 40% 80%, white 1px, transparent 2px),
-    radial-gradient(circle at 60% 40%, white 1px, transparent 2px),
-    radial-gradient(circle at 80% 60%, white 1px, transparent 2px);
+    radial-gradient(circle at 20% 20%, white 2px, transparent 3px),
+    radial-gradient(circle at 40% 80%, white 2px, transparent 3px),
+    radial-gradient(circle at 60% 40%, white 2px, transparent 3px),
+    radial-gradient(circle at 80% 60%, white 2px, transparent 3px);
   background-size: 200px 200px;
-  animation: snowfall 20s infinite linear, snowDrift 25s infinite ease-in-out;
+  border: 2px solid #000;
   z-index: 0;
 }
 
-.weather-snowy::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    radial-gradient(circle at 10% 50%, white 1px, transparent 2px),
-    radial-gradient(circle at 30% 70%, white 1px, transparent 2px),
-    radial-gradient(circle at 70% 30%, white 1px, transparent 2px),
-    radial-gradient(circle at 90% 80%, white 1px, transparent 2px);
-  background-size: 150px 150px;
-  animation: snowfall 15s infinite linear reverse, snowDrift 20s infinite ease-in-out reverse;
-  z-index: 0;
-}
-
-/* 雾天 - 增强动画 */
+/* MBE风格雾天 */
 .weather-foggy {
   background: linear-gradient(160deg, #8592b3 0%, #a8c0ff 100%);
   color: white;
   position: relative;
   overflow: hidden;
+  border: 3px solid #000;
+  box-shadow:
+    4px 4px 0 #000,
+    inset 2px 2px 0 rgba(255, 255, 255, 0.2);
 }
 
 .weather-foggy::before {
@@ -131,43 +87,35 @@
   right: 0;
   bottom: 0;
   background:
-    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%),
-    linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
-  animation: fogMove 25s infinite linear, fogPulse 15s infinite alternate;
+    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+  border: 2px solid #000;
   z-index: 0;
 }
 
-.weather-foggy::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.15) 50%, transparent 100%);
-  animation: fogMove 30s infinite linear reverse, fogPulse 20s infinite alternate-reverse;
-  z-index: 0;
-}
-
-/* 多云 - 增强动画 */
+/* MBE风格多云 */
 .weather-cloudy {
   background: linear-gradient(160deg, #e7e2e2 0%, #f8f8f9 100%);
   color: #2c3e50;
   position: relative;
   overflow: hidden;
+  border: 3px solid #000;
+  box-shadow:
+    4px 4px 0 #000,
+    inset 2px 2px 0 rgba(255, 255, 255, 0.4);
 }
 
-.weather-cloudy::before {
+/* .weather-cloudy::before {
   content: '';
   position: absolute;
   top: 20%;
-  left: -100px;
+  left: 10%;
   width: 120px;
   height: 50px;
-  background: rgba(255, 255, 255, 0.9);
+  background: white;
+  border: 3px solid #000;
   border-radius: 25px;
-  animation: cloudMove 25s infinite linear, cloudPulse 10s infinite alternate;
+  box-shadow: 3px 3px 0 #000;
   z-index: 0;
 }
 
@@ -175,24 +123,29 @@
   content: '';
   position: absolute;
   top: 40%;
-  right: -80px;
+  right: 15%;
   width: 100px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.9);
+  background: white;
+  border: 3px solid #000;
   border-radius: 20px;
-  animation: cloudMove 30s infinite linear reverse, cloudPulse 15s infinite alternate-reverse;
+  box-shadow: 3px 3px 0 #000;
   z-index: 0;
-}
+} */
 
-/* 雾霾 - 增强动画 */
+/* MBE风格雾霾 */
 .weather-haze {
   background: linear-gradient(160deg, #ff9068 0%, #ffb6a3 100%);
   color: #5a3e1b;
   position: relative;
   overflow: hidden;
+  border: 3px solid #000;
+  box-shadow:
+    4px 4px 0 #000,
+    inset 2px 2px 0 rgba(255, 255, 255, 0.3);
 }
 
-.weather-haze::before {
+/* .weather-haze::before {
   content: '';
   position: absolute;
   top: 0;
@@ -200,33 +153,22 @@
   right: 0;
   bottom: 0;
   background:
-    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%),
-    linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.15) 50%, transparent 100%);
-  animation: hazeMove 20s infinite linear, hazePulse 15s infinite alternate;
+    linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+    linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.25) 50%, transparent 100%);
+  border: 2px solid #000;
   z-index: 0;
-}
+} */
 
-.weather-haze::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.1) 1px, transparent 2px),
-    radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.1) 1px, transparent 2px);
-  background-size: 100px 100px;
-  animation: hazeParticles 25s infinite linear;
-  z-index: 0;
-}
-
-/* 默认天气 - 增强动画 */
+/* MBE风格默认天气 */
 .weather-default {
   background: linear-gradient(160deg, #667eea 0%, #764ba2 100%);
   color: white;
   position: relative;
   overflow: hidden;
+  border: 3px solid #000;
+  box-shadow:
+    4px 4px 0 #000,
+    inset 2px 2px 0 rgba(255, 255, 255, 0.2);
 }
 
 .weather-default::before {
@@ -237,224 +179,88 @@
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-  animation: defaultPulse 15s infinite alternate, defaultShift 20s infinite ease-in-out;
+    radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+    radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+  border: 2px solid #000;
   z-index: 0;
 }
 
-.weather-default::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background:
-    linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
-  animation: defaultFlow 25s infinite linear;
-  z-index: 0;
-}
-
-/* 增强的动画关键帧 */
-
-/* 晴天动画 */
-@keyframes sunPulse {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.2);
-  }
-}
-
-@keyframes sunRotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes sunRay {
-  0% {
-    transform: rotate(0deg) scale(1);
-    opacity: 0.2;
-  }
-  50% {
-    transform: rotate(180deg) scale(1.1);
-    opacity: 0.4;
-  }
-  100% {
-    transform: rotate(360deg) scale(1);
-    opacity: 0.2;
-  }
-}
-
-/* 雨天动画 */
-@keyframes rainFall {
-  0% {
-    background-position: 0 0, 0 0, 0 0;
-  }
-  100% {
-    background-position: 0 50px, 0 75px, 0 100px;
-  }
-}
-
-@keyframes rainSway {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(10px);
-  }
-}
-
-@keyframes rainDrops {
-  0% {
-    background-position: 0 0, 0 0, 0 0;
-  }
-  100% {
-    background-position: 200px 200px, 150px 150px, 100px 100px;
-  }
-}
-
-/* 雪天动画 */
-@keyframes snowfall {
-  0% {
-    background-position: 0 0, 0 0, 0 0, 0 0;
-  }
-  100% {
-    background-position: 0 200px, 0 300px, 0 400px, 0 500px;
-  }
-}
-
-@keyframes snowDrift {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(15px);
-  }
-}
-
-/* 雾天动画 */
-@keyframes fogMove {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes fogPulse {
-  0%, 100% {
-    opacity: 0.1;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
-
-/* 多云动画 */
-@keyframes cloudMove {
-  0% {
-    transform: translateX(-100px);
-  }
-  100% {
-    transform: translateX(calc(100vw + 100px));
-  }
-}
-
-@keyframes cloudPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-/* 雾霾动画 */
-@keyframes hazeMove {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes hazePulse {
-  0%, 100% {
-    opacity: 0.1;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
-
-@keyframes hazeParticles {
-  0% {
-    background-position: 0 0, 0 0;
-  }
-  100% {
-    background-position: 100px 100px, 150px 150px;
-  }
-}
-
-/* 默认天气动画 */
-@keyframes defaultPulse {
-  0%, 100% {
-    opacity: 0.05;
-  }
-  50% {
-    opacity: 0.15;
-  }
-}
-
-@keyframes defaultShift {
-  0%, 100% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(5px, 5px);
-  }
-  50% {
-    transform: translate(-5px, 10px);
-  }
-  75% {
-    transform: translate(10px, -5px);
-  }
-}
-
-@keyframes defaultFlow {
-  0% {
-    transform: translateX(-100%) rotate(0deg);
-  }
-  100% {
-    transform: translateX(100%) rotate(360deg);
-  }
-}
-
-/* 在所有天气样式的伪元素中添加 */
+/* 确保伪元素不干扰交互 */
 .weather-sunny::before,
 .weather-sunny::after,
 .weather-rainy::before,
-.weather-rainy::after,
 .weather-snowy::before,
-.weather-snowy::after,
 .weather-foggy::before,
-.weather-foggy::after,
 .weather-cloudy::before,
 .weather-cloudy::after,
 .weather-haze::before,
-.weather-haze::after,
 .weather-default::before {
   pointer-events: none;
-  /* 关键：允许鼠标事件穿透 */
+}
+
+/* 添加MBE风格特有的细节 */
+.weather-cloudy::before,
+.weather-cloudy::after {
+  /* 云朵的MBE高光 */
+  background: radial-gradient(ellipse at 30% 40%, white 10%, #F0F0F0 60%);
+}
+
+/* MBE风格完整字体系统 */
+.weather-widget {
+  font-family: 'Fredoka One', '幼圆', 'Comic Sans MS', cursive;
+}
+
+.weather-widget h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow:
+    4px 4px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000;
+  margin: 0;
+}
+
+.weather-widget p {
+  font-family: 'Quicksand', 'Comic Sans MS', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow:
+    2px 2px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000;
+  margin: 0.5rem 0;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .weather-widget h1 {
+    font-size: 2rem;
+  }
+
+  .weather-widget p {
+    font-size: 1.1rem;
+  }
+
+  .temperature {
+    font-size: 2.5rem;
+  }
+
+  /* .weather-cloudy::before {
+    width: 80px;
+    height: 35px;
+    top: 15%;
+    left: 5%;
+  }
+
+  .weather-cloudy::after {
+    width: 70px;
+    height: 30px;
+    top: 35%;
+    right: 10%;
+  } */
 }
