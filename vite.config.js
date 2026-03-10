@@ -1,16 +1,16 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { fileURLToPath, URL } from 'node:url'
-import process from 'node:process'
+// import process from 'node:process'
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   // 加载环境变量
-  const env = loadEnv(mode, process.cwd(), '')
+  // const env = loadEnv(mode, process.cwd(), '')
   return {
     plugins: [
       vue(),
@@ -42,23 +42,23 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       },
     },
-    server: {
-      host: true,
-      port: 3000,
-      proxy: {
-        // 和风天气代理
-        '/qweather': {
-          target: `https://${env.VITE_API_HOST || 'api.qweather.com'}`,
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/qweather/, '')
-        },
-        // OpenWeatherMap 代理
-        '/openweather': {
-          target: 'http://api.openweathermap.org',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/openweather/, '/data/2.5')
-        }
-      }
-    }
+    // server: {
+    //   host: true,
+    //   port: 3000,
+    //   proxy: {
+    //     // 和风天气代理
+    //     '/qweather': {
+    //       target: `https://${env.VITE_API_HOST || 'api.qweather.com'}`,
+    //       changeOrigin: true,
+    //       rewrite: (path) => path.replace(/^\/qweather/, '')
+    //     },
+    //     // OpenWeatherMap 代理
+    //     '/openweather': {
+    //       target: 'http://api.openweathermap.org',
+    //       changeOrigin: true,
+    //       rewrite: (path) => path.replace(/^\/openweather/, '/data/2.5')
+    //     }
+    //   }
+    // }
   }
 })

@@ -1,14 +1,14 @@
 <template>
-  <div @mouseenter="setIsBig(true)" @mouseleave="setIsBig(false)"
-    :class="[weather?.weatherClass, { 'small-card': !isHover, 'magnify-card': isHover }]"
+  <div @mouseenter="setIsBig(true)" @mouseleave="setIsBig(false)" 
     style="  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);" class="weather-widget">
     <!-- 大图样式 -->
     <template v-if="isHover">
       <div class="header">
+        <!-- :class="[weather?.weatherClass, { 'small-card': !isHover, 'magnify-card': isHover }]" -->
         <!-- <i :class="'qi-' + `${weather?.iconDay || '0'}`" style="display: block;"></i> -->
-        <svg class="icon" aria-hidden="true">
-          <use :xlink:href="'#icon-' + `${weather?.weatherIcon}`"></use>
-        </svg>
+        <!-- <svg class="icon" aria-hidden="true"> -->
+          <!-- <use :xlink:href="'#icon-' + `${weather?.weatherIcon}`"></use> -->
+        <!-- </svg> -->
         <span class="text">{{ weather?.textDay || '0' }}</span>
         <span class="time">{{ weather?.fxDate || '0' }}&nbsp;{{ weather?.weekDay || '0' }}</span>
       </div>
@@ -34,9 +34,11 @@
     <!-- 小图样式 -->
     <template v-else>
       <div>{{ weather?.fxDate || '0' }}</div>
-      <div> <svg class="icon" aria-hidden="true">
+      <div> 
+        <!-- <svg class="icon" aria-hidden="true">
           <use :xlink:href="'#icon-' + `${weather?.weatherIcon}`"></use>
-        </svg></div>
+        </svg> -->
+      </div>
       <div>{{ weather?.textDay || '0' }}</div>
       <div>↑{{ weather?.tempMax || '0' }}℃</div>
       <div>↓{{ weather?.tempMin || '0' }}℃</div>

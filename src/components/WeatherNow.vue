@@ -2,9 +2,9 @@
   <div class="big-card weather-widget" :class="weather?.weatherClass">
     <div class="header">
       <!-- <i :class="'qi-' + `${weather?.icon || '0'}`" style="display: block;"></i> -->
-      <svg class="icon" aria-hidden="true">
+      <!-- <svg class="icon" aria-hidden="true">
         <use :xlink:href="'#icon-' + `${weather?.weatherIcon}`"></use>
-      </svg>
+      </svg> -->
       <span class="text">{{ weather?.text || '0' }}</span>
     </div>
     <div class="main">

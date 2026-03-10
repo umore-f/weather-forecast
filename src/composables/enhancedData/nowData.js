@@ -1,4 +1,4 @@
-import {getWeatherTypeByCode,weatherClassMap, getWeatherIconByCode} from './weatherType'
+// import {getWeatherTypeByCode,weatherClassMap, getWeatherIconByCode} from './weatherType'
 import {getHourMin} from '@/utils/formatTime'
 
 export function getNowEnData(now) {
@@ -13,16 +13,16 @@ export function getNowEnData(now) {
   return weatherNowInfo.map(item => {
     const isProcessed = true
     const formattedTime = getHourMin(item.obsTime)
-    const weatherType = getWeatherTypeByCode(+item.icon)
-    const weatherIcon = getWeatherIconByCode(+item.icon)
-    const weatherClass = weatherClassMap[weatherType] || 'weather-default'
+    // const weatherType = getWeatherTypeByCode(+item.icon)
+    // const weatherIcon = getWeatherIconByCode(+item.icon)
+    // const weatherClass = weatherClassMap[weatherType] || 'weather-default'
 
     return {
       ...item,
       obsTime: formattedTime,
-      weatherClass,
-      weatherType,
-      weatherIcon,
+      // weatherClass,
+      // weatherType,
+      // weatherIcon,
       isProcessed
     }
   })

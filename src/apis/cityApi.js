@@ -9,7 +9,7 @@ export const cityApi = {
       return Promise.reject(new Error('城市名称不能为空'))
     }
     return httpInstance({
-      url: '/geo/v2/city/lookup',
+      url: '/hf_search_city',
       params: {
         location: location.trim()
       }

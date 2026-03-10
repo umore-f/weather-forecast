@@ -1,4 +1,4 @@
-import { getWeatherIconByCode, getWeatherTypeByCode, weatherClassMap } from './weatherType'
+// import { getWeatherIconByCode, getWeatherTypeByCode } from './weatherType'
 import { getMonthDay, getWeekday } from '@/utils/formatTime'
 export function getDaysEnData(days) {
   console.log("未来7天天气处理");
@@ -15,16 +15,16 @@ export function getDaysEnData(days) {
     // 时间格式化转换为星期几
     const weekDay = getWeekday(item.fxDate)
     // 天气类型,天气图表和CSS类计算
-    const weatherType = getWeatherTypeByCode(+item.iconDay)
-    const weatherIcon = getWeatherIconByCode(+item.iconDay)
-    const weatherClass = weatherClassMap[weatherType] || 'weather-default'
+    // const weatherType = getWeatherTypeByCode(+item.iconDay)
+    // const weatherIcon = getWeatherIconByCode(+item.iconDay)
+    // const weatherClass = weatherClassMap[weatherType] || 'weather-default'
     return {
       ...item,
       fxDate: formattedTime,
-      weatherClass,
-      weatherType,
+      // weatherClass,
+      // weatherType,
       weekDay,
-      weatherIcon,
+      // weatherIcon,
       isProcessed
     }
   })
