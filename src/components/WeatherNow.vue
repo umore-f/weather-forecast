@@ -30,12 +30,6 @@
 </template>
 
 <script setup>
-defineProps({
-  weather: {
-    type: Object,
-    default: () => { }
-  }
-})
 
 </script>
 

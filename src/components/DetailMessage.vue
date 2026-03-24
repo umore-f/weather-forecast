@@ -23,18 +23,7 @@
 </template>
 
 <script setup>
-import { useWeatherDaysStore } from '@/store/index'
-const weatherDaysStore = useWeatherDaysStore()
 
-// 根据时间判断天气风格
-const getWeatherClass = () => {
-  const hour = new Date().getHours();
-  if (hour >= 6 && hour < 18) {
-    return 'mbe-daytime';
-  } else {
-    return 'mbe-nighttime';
-  }
-}
 </script>
 
 <style scoped>

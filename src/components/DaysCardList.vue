@@ -47,18 +47,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-defineProps({
-  // isHover:number,
-  weather: {
-    type: Object,
-    default: () => { }
-  }
-})
-const isHover = ref(false)
-function setIsBig(state) {
-  isHover.value = state
-}
 
 </script>
 

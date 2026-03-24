@@ -1,174 +1,190 @@
 <template>
-  <div @mouseenter="setIsBig(true)" @mouseleave="setIsBig(false)"
-    :class="[weather?.weatherClass, { 'small-card': !isHover, 'magnify-card': isHover }]"
-    style="  transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);" class="weather-widget">
-    <!-- 大图样式 -->
-    <template v-if="isHover">
+  <div class="weather-card" v-loading="loading">
+    <div class="card-content">
       <div class="header">
-        <svg class="icon" aria-hidden="true">
-          <use :xlink:href="'#icon-' + `${weather?.weatherIcon}`"></use>
-        </svg>
-        <span class="text">{{ weather?.text || '0' }}</span>&nbsp;
-        <span class="time">{{ weather?.fxTime || '0' }}</span>
+        <span class="text">{{ weather?.weather_text || '0' }}</span>
+        <span class="time">
+          <span>{{ weather?.forecast_time.split('-')[1] || '0' }}</span>-
+          <span>{{ weather?.forecast_time.split('-')[2] || '0' }}</span>
+        </span>
       </div>
       <div class="main">
-        <span>{{ weather?.temp || '0' }}℃</span>
-
+        <span class="temp">{{ weather?.temp || '0' }}℃</span>
       </div>
       <div class="footer">
         <div class="pressure">
-          <span class="title">大气压</span>
-          <span class="text">{{ weather?.windSpeed || '0' }}公里/时</span>
+          <span class="label">大气压</span>
+          <span class="value">{{ weather?.wind_speed || '0' }}公里/时</span>
         </div>
         <div class="humidity">
-          <span class="title">相对湿度</span>
-          <span class="text">{{ weather?.humidity || '0' }}%</span>
+          <span class="label">相对湿度</span>
+          <span class="value">{{ weather?.humidity || '0' }}%</span>
         </div>
       </div>
-    </template>
-    <!-- 小图样式 -->
-    <template v-else>
-      <div> <svg class="icon" aria-hidden="true">
-          <use :xlink:href="'#icon-' + `${weather?.weatherIcon}`"></use>
-        </svg></div>
-      <div>{{ weather?.text || '0' }}</div>
-      <div>{{ weather?.temp || '0' }}℃</div>
-      <span>{{ weather?.fxTime || '0' }}</span>
-    </template>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+// import { props } from 'vue'
 
-defineProps({
-
+const props = defineProps({
   weather: {
     type: Object,
-    default: () => { }
-  }
+    required: true,   // 如果 title 是必需的，可以设置
+  },
 })
-const isHover = ref(false)
-function setIsBig(state) {
-  isHover.value = state
-}
 </script>
 
 <style scoped>
-.small-card {
-  flex: 0 0 14%;
-  height: 200px;
-  /* background: white; */
-  /* box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
-    0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3); */
-  transition: border-radius 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border-radius: 15%;
-  display: flex;
-  flex-direction: column;
-  margin: 10px;
-  align-items: center;
-  justify-content: space-around;
+.weather-card {
+  flex: 0 0 16%;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  border: 1px solid #f0f2f5;
 }
 
-.small-card i {
-  font-size: 40px;
-  margin-right: 10px;
+.weather-card:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.04);
+  transform: translateY(-3px);
+  border-color: #e9ecef;
+}
+
+.card-content {
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 头部区域 - 增强文字对比 */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: #1e2a3a;
 }
 
 .icon {
-  width: 3em;
-  height: 3em;
-  vertical-align: -0.15em;
-  fill: currentColor;
-  overflow: hidden;
-
+  width: 32px;
+  height: 32px;
+  fill: #4a6a8b;
+  color: #4a6a8b;
 }
 
-i {
-  font-size: 28px;
-  margin-right: 10px;
-
-
+.text {
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.2px;
 }
 
-.magnify-card {
-  height: 200px;
-  border-radius: 15%;
-  /* background: white; */
-  /* box-shadow: inset 0 -3em 3em rgba(0, 0, 0, 0.1),
-    0 0 0 2px rgb(190, 190, 190),
-    0.3em 0.3em 1em rgba(0, 0, 0, 0.3); */
-  transition: border-radius 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  transition-duration: 0.2s;
-  /* transition-property: all; */
-  flex: 0 0 30%;
-  margin: 10px;
+.time {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 500;
+  color: #5b6e8c;
+  background: #f8fafc;
+  padding: 2px 8px;
+  border-radius: 20px;
 }
 
-.header {
-  display: flex;
-  justify-content: start;
-  width: 90%;
-  line-height: 24px;
-}
-
-.header .text {
-  font-size: 24px;
-}
-
+/* 温度主区域 - 更突出 */
 .main {
-  display: flex;
-  width: 90%;
+  text-align: center;
+  margin: 6px 0;
 }
 
-.main span {
-  display: inline-block;
-  justify-self: start;
-  line-height: 24px;
+.temp {
+  font-size: 42px;
+  font-weight: 700;
+  color: #0a1c2f;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.02);
 }
 
-.main span:first-child {
-  font-size: 24px;
-  margin-right: 10px;
-}
-
-
+/* 底部信息 - 更清晰的分隔和对比 */
 .footer {
   display: flex;
-  width: 95%;
-  justify-content: space-evenly;
-  align-items: center;
-
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px solid #e9edf2;
+  padding-top: 14px;
+  margin-top: 6px;
 }
 
-.footer div {
-  width: 25%;
-  height: 45px;
-  border-radius: 15%;
+.pressure,
+.humidity {
+  flex: 1;
   text-align: center;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
-  transition-duration: 0.2s;
-  transition-property: all;
+  gap: 6px;
+  background: #fafcff;
+  padding: 8px 4px;
+  border-radius: 14px;
+  transition: background 0.2s ease;
 }
 
-.footer div:hover {
-  transform: scale(1.15);
+.pressure:hover,
+.humidity:hover {
+  background: #f5f9ff;
 }
 
-.footer .title {
-  font-size: 12px;
-  display: block;
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #5b6e8c;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
 }
 
-.footer .text {
-  font-size: 12px;
-  display: block;
+.value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e2f41;
+}
+
+/* 响应式调整 - 保持移动端同样清晰 */
+@media (max-width: 768px) {
+  .weather-card {
+    flex: 0 0 100%;
+    margin: 8px 0;
+    border-radius: 18px;
+  }
+  
+  .card-content {
+    padding: 14px;
+  }
+
+  .temp {
+    font-size: 38px;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .pressure,
+  .humidity {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  
+  .label {
+    font-size: 12px;
+  }
+  
+  .value {
+    font-size: 15px;
+  }
 }
 </style>

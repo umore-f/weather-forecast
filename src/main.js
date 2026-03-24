@@ -15,7 +15,9 @@ import '@/assets/styles/weather-styles.css'
 // 引入加载组件
 import Loading from './components/Loading.vue'
 // 引入emitter
-import emitter from './utils/emitter'
+import emitter from './utils/echarts'
+import EChartsWrapper from './components/EChartsWrapper.vue'
+
 const pinia = createPinia()
 const app = createApp(App)
 // 循环注册
@@ -25,6 +27,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 app.use(pinia)
 app.use(emitter)
+app.component('EChartsWrapper', EChartsWrapper)
 // 全局注册图表组件，在模板中可以使用 <v-chart> 标签
 app.component('Loading', Loading) // 全局注册，在任何组件中都可以直接使用<Loading />
 app.component('v-chart', ECharts);
