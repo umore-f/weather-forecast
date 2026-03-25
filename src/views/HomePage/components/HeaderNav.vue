@@ -70,7 +70,7 @@ import { cityApi } from '@/apis/city'
 import { emitter } from '../../../utils/eventBus'
 
 const searchValue = ref('北京')
-const showSource = ref(false)
+const showSource = ref(true)
 const remoteSearch = async (queryString, cb) => {
   if (!queryString) {
     cb([])

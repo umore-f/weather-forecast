@@ -9,58 +9,33 @@
     <div class="chart-grid">
       <!-- 温度组（面积图） -->
       <div class="chart-card">
-        <EChartsWrapper
-          :options="temperatureOptions"
-          height="300px"
-          :loading="loading"
-        />
+        <EChartsWrapper :options="temperatureOptions" height="300px" :loading="loading" />
       </div>
 
       <!-- 湿度与露点组（柱状图+折线，双Y轴） -->
       <div class="chart-card">
-        <EChartsWrapper
-          :options="humidityOptions"
-          height="300px"
-          :loading="loading"
-        />
+        <EChartsWrapper :options="humidityOptions" height="300px" :loading="loading" />
       </div>
 
       <!-- 风组（折线 + 散点标记） -->
       <div class="chart-card">
-        <EChartsWrapper
-          :options="windOptions"
-          height="300px"
-          :loading="loading"
-        />
-        <EChartsWrapper
-          :options="windRoseOptions"
-          height="300px"
-          :loading="loading"
-        />
+        <EChartsWrapper :options="windOptions" height="300px" :loading="loading" />
       </div>
 
       <!-- 降水组（柱状图+折线） -->
       <div class="chart-card">
-        <EChartsWrapper
-          :options="precipOptions"
-          height="300px"
-          :loading="loading"
-        />
+        <EChartsWrapper :options="precipOptions" height="300px" :loading="loading" />
       </div>
 
       <!-- 紫外线指数（渐变面积图） -->
       <div class="chart-card">
-        <EChartsWrapper
-          :options="uvOptions"
-          height="250px"
-          :loading="loading"
-        />
+        <EChartsWrapper :options="uvOptions" height="250px" :loading="loading" />
       </div>
 
-      <!-- 风向玫瑰图（替代原风向卡片） -->
-      <!-- <div class="chart-card">
-
-      </div> -->
+      <!-- 风向玫瑰图 -->
+      <div class="chart-card">
+        <EChartsWrapper :options="windRoseOptions" height="300px" :loading="loading" />
+      </div>
     </div>
   </div>
 </template>
@@ -87,9 +62,10 @@ function convertToLocalDate(utcTimeStr) {
 }
 
 // 数据存储
-const hoursList = ref([])      // 和风天气数据
-const hoursList1 = ref([])     // tomorrow.io 数据
-const date = ref('')           // 当前日期
+const hfHoursList = ref([])      // 和风天气原始数据
+const tiHoursList = ref([])      // tomorrow.io 原始数据
+const hoursList = ref([])        // 当前显示的数据源（和风 or tomorrow）
+const date = ref('')             // 当前日期
 const loading = ref(false)
 const error = ref(null)
 const selectedCity = ref('广州')
@@ -97,12 +73,12 @@ const selectedCity = ref('广州')
 // 计算标题文本（带日期）
 const titleText = computed(() => `小时气象趋势 日期：${date.value}`)
 
-// 风向文字映射（用于玫瑰图的半径轴标签，不再需要单独卡片）
-// 统计风向频率（响应式，供玫瑰图使用）
+// 风向玫瑰图数据（基于当前数据源）
 const windRoseData = computed(() => {
-  if (!hoursList.value.length) return []
+  const data = hoursList.value
+  if (!data.length) return []
   const counts = Array(8).fill(0)
-  hoursList.value.forEach(item => {
+  data.forEach(item => {
     const angle = item.wind_direction
     if (angle !== undefined) {
       const idx = Math.round(angle / 45) % 8
@@ -112,30 +88,30 @@ const windRoseData = computed(() => {
   return counts
 })
 
-// 风向玫瑰图配置（响应式更新）
+// 风向玫瑰图配置
 const windRoseOptions = reactive({
   title: { text: '风向玫瑰图', left: 'left' },
   tooltip: { trigger: 'item' },
   angleAxis: { startAngle: 0 },
-  radiusAxis: { 
-    type: 'category', 
+  radiusAxis: {
+    type: 'category',
     data: ['北', '东北', '东', '东南', '南', '西南', '西', '西北'],
     axisLabel: { rotate: 0 }
   },
   polar: {},
   series: [{
     type: 'bar',
-    data: [],  // 初始为空
+    data: [],
     coordinateSystem: 'polar',
     name: '风向频率',
     roundCap: true,
     barWidth: 30,
-    itemStyle: { color: '#5470c6', borderRadius: [4,4,0,0] },
+    itemStyle: { color: '#5470c6', borderRadius: [4, 4, 0, 0] },
     label: { show: true, position: 'top', formatter: '{c}' }
   }]
 })
 
-// 监听 windRoseData 变化，更新玫瑰图数据
+// 监听风向数据变化，更新玫瑰图
 watch(windRoseData, (newData) => {
   if (windRoseOptions.series[0]) {
     windRoseOptions.series[0].data = newData
@@ -146,9 +122,9 @@ watch(windRoseData, (newData) => {
 
 // 温度组（双面积折线图）
 const temperatureOptions = reactive({
-  title: { text: '温度趋势', left: 'left' },
+  title: { text: '温度趋势', left: 'left', top: 0 },
   tooltip: { trigger: 'axis' },
-  legend: { data: ['和风天气温度', 'tomorrow.io 温度'], top: 30, left: 'left' },
+  legend: { data: ['温度', '体感温度'], top: 20, left: 'left' },
   grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
   xAxis: { type: 'category', boundaryGap: false, data: [] },
   yAxis: { name: '摄氏度 (°C)' },
@@ -298,41 +274,46 @@ const uvOptions = reactive({
       symbol: 'circle',
       symbolSize: 6
     }
-  ]
+  ],
+  grid: {
+    left: '5%',      // 左侧距容器边缘的距离（可调小）
+    right: '5%',     // 右侧
+    top: '25%',      // 顶部，为标题预留空间（若标题紧凑可再调小）
+    bottom: '2%',    // 底部
+    containLabel: true  // 防止坐标轴标签被截断
+  }
 })
 
 // ==================== 数据更新函数 ====================
-function updateAllCharts(dataQ, dataT) {
-  if (!dataQ || !dataT || dataQ.length === 0 || dataT.length === 0) return
+function updateAllCharts() {
+  const data = hoursList.value
+  if (!data || data.length === 0) return
 
-  // 使用和风天气的时间作为 x 轴（假设两个数据源时间对齐）
-  const times = dataQ.map(item => convertToLocalTime(item.forecast_time))
-  
+  const times = data.map(item => convertToLocalTime(item.forecast_time))
+
   // 温度组
   temperatureOptions.xAxis.data = times
-  temperatureOptions.series[0].data = dataQ.map(item => item.temperature)
-  temperatureOptions.series[1].data = dataQ.map(item => item.feelslike)
+  temperatureOptions.series[0].data = data.map(item => item.temperature)
+  temperatureOptions.series[1].data = data.map(item => item.feelslike)
 
-  // 湿度与露点组（使用和风天气数据）
+  // 湿度与露点组
   humidityOptions.xAxis.data = times
-  humidityOptions.series[0].data = dataQ.map(item => item.humidity)
-  humidityOptions.series[1].data = dataQ.map(item => item.dew)
+  humidityOptions.series[0].data = data.map(item => item.humidity)
+  humidityOptions.series[1].data = data.map(item => item.dew)
 
-  // 风组（使用和风天气数据）
+  // 风组
   windOptions.xAxis.data = times
-  windOptions.series[0].data = dataQ.map(item => item.wind_speed)
-  windOptions.series[1].data = dataQ.map(item => item.wind_gust)
+  windOptions.series[0].data = data.map(item => item.wind_speed)
+  windOptions.series[1].data = data.map(item => item.wind_gust)
 
-  // 降水组（使用和风天气数据，字段名根据实际API调整）
-  // 注意：这里假设和风天气数据有 precipitation_amount 和 precipitation_rate
-  // 如果字段名不同，请修改下面两行
-  precipOptions.series[0].data = dataQ.map(item => item.precipitation || 0)
-  precipOptions.series[1].data = dataQ.map(item => item.precipitation_probability || 0)
+  // 降水组
   precipOptions.xAxis.data = times
+  precipOptions.series[0].data = data.map(item => item.precipitation || 0)
+  precipOptions.series[1].data = data.map(item => item.precipitation_probability || 0)
 
-  // 紫外线指数（使用和风天气数据）
+  // 紫外线指数
   uvOptions.xAxis.data = times
-  uvOptions.series[0].data = dataQ.map(item => item.uv_index || 0)
+  uvOptions.series[0].data = data.map(item => item.uv_index || 0)
 }
 
 // ==================== 数据获取 ====================
@@ -349,12 +330,14 @@ const fetchData = async (city) => {
     const resultT = resT.data
 
     if (resultQ.code === 200 || resultT.code === 200) {
-      hoursList.value = resultQ.data || []
-      hoursList1.value = resultT.data || []
+      hfHoursList.value = resultQ.data || []
+      tiHoursList.value = resultT.data || []
+      // 默认使用和风天气数据
+      hoursList.value = hfHoursList.value
       if (hoursList.value.length) {
         date.value = convertToLocalDate(hoursList.value[0].forecast_time)
       }
-      updateAllCharts(hoursList.value, hoursList1.value)
+      updateAllCharts()
       selectedCity.value = cityToUse
     } else {
       error.value = resultQ.message || resultT.message
@@ -375,25 +358,42 @@ const handleCityChange = (cityName) => {
   }
 }
 
-// 监听数据变化（当外部修改时也更新）
-watch([hoursList, hoursList1], () => {
-  if (hoursList.value.length && hoursList1.value.length) {
-    updateAllCharts(hoursList.value, hoursList1.value)
+// 切换数据源（true: 和风天气, false: tomorrow.io）
+const switchChartsSource = (source) => {
+  if (source) {
+    hoursList.value = hfHoursList.value
+  } else {
+    hoursList.value = tiHoursList.value
   }
-})
+  if (hoursList.value.length) {
+    date.value = convertToLocalDate(hoursList.value[0].forecast_time)
+  }
+  updateAllCharts()
+}
+
+// 监听当前数据源变化（如切换后自动更新）
+watch(hoursList, () => {
+  if (hoursList.value && hoursList.value.length) {
+    updateAllCharts()
+    date.value = convertToLocalDate(hoursList.value[0].forecast_time)
+  }
+}, { deep: false })
 
 // 生命周期
 onMounted(() => {
   emitter.on('cityName', handleCityChange)
+  emitter.on('source', switchChartsSource)
   fetchData()
 })
 
 onUnmounted(() => {
   emitter.off('cityName', handleCityChange)
+  emitter.off('source', switchChartsSource)
 })
 </script>
 
 <style scoped>
+/* 样式保持不变，略去重复部分 */
 .dashboard {
   max-width: 1400px;
   margin: 16px auto;
@@ -438,6 +438,7 @@ onUnmounted(() => {
   .chart-grid {
     grid-template-columns: 1fr;
   }
+
   .chart-card {
     padding: 12px;
   }

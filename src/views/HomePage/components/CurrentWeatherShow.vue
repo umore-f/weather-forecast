@@ -88,8 +88,9 @@ onMounted(() => {
   emitter.on('cityName', handleCityChange)
   emitter.on('source', switchSource)
   // 初始加载默认城市的数据
-  fetchDataHeFeng()
   fetchDataTi()
+  fetchDataHeFeng()
+
 })
 
 // 生命周期：移除监听器，防止内存泄漏
