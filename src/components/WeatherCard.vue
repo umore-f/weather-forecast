@@ -2,7 +2,7 @@
   <div class="weather-card" v-loading="loading">
     <div class="card-content">
       <div class="header">
-        <span class="text">{{ weather?.weather_text || '0' }}</span>
+        <span class="text">{{ weather?.weather_text || '暂无天气描述' }}</span>
         <span class="time">
           <span>{{ weather?.forecast_time.split('-')[1] || '0' }}</span>-
           <span>{{ weather?.forecast_time.split('-')[2] || '0' }}</span>
@@ -28,6 +28,7 @@
 <script setup>
 // import { props } from 'vue'
 
+// eslint-disable-next-line no-unused-vars
 const props = defineProps({
   weather: {
     type: Object,
@@ -65,7 +66,7 @@ const props = defineProps({
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
+  font-size: 12px;
   color: #1e2a3a;
 }
 

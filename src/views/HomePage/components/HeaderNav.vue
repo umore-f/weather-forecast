@@ -1,25 +1,34 @@
 <template>
   <div class="header-container">
     <div class="user-section">
-      <div class="user-icon">
+      <!-- <div class="user-icon">
         <User class="icon" />
-      </div>
-      <span class="greeting">Hello,</span>
-      <span class="username">Jack Grealish</span>
+      </div> -->
+      <!-- <span class="greeting">Hello,</span>
+      <span class="username">Jack Grealish</span> -->
       <div class="location">
-        <Location class="location-icon" />
-        <span class="city">{{ searchValue }}</span>
+        <!-- <Location class="location-icon" /> -->
+        <el-tooltip         
+        effect="light"
+        content="默认城市: 北京"
+        placement="bottom"
+        >
+          <span class="city">{{ searchValue }}</span>
+        </el-tooltip>
       </div>
     </div>
 
     <div class="switch-section">
+      
       <div class="switch-container">
+        <span style="margin-right: 16px;">数据来源:</span>
         <el-switch
-          v-model="show"
+          v-model="showSource"
           inline-prompt
-          active-text="五天"
-          inactive-text="今天"
+          active-text="和风天气"
+          inactive-text="tomorrow.io"
           class="switch"
+          @change="switchSource"
         />
       </div>
     </div>
@@ -27,7 +36,7 @@
     <div class="search-section">
       <el-autocomplete
         style="width: 240px;"
-        placeholder="请输入城市名称"
+        placeholder="请输入城市名称,仅支持部分城市"
         v-model="searchValue"
         :fetch-suggestions="remoteSearch"
         clearable
@@ -46,11 +55,11 @@
       </el-autocomplete>
     </div>
 
-    <div class="notification">
+    <!-- <div class="notification">
       <div class="bell-icon">
         <Bell class="icon" />
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -58,10 +67,10 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { cityApi } from '@/apis/city'
-import { emitter } from '../utils/eventBus'
+import { emitter } from '../../../utils/eventBus'
 
-const searchValue = ref('')
-
+const searchValue = ref('北京')
+const showSource = ref(false)
 const remoteSearch = async (queryString, cb) => {
   if (!queryString) {
     cb([])
@@ -95,8 +104,10 @@ const remoteSearch = async (queryString, cb) => {
 }
 
 const handleSelect = (item) => {
-  console.log('选中:', item)
   emitter.emit('cityName', item.value)
+}
+const switchSource = (showSource) => {
+  emitter.emit('source', showSource)
 }
 </script>
 

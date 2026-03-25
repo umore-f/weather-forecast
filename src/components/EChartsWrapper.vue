@@ -24,8 +24,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import ECharts from 'vue-echarts'
-import { useResizeObserver } from '@vueuse/core' // 可选，用于更精确的尺寸监听
+// import ECharts from 'vue-echarts'
+// import { useResizeObserver } from '@vueuse/core' // 可选，用于更精确的尺寸监听
 
 const props = defineProps({
   // ECharts 配置项
@@ -91,7 +91,7 @@ const computedOptions = computed(() => {
 // 监听 options 变化，手动更新图表（vue-echarts 的 option 是响应式的，但有时需要强制更新）
 watch(
   computedOptions,
-  (newVal, oldVal) => {
+  (newVal) => {
     if (chart.value) {
       chart.value.setOption(newVal, { notMerge: false })
       emit('updated')
@@ -100,19 +100,6 @@ watch(
   { deep: true }
 )
 
-// // 监听 loading 状态
-// watch(
-//   () => props.loading,
-//   (val) => {
-//     if (chart.value) {
-//       if (val) {
-//         chart.value.showLoading()
-//       } else {
-//         chart.value.hideLoading()
-//       }
-//     }
-//   }
-// )
 
 // 组件挂载后，如果 autoResize 为 true，且容器存在，监听 resize
 onMounted(() => {

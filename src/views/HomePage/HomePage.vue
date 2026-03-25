@@ -9,7 +9,7 @@
           </el-header>
           <el-main>
             <CurrentWeatherShow/>
-            <DaysLineChart/>
+            <LineChart/>
             <!-- <CurrentCharts/> -->
           </el-main>
         </el-container>
@@ -20,14 +20,10 @@
 </template>
 
 <script setup>
-import HeaderNav from '../components/HeaderNav.vue';
-import DaysLineChart from '@/components/DaysLineChart.vue';
-// import HourCardList from '../components/HourCardList.vue';
-// import CurrentCharts from '../components/CurrentChartsShow.vue';
-import CurrentWeatherShow from '../components/CurrentWeatherShow.vue'
-// import AirQuality from '../components/AirQuality.vue';
-import AsideNav from '../components/AsideNav.vue';
-// import DetailMessage from '../components/DetailMessage.vue';
+import HeaderNav from './components/HeaderNav.vue';
+import LineChart from './components/LineChart.vue';
+import CurrentWeatherShow from './components/CurrentWeatherShow.vue'
+import AsideNav from './components/AsideNav.vue';
 </script>
 
 <style scoped></style>

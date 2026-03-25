@@ -1,5 +1,5 @@
 <script setup>
-import HomePage from './views/HomePage.vue';
+import HomePage from './views/HomePage/HomePage.vue';
 // import TimeShow from './components/TimeShow.vue';
 </script>
 
