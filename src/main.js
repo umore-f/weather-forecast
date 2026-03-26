@@ -15,6 +15,7 @@ import '@/assets/styles/weather-styles.css'
 // 引入emitter
 import emitter from './utils/echarts'
 import EChartsWrapper from './components/EChartsWrapper.vue'
+import router from './router'
 
 const pinia = createPinia()
 const app = createApp(App)
@@ -25,6 +26,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 
 app.use(pinia)
 app.use(emitter)
+app.use(router)
 app.component('EChartsWrapper', EChartsWrapper)
 // 全局注册图表组件，在模板中可以使用 <v-chart> 标签
 app.component('v-chart', ECharts);

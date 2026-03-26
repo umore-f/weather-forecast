@@ -8,7 +8,7 @@
       <span class="username">Jack Grealish</span> -->
       <div class="location">
         <!-- <Location class="location-icon" /> -->
-        <el-tooltip         
+        <el-tooltip
         effect="light"
         content="默认城市: 北京"
         placement="bottom"
@@ -19,7 +19,7 @@
     </div>
 
     <div class="switch-section">
-      
+
       <div class="switch-container">
         <span style="margin-right: 16px;">数据来源:</span>
         <el-switch

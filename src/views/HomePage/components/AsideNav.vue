@@ -3,7 +3,7 @@
     <div class="menu-item">
       <div class="icon-container">
         <el-icon :size="24">
-          <HomeFilled />
+          <router-link to="/"><HomeFilled /></router-link>
         </el-icon>
       </div>
     </div>
@@ -17,7 +17,7 @@
     <div class="menu-item">
       <div class="icon-container">
         <el-icon :size="24">
-          <TrendCharts />
+          <router-link to="/analyse"><TrendCharts /></router-link>
         </el-icon>
       </div>
     </div>
@@ -32,11 +32,11 @@
 </template>
 
 <script setup>
-// 组件逻辑保持不变
+
 </script>
 
 <style scoped>
-/* 简约风格侧边栏 */
+
 .sidebar {
   width: 80%;
   height: auto;
