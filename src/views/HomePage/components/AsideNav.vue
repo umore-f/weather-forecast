@@ -3,7 +3,9 @@
     <div class="menu-item">
       <div class="icon-container">
         <el-icon :size="24">
-          <router-link to="/"><HomeFilled /></router-link>
+          <router-link to="/">
+            <HomeFilled />
+          </router-link>
         </el-icon>
       </div>
     </div>
@@ -17,7 +19,9 @@
     <div class="menu-item">
       <div class="icon-container">
         <el-icon :size="24">
-          <router-link to="/analyse"><TrendCharts /></router-link>
+          <router-link to="/analyse">
+            <TrendCharts />
+          </router-link>
         </el-icon>
       </div>
     </div>
@@ -25,6 +29,15 @@
       <div class="icon-container">
         <el-icon :size="24">
           <Setting />
+        </el-icon>
+      </div>
+    </div>
+    <div class="menu-item">
+      <div class="icon-container">
+        <el-icon :size="24">
+          <router-link to="/score">
+          <Opportunity />
+          </router-link>
         </el-icon>
       </div>
     </div>
@@ -36,7 +49,6 @@
 </script>
 
 <style scoped>
-
 .sidebar {
   width: 80%;
   height: auto;
@@ -61,6 +73,7 @@
   display: flex;
   justify-content: center;
 }
+
 .menu-item:last-child {
   margin-bottom: 0px;
 }

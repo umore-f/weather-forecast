@@ -25,8 +25,11 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 // import ECharts from 'vue-echarts'
+import VChart from 'vue-echarts'
+import * as echarts from 'echarts'
+import { CalendarComponent } from 'echarts/components'
 // import { useResizeObserver } from '@vueuse/core' // 可选，用于更精确的尺寸监听
-
+echarts.use([CalendarComponent])
 const props = defineProps({
   // ECharts 配置项
   options: {

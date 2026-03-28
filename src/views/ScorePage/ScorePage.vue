@@ -1,8 +1,10 @@
 <template>
-  <div class="weather-chart-container">
-    <!-- 控制面板 -->
+  <div class="weather-quality-container">
+    <!-- 调试信息（可删除） -->
+    <div><pre>{{ uniqueCities }}</pre></div>
+
     <div class="controls-panel">
-      <!-- 城市 -->
+      <!-- 城市选择 -->
       <el-row :gutter="20" class="controls-row">
         <el-col :span="24">
           <div class="control-group">
@@ -21,12 +23,31 @@
         </el-col>
       </el-row>
 
-      <!-- 天气字段 -->
+      <!-- 数据源选择 -->
       <el-row :gutter="20" class="controls-row">
         <el-col :span="24">
           <div class="control-group">
             <div class="control-header">
-              <label>天气字段（最多选2个）</label>
+              <label>数据来源（最多选2个）</label>
+              <el-button type="text" @click="toggleSourceExpand"
+                :icon="isSourceExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'">
+                {{ isSourceExpanded ? '收起' : '展开' }}
+              </el-button>
+            </div>
+            <el-checkbox-group v-model="selectedSources" :max="2" class="horizontal-checkbox-group"
+              :class="{ expanded: isSourceExpanded }">
+              <el-checkbox v-for="source in sourceOptions" :key="source.value" :value="source.value" :label="source.label" />
+            </el-checkbox-group>
+          </div>
+        </el-col>
+      </el-row>
+
+      <!-- 字段选择（误差类型/分数类型） -->
+      <el-row :gutter="20" class="controls-row">
+        <el-col :span="24">
+          <div class="control-group">
+            <div class="control-header">
+              <label>{{ mode === 'error' ? '误差字段' : '分数字段' }}（最多选2个）</label>
               <el-button type="text" @click="toggleFieldsExpand"
                 :icon="isFieldsExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'">
                 {{ isFieldsExpanded ? '收起' : '展开' }}
@@ -40,9 +61,9 @@
         </el-col>
       </el-row>
 
-      <!-- 时间范围 + 数据来源 + 图表类型 -->
+      <!-- 时间范围 + 图表类型 + 模式切换 -->
       <el-row :gutter="20" class="controls-row">
-        <el-col :span="8">
+        <el-col :span="7">
           <div class="control-group">
             <label>时间范围</label>
             <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
@@ -50,16 +71,7 @@
               value-format="YYYY-MM-DD" style="width: 100%" />
           </div>
         </el-col>
-        <el-col :span="8">
-          <div class="control-group">
-            <label>数据来源</label>
-            <el-select v-model="selectedSource" placeholder="请选择数据源" multiple style="width: 100%">
-              <el-option v-for="source in sourceOptions" :key="source.value" :label="source.label"
-                :value="source.value" />
-            </el-select>
-          </div>
-        </el-col>
-        <el-col :span="8">
+        <el-col :span="6">
           <div class="control-group">
             <label>图表类型</label>
             <el-select v-model="chartType" placeholder="选择图表类型" style="width: 100%">
@@ -71,9 +83,18 @@
             </el-select>
           </div>
         </el-col>
+        <el-col :span="6">
+          <div class="control-group">
+            <label>显示模式</label>
+            <el-radio-group v-model="mode" size="small">
+              <el-radio-button label="error">误差值</el-radio-button>
+              <el-radio-button label="score">可信度分数</el-radio-button>
+            </el-radio-group>
+          </div>
+        </el-col>
       </el-row>
 
-      <!-- 动态配置面板 -->
+      <!-- 动态配置面板（柱状图选日期，散点图选轴） -->
       <div v-if="chartType === 'bar'" class="extra-controls">
         <el-row :gutter="20">
           <el-col :span="12">
@@ -106,41 +127,20 @@
           </el-col>
         </el-row>
       </div>
-
-      <!-- <div v-if="chartType === 'heatmap'" class="extra-controls">
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <div class="control-group">
-              <label>选择城市</label>
-              <el-select v-model="selectedHeatmapCity" placeholder="选择城市" style="width: 100%">
-                <el-option v-for="city in cityOptions" :key="city.value" :label="city.label" :value="city.value" />
-              </el-select>
-            </div>
-          </el-col>
-          <el-col :span="12">
-            <div class="control-group">
-              <label>选择字段</label>
-              <el-select v-model="selectedHeatmapField" placeholder="选择字段" style="width: 100%">
-                <el-option v-for="field in fieldOptions" :key="field.value" :label="field.label" :value="field.value" />
-              </el-select>
-            </div>
-          </el-col>
-        </el-row>
-      </div> -->
     </div>
 
     <!-- 图表区域 -->
     <div class="chart-wrapper">
       <EChartsWrapper v-if="hasValidSelection" :options="chartOptions" height="400px" :loading="loading"
         @click="handleChartClick" />
-      <div v-else class="no-data">请至少选择一个城市和一个字段</div>
+      <div v-else class="no-data">请至少选择一个城市、一个数据源和一个字段</div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { weatherApi } from '../../apis/weatherApi'
+import { errorScoreApi } from '../../apis/weatherApi'
 import { cityApi } from '../../apis/city'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -149,11 +149,12 @@ import timezone from 'dayjs/plugin/timezone'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
+// 工具函数：将 UTC 时间转为本地日期（格式 YYYY/MM/DD）
 function convertToLocalDate(utcTimeStr) {
   return dayjs(utcTimeStr).tz('Asia/Shanghai').format('YYYY/MM/DD')
 }
 
-// ---------- 配置 ----------
+// ---------- 静态配置 ----------
 const cityOptions = [
   { label: '北京', value: '北京' }, { label: '上海', value: '上海' }, { label: '广州', value: '广州' },
   { label: '深圳', value: '深圳' }, { label: '杭州', value: '杭州' }, { label: '成都', value: '成都' },
@@ -167,152 +168,207 @@ const cityOptions = [
   { label: '哈尔滨', value: '哈尔滨' }, { label: '泉州', value: '泉州' }, { label: '常州', value: '常州' }
 ]
 
-const fieldOptions = [
-  { label: '最高温度 (°C)', value: 'temp_max' }, { label: '最低温度 (°C)', value: 'temp_min' },
-  { label: '温度 (°C)', value: 'temp' }, { label: '湿度 (%)', value: 'humidity' },
-  { label: '风速 (km/h)', value: 'wind_speed' }, { label: '风向', value: 'wind_direction' },
-  { label: '降水量 (mm)', value: 'precip_total' }, { label: '降水概率 (%)', value: 'precip_prob' },
-  { label: '气压 (hPa)', value: 'pressure' }, { label: '云量 (%)', value: 'cloud_cover' },
-  { label: '能见度 (km)', value: 'visibility' }, { label: '紫外线指数', value: 'uv_index' },
-  { label: '露点 (°C)', value: 'dew' }, { label: '阵风 (km/h)', value: 'wind_gust' },
-  { label: '日出时间', value: 'sunrise' }, { label: '日落时间', value: 'sunset' }
-]
-
 const sourceOptions = [
   { label: '和风天气', value: 'QWeather' },
   { label: 'tomorrow.io', value: 'tomorrow.io' },
   { label: 'visualcrossing', value: 'visualcrossing' }
 ]
 
-// 响应式数据
-const selectedCities = ref([])
-const selectedFields = ref([])
-const selectedSource = ref(['QWeather'])
-const granularity = ref('day')
-const dateRange = ref(null)
-const loading = ref(false)
-const daysList = ref([])
-const cityInfoList = ref([])
+// 字段选项（误差类型/分数类型共用）
+const fieldOptions = [
+  { label: '最高温度', value: 'tempMax' },
+  { label: '最低温度', value: 'tempMin' },
+  { label: '平均温度', value: 'temp' },
+  { label: '相对湿度', value: 'humidity' },
+  { label: '降水量', value: 'precip' },
+  { label: '气压', value: 'pressure' }
+]
 
-// 图表类型
-const chartType = ref('line')
-const selectedBarDate = ref(null)
-const selectedScatterX = ref('temp')
-const selectedScatterY = ref('humidity')
-// const selectedHeatmapCity = ref('')
-// const selectedHeatmapField = ref('temp')
+// ---------- 响应式数据 ----------
+const selectedCities = ref([])          // 选中的城市（最多2个）
+const selectedSources = ref(['QWeather']) // 选中的数据源（最多2个）
+const selectedFields = ref([])           // 选中的字段（误差/分数类型，最多2个）
+const dateRange = ref(null)              // 时间范围 [start, end]
+const mode = ref('error')                // 显示模式：'error' 或 'score'
+const chartType = ref('line')            // 图表类型
+const selectedBarDate = ref(null)        // 柱状图选中的日期
+const selectedScatterX = ref('temp')     // 散点图 X 轴字段
+const selectedScatterY = ref('humidity') // 散点图 Y 轴字段
+
+const loading = ref(false)
+const rawData = ref([])                  // 从 API 获取的原始数据列表
+const cityInfoList = ref([])             // 城市经纬度信息（若地图需要，保留）
 
 // 展开状态
 const isCityExpanded = ref(false)
+const isSourceExpanded = ref(false)
 const isFieldsExpanded = ref(false)
 
-// 计算属性
-const hasValidSelection = computed(() => selectedCities.value.length > 0 && selectedFields.value.length > 0)
+// ---------- 计算属性 ----------
+const hasValidSelection = computed(() => {
+  return selectedCities.value.length > 0 &&
+         selectedSources.value.length > 0 &&
+         selectedFields.value.length > 0
+})
 
+// 城市唯一信息（含经纬度，可用于地图）
+const uniqueCities = computed(() => {
+  const map = new Map()
+  for (const item of cityInfoList.value) {
+    if (!map.has(item.name) && item.lat && item.lon) {
+      map.set(item.name, { city: item.name, lat: item.lat, lon: item.lon, province: item.province })
+    }
+  }
+  return Array.from(map.values())
+})
 
-// 辅助函数
+// 辅助函数：获取字段的友好标签
 const getFieldLabel = (fieldValue) => {
   const field = fieldOptions.find(f => f.value === fieldValue)
   return field ? field.label : fieldValue
 }
 
-const toggleCityExpand = () => { isCityExpanded.value = !isCityExpanded.value }
-const toggleFieldsExpand = () => { isFieldsExpanded.value = !isFieldsExpanded.value }
+// 辅助函数：根据模式获取 API 数据
+const fetchData = async () => {
+  if (!hasValidSelection.value) {
+    rawData.value = []
+    return
+  }
 
-// 折线图系列生成（原有逻辑）
-const generateChartSeries = () => {
+  loading.value = true
+  try {
+    const cities = selectedCities.value
+    const sources = selectedSources.value
+    const range = dateRange.value ? { start: dateRange.value[0], end: dateRange.value[1] } : undefined
+
+    // 根据 mode 选择调用哪个 API
+    let response
+    if (mode.value === 'error') {
+      response = await errorScoreApi.getWeatherDaysErrors(cities, range, sources)
+    } else {
+      response = await errorScoreApi.getWeatherDaysScore(cities, range, sources)
+    }
+
+    if (response.data && response.data.code === 200) {
+      rawData.value = response.data.data || []
+    } else {
+      console.error('API 错误：', response.message || '未知错误')
+      rawData.value = []
+    }
+  } catch (err) {
+    console.error('请求失败：', err)
+    rawData.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+// ---------- 图表数据处理 ----------
+// 获取 X 轴日期（排序去重）
+const xAxisData = computed(() => {
+  if (!rawData.value.length) return []
+  const dateStrings = rawData.value.map(item => convertToLocalDate(item.target_date))
+  const uniqueDates = [...new Set(dateStrings)]
+  return uniqueDates.sort((a, b) => new Date(a) - new Date(b))
+})
+
+// 折线图系列生成（城市-数据源-字段组合）
+const generateLineSeries = () => {
   const series = []
   const cityMap = new Map(cityOptions.map(c => [c.value, c.label]))
-  const fieldMap = new Map(fieldOptions.map(f => [f.value, { label: f.label, value: f.value }]))
-  const sourceMap = new Map(sourceOptions.map(s => [s.value, { label: s.label, value: s.value }]))
+  const sourceMap = new Map(sourceOptions.map(s => [s.value, s.label]))
+  const fieldMap = new Map(fieldOptions.map(f => [f.value, f.label]))
 
-  const cities = [...selectedCities.value]
-  const fields = [...selectedFields.value]
-  const sources = [...selectedSource.value]
+  const cities = selectedCities.value
+  const sources = selectedSources.value
+  const fields = selectedFields.value
 
   for (const city of cities) {
-    for (const field of fields) {
-      for (const source of sources) {
+    for (const source of sources) {
+      for (const field of fields) {
         const cityLabel = cityMap.get(city) ?? city
-        const fieldInfo = fieldMap.get(field)
-        const fieldLabel = fieldInfo?.label ?? field
-        const fieldValue = fieldInfo?.value
-        const sourceLabel = sourceMap.get(source)?.label ?? source
+        const sourceLabel = sourceMap.get(source) ?? source
+        const fieldLabel = fieldMap.get(field) ?? field
 
         const name = `${cityLabel}-${sourceLabel}-${fieldLabel}`
-        const filtered = daysList.value.filter(item => item.city === city && item.source === source)
-        const data = filtered.map(item => item[fieldValue])
+        // 过滤出符合条件的数据
+        const filtered = rawData.value.filter(item =>
+          item.city === city && item.source === source && item[mode.value === 'error' ? 'error_type' : 'score_type'] === field
+        )
+        // 按日期排序
+        filtered.sort((a, b) => new Date(a.target_date) - new Date(b.target_date))
+        const data = filtered.map(item => mode.value === 'error' ? item.error_value : item.score)
 
-        series.push({ name, type: 'line', data, smooth: true, symbol: 'circle', symbolSize: 6 })
+        series.push({
+          name,
+          type: 'line',
+          data,
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 6
+        })
       }
     }
   }
   return series
 }
 
-const xAxisData = computed(() => {
-  const dateStrings = daysList.value.map(item => convertToLocalDate(item.forecast_time))
-  const uniqueDates = [...new Set(dateStrings)]
-  return uniqueDates.sort((a, b) => new Date(a) - new Date(b))
-})
-
-// 各图表配置生成函数
-const getLineChartOptions = () => {
-  const series = generateChartSeries()
-  return {
-    title: { text: '天气数据对比（折线图）', left: 'left' },
-    tooltip: { trigger: 'axis' },
-    legend: { data: series.map(s => s.name), top: 30, left: 'center' },
-    grid: { left: '5%', right: '5%', top: '15%', bottom: '5%', containLabel: true },
-    xAxis: { type: 'category', data: xAxisData.value, boundaryGap: false },
-    yAxis: { type: 'value', name: '数值' },
-    series,
-    dataZoom: [{ type: 'slider', start: 0, end: 100, bottom: 10 }, { type: 'inside' }]
-  }
-}
-
+// 柱状图配置
 const getBarChartOptions = () => {
   let targetDate = selectedBarDate.value
-  if (!targetDate && daysList.value.length) {
-    const latest = daysList.value.reduce((max, item) => max < item.forecast_time ? item.forecast_time : max, '')
+  if (!targetDate && rawData.value.length) {
+    const latest = rawData.value.reduce((max, item) => max < item.target_date ? item.target_date : max, '')
     targetDate = convertToLocalDate(latest)
   }
-  const dataForDate = daysList.value.filter(item => convertToLocalDate(item.forecast_time) === targetDate)
+
+  const dataForDate = rawData.value.filter(item => convertToLocalDate(item.target_date) === targetDate)
   if (!dataForDate.length) return { title: { text: '无数据' } }
 
   const cities = [...new Set(dataForDate.map(d => d.city))]
+  const sources = selectedSources.value
   const fields = selectedFields.value
+
+  // 为了清晰，按字段分组，每个字段生成一组柱状图
   const series = fields.map(field => {
-    const fieldInfo = fieldOptions.find(f => f.value === field)
+    const fieldLabel = getFieldLabel(field)
     return {
-      name: fieldInfo?.label || field,
+      name: fieldLabel,
       type: 'bar',
       data: cities.map(city => {
-        const item = dataForDate.find(d => d.city === city)
-        return item ? item[field] : null
+        // 对每个城市，计算该字段在所有数据源上的平均值（或取第一个？这里简单取平均）
+        const items = dataForDate.filter(d => d.city === city &&
+          d[mode.value === 'error' ? 'error_type' : 'score_type'] === field)
+        if (!items.length) return null
+        const sum = items.reduce((acc, cur) => acc + (mode.value === 'error' ? cur.error_value : cur.score), 0)
+        return sum / items.length
       }),
       label: { show: true, position: 'top' }
     }
   })
 
   return {
-    title: { text: `天气数据对比（${targetDate}）`, left: 'left' },
+    title: { text: `${mode.value === 'error' ? '误差' : '分数'}对比（${targetDate}）`, left: 'left' },
     tooltip: { trigger: 'axis' },
     legend: { data: series.map(s => s.name), top: 30 },
     xAxis: { type: 'category', data: cities, name: '城市' },
-    yAxis: { type: 'value', name: '数值' },
+    yAxis: { type: 'value', name: mode.value === 'error' ? '误差值' : '分数' },
     series
   }
 }
 
+// 雷达图配置（展示各字段平均值）
 const getRadarChartOptions = () => {
   const cities = selectedCities.value
   const fields = selectedFields.value
   if (!cities.length || !fields.length) return { title: { text: '请至少选择一个城市和一个字段' } }
 
-  const allData = daysList.value
+  const allData = rawData.value
+  // 指标范围：根据实际数据动态计算最大值最小值
   const indicator = fields.map(field => {
-    const values = allData.map(item => item[field]).filter(v => v !== null && v !== undefined)
+    const values = allData
+      .filter(item => item[mode.value === 'error' ? 'error_type' : 'score_type'] === field)
+      .map(item => mode.value === 'error' ? item.error_value : item.score)
+      .filter(v => v !== null && v !== undefined)
     const max = Math.max(...values)
     const min = Math.min(...values)
     return { name: getFieldLabel(field), max, min }
@@ -321,8 +377,10 @@ const getRadarChartOptions = () => {
   const seriesData = cities.map(city => {
     const cityData = allData.filter(d => d.city === city)
     const values = fields.map(field => {
-      const avg = cityData.reduce((sum, d) => sum + (d[field] || 0), 0) / cityData.length
-      return avg
+      const items = cityData.filter(d => d[mode.value === 'error' ? 'error_type' : 'score_type'] === field)
+      if (!items.length) return 0
+      const sum = items.reduce((acc, cur) => acc + (mode.value === 'error' ? cur.error_value : cur.score), 0)
+      return sum / items.length
     })
     return {
       name: cityOptions.find(c => c.value === city)?.label || city,
@@ -333,7 +391,7 @@ const getRadarChartOptions = () => {
   })
 
   return {
-    title: { text: '城市天气指标雷达图（平均值）', left: 'left' },
+    title: { text: `${mode.value === 'error' ? '误差' : '分数'}雷达图（平均值）`, left: 'left' },
     tooltip: {},
     legend: { data: seriesData.map(s => s.name), top: 30 },
     radar: { indicator, center: ['50%', '50%'], radius: '60%' },
@@ -341,6 +399,7 @@ const getRadarChartOptions = () => {
   }
 }
 
+// 散点图配置（两个字段的关系）
 const getScatterChartOptions = () => {
   const xField = selectedScatterX.value
   const yField = selectedScatterY.value
@@ -348,8 +407,22 @@ const getScatterChartOptions = () => {
   if (!cities.length) return { title: { text: '请至少选择一个城市' } }
 
   const series = cities.map(city => {
-    const cityData = daysList.value.filter(d => d.city === city)
-    const data = cityData.map(d => [d[xField], d[yField]])
+    const cityData = rawData.value.filter(d => d.city === city)
+    // 需要将数据按日期对齐：同一日期的两个字段值组成一对
+    const dateMap = new Map()
+    for (const item of cityData) {
+      const date = item.target_date
+      const type = mode.value === 'error' ? item.error_type : item.score_type
+      const value = mode.value === 'error' ? item.error_value : item.score
+      if (!dateMap.has(date)) dateMap.set(date, {})
+      dateMap.get(date)[type] = value
+    }
+    const data = []
+    for (const [date, values] of dateMap.entries()) {
+      if (values[xField] !== undefined && values[yField] !== undefined) {
+        data.push([values[xField], values[yField]])
+      }
+    }
     return {
       name: cityOptions.find(c => c.value === city)?.label || city,
       type: 'scatter',
@@ -361,35 +434,37 @@ const getScatterChartOptions = () => {
 
   return {
     title: { text: `${getFieldLabel(xField)} vs ${getFieldLabel(yField)}`, left: 'left' },
-    tooltip: { trigger: 'item', formatter: params => `${params.seriesName}<br/>${getFieldLabel(xField)}: ${params.value[0]}<br/>${getFieldLabel(yField)}: ${params.value[1]}` },
+    tooltip: {
+      trigger: 'item',
+      formatter: params => `${params.seriesName}<br/>${getFieldLabel(xField)}: ${params.value[0]}<br/>${getFieldLabel(yField)}: ${params.value[1]}`
+    },
     xAxis: { name: getFieldLabel(xField), nameLocation: 'middle', nameGap: 30 },
     yAxis: { name: getFieldLabel(yField), nameLocation: 'middle', nameGap: 30 },
     series
   }
 }
 
+// 热力图配置（日历热力图，需要单个城市）
 const getHeatmapOptions = () => {
-  // const city = selectedHeatmapCity.value || selectedCities.value[0]
-  // const field = selectedHeatmapField.value || selectedFields.value[0]
   const city = selectedCities.value[0]
   const field = selectedFields.value[0]
   if (!city || !field) return { title: { text: '请选择城市和字段' } }
 
-  const cityData = daysList.value.filter(d => d.city === city)
+  const cityData = rawData.value.filter(d => d.city === city &&
+    d[mode.value === 'error' ? 'error_type' : 'score_type'] === field)
   if (!cityData.length) return { title: { text: '所选城市无数据' } }
 
-  const data = cityData.map(item => [item.forecast_time, item[field]])
-  const dates = cityData.map(d => d.forecast_time).sort()
+  const data = cityData.map(item => [item.target_date, mode.value === 'error' ? item.error_value : item.score])
+  const dates = cityData.map(d => d.target_date).sort()
   const startDate = dates[0]
   const endDate = dates[dates.length - 1]
-    console.log('热力图城市数据:', cityData);
-console.log('热力图数据点:', data);
+
   return {
-    title: { text: `${cityOptions.find(c => c.value === city)?.label || city} - ${getFieldLabel(field)} 日历热力图`, left: 'left' },
+    title: { text: `${city} - ${getFieldLabel(field)} ${mode.value === 'error' ? '误差' : '分数'}热力图`, left: 'left' },
     tooltip: { trigger: 'item', formatter: params => `${params.value[0]}<br/>值: ${params.value[1]}` },
     visualMap: {
-      min: Math.min(...cityData.map(d => d[field]).filter(v => v !== null)),
-      max: Math.max(...cityData.map(d => d[field]).filter(v => v !== null)),
+      min: Math.min(...cityData.map(d => mode.value === 'error' ? d.error_value : d.score)),
+      max: Math.max(...cityData.map(d => mode.value === 'error' ? d.error_value : d.score)),
       calculable: true,
       orient: 'horizontal',
       left: 'center',
@@ -406,21 +481,42 @@ console.log('热力图数据点:', data);
   }
 }
 
+// 根据当前选择的图表类型生成最终配置
 const chartOptions = computed(() => {
   if (!hasValidSelection.value) return null
   switch (chartType.value) {
-    case 'line': return getLineChartOptions()
-    case 'bar': return getBarChartOptions()
-    case 'radar': return getRadarChartOptions()
-    case 'scatter': return getScatterChartOptions()
-    case 'heatmap': return getHeatmapOptions()
-    default: return getLineChartOptions()
+    case 'line': {
+      const series = generateLineSeries()
+      return {
+        title: { text: `${mode.value === 'error' ? '误差' : '分数'}趋势对比（折线图）`, left: 'left' },
+        tooltip: { trigger: 'axis' },
+        legend: { data: series.map(s => s.name), top: 30, left: 'center' },
+        grid: { left: '5%', right: '5%', top: '15%', bottom: '5%', containLabel: true },
+        xAxis: { type: 'category', data: xAxisData.value, boundaryGap: false },
+        yAxis: { type: 'value', name: mode.value === 'error' ? '误差值' : '分数' },
+        series,
+        dataZoom: [{ type: 'slider', start: 0, end: 100, bottom: 10 }, { type: 'inside' }]
+      }
+    }
+    case 'bar':
+      return getBarChartOptions()
+    case 'radar':
+      return getRadarChartOptions()
+    case 'scatter':
+      return getScatterChartOptions()
+    case 'heatmap':
+      return getHeatmapOptions()
+    default:
+      return {}
   }
 })
 
+// 图表点击事件
 const handleChartClick = (params) => {
   console.log('图表点击：', params)
 }
+
+// 获取城市经纬度信息（用于地图，此处仅保留数据结构）
 const fetchCityInfo = async (city) => {
   try {
     const res = await cityApi.getCityInfo(city)
@@ -431,56 +527,39 @@ const fetchCityInfo = async (city) => {
     }
   } catch (error) {
     console.error(`请求 ${city} 出错`, error)
-    return { city, error: true } // 返回错误标记，方便处理
+    return { city, error: true }
   }
 }
 const getAllCitiesInfo = async () => {
   const promises = cityOptions.map(option => fetchCityInfo(option.value))
   const results = await Promise.all(promises)
-
-  // 筛选成功的数据，存入 cityInfoList（假设是响应式数组）
   cityInfoList.value = results.filter(item => !item.error).map(item => item.data)
-  // 如果需要保留城市名对应关系，可以改用对象存储
-  // cityInfoMap.value = Object.fromEntries(results.filter(item => !item.error).map(item => [item.city, item.data]))
-  console.log("$$$$$$$$$$$$",cityInfoList.value);
-
+  console.log("城市信息：", cityInfoList.value)
 }
 
-// 数据请求
-watch([selectedCities, selectedFields, selectedSource, granularity, dateRange], async () => {
-  if (!hasValidSelection.value) {
-    daysList.value = []
-    loading.value = false
-    return
-  }
+// 监听筛选条件变化，重新获取数据
+watch(
+  [selectedCities, selectedSources, selectedFields, dateRange, mode],
+  () => {
+    fetchData()
+  },
+  { immediate: true }
+)
 
-  loading.value = true
-  try {
-    const cities = selectedCities.value
-    const range = dateRange.value ? { start: dateRange.value[0], end: dateRange.value[1] } : undefined
-    const source = selectedSource.value
-    const response = await weatherApi.getWeatherDaysInfo(cities, range, source)
-    if (response.data && response.data.code === 200) {
-      daysList.value = response.data.data || []
-      console.log('daysList 中的城市:', [...new Set(daysList.value.map(item => item.city))])
-    } else {
-      console.error('API 错误：', response.message || '未知错误')
-      daysList.value = []
-    }
-  } catch (err) {
-    console.error('请求失败：', err)
-    daysList.value = []
-  } finally {
-    loading.value = false
-  }
-}, { immediate: true })
-onMounted(()=>{
+// 初始化时获取城市信息
+onMounted(() => {
   getAllCitiesInfo()
 })
+
+// 展开/收起控制函数
+const toggleCityExpand = () => { isCityExpanded.value = !isCityExpanded.value }
+const toggleSourceExpand = () => { isSourceExpanded.value = !isSourceExpanded.value }
+const toggleFieldsExpand = () => { isFieldsExpanded.value = !isFieldsExpanded.value }
 </script>
 
 <style scoped>
-.weather-chart-container {
+/* 样式与之前保持完全一致，仅修改了容器类名 */
+.weather-quality-container {
   background: #f5f7fa;
   border-radius: 16px;
   padding: 24px;

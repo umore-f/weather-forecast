@@ -17,6 +17,16 @@ const routes = [
     name: 'analyse',
     component: () => import('../views/AnalysePage/AnalysePage.vue')
   },
+  {
+    path: '/map',
+    name: 'map',
+    component: () => import('../views/AnalysePage/AnalysePage.vue')
+  },
+  {
+    path: '/score',
+    name: 'score',
+    component: () => import('../views/ScorePage/ScorePage.vue')
+  },
 ]
 
 const router = createRouter({

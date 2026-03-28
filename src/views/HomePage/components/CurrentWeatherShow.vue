@@ -79,7 +79,7 @@ const handleCityChange = (cityName) => {
     selectedCity.value = cityName
 }
 const switchSource = (source) => {
-  source ? 
+  source ?
   (daysList.value = hfdaysList.value) :
   (daysList.value = tidaysList.value)
 }

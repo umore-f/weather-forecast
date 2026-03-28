@@ -25,10 +25,21 @@
         <el-switch
           v-model="showSource"
           inline-prompt
-          active-text="和风天气"
+          active-text="  和风天气  "
           inactive-text="tomorrow.io"
           class="switch"
           @change="switchSource"
+        />
+      </div>
+      <div class="switch-container1">
+        <span style="margin-right: 16px;">范围:</span>
+        <el-switch
+          v-model="showTime"
+          inline-prompt
+          active-text="24小时"
+          inactive-text="实时"
+          class="switch"
+          @change="switchTime"
         />
       </div>
     </div>
@@ -71,6 +82,8 @@ import { emitter } from '../../../utils/eventBus'
 
 const searchValue = ref('北京')
 const showSource = ref(true)
+const showTime = ref(true)
+
 const remoteSearch = async (queryString, cb) => {
   if (!queryString) {
     cb([])
@@ -108,6 +121,11 @@ const handleSelect = (item) => {
 }
 const switchSource = (showSource) => {
   emitter.emit('source', showSource)
+}
+const switchTime = (showTime) => {
+  console.log("发送数据",showTime,emitter);
+
+  emitter.emit('time', showTime)
 }
 </script>
 
@@ -202,6 +220,7 @@ const switchSource = (showSource) => {
 /* Switch 区域 */
 .switch-section {
   margin: 0 16px;
+  display: flex;
 }
 
 .switch-container {
@@ -210,6 +229,17 @@ const switchSource = (showSource) => {
   border-radius: 0;
   padding: 0;
   box-shadow: none;
+  margin-right: 16px;
+  width: 180px;
+}
+.switch-container1 {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  margin-right: 16px;
+  width: 120px;
 }
 
 /* 搜索区域 */

@@ -108,7 +108,7 @@ onUnmounted(() => {
   overflow-x: auto;
   flex-wrap: nowrap;
   scrollbar-width: none;
-
+  overflow: visible;
   -ms-overflow-style: none;
   user-select: none;
   cursor: grab;
