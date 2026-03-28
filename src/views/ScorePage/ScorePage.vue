@@ -1,7 +1,5 @@
 <template>
   <div class="weather-quality-container">
-    <!-- 调试信息（可删除） -->
-    <div><pre>{{ uniqueCities }}</pre></div>
 
     <div class="controls-panel">
       <!-- 城市选择 -->
@@ -34,7 +32,7 @@
                 {{ isSourceExpanded ? '收起' : '展开' }}
               </el-button>
             </div>
-            <el-checkbox-group v-model="selectedSources" :max="2" class="horizontal-checkbox-group"
+            <el-checkbox-group v-model="selectedSources" :max="3" class="horizontal-checkbox-group"
               :class="{ expanded: isSourceExpanded }">
               <el-checkbox v-for="source in sourceOptions" :key="source.value" :value="source.value" :label="source.label" />
             </el-checkbox-group>
@@ -47,7 +45,7 @@
         <el-col :span="24">
           <div class="control-group">
             <div class="control-header">
-              <label>{{ mode === 'error' ? '误差字段' : '分数字段' }}（最多选2个）</label>
+              <label>字段（最多选2个）</label>
               <el-button type="text" @click="toggleFieldsExpand"
                 :icon="isFieldsExpanded ? 'el-icon-arrow-up' : 'el-icon-arrow-down'">
                 {{ isFieldsExpanded ? '收起' : '展开' }}
@@ -61,9 +59,9 @@
         </el-col>
       </el-row>
 
-      <!-- 时间范围 + 图表类型 + 模式切换 -->
+      <!-- 时间范围 + 模式切换（误差/分数） -->
       <el-row :gutter="20" class="controls-row">
-        <el-col :span="7">
+        <el-col :span="12">
           <div class="control-group">
             <label>时间范围</label>
             <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
@@ -71,19 +69,7 @@
               value-format="YYYY-MM-DD" style="width: 100%" />
           </div>
         </el-col>
-        <el-col :span="6">
-          <div class="control-group">
-            <label>图表类型</label>
-            <el-select v-model="chartType" placeholder="选择图表类型" style="width: 100%">
-              <el-option label="折线图（趋势对比）" value="line" />
-              <el-option label="柱状图（某日对比）" value="bar" />
-              <el-option label="雷达图（多指标对比）" value="radar" />
-              <el-option label="散点图（相关性分析）" value="scatter" />
-              <el-option label="热力图（日历）" value="heatmap" />
-            </el-select>
-          </div>
-        </el-col>
-        <el-col :span="6">
+        <el-col :span="12">
           <div class="control-group">
             <label>显示模式</label>
             <el-radio-group v-model="mode" size="small">
@@ -93,54 +79,41 @@
           </div>
         </el-col>
       </el-row>
-
-      <!-- 动态配置面板（柱状图选日期，散点图选轴） -->
-      <div v-if="chartType === 'bar'" class="extra-controls">
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <div class="control-group">
-              <label>选择日期</label>
-              <el-date-picker v-model="selectedBarDate" type="date" placeholder="选择日期" value-format="YYYY-MM-DD"
-                style="width: 100%" />
-            </div>
-          </el-col>
-        </el-row>
-      </div>
-
-      <div v-if="chartType === 'scatter'" class="extra-controls">
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <div class="control-group">
-              <label>X轴字段</label>
-              <el-select v-model="selectedScatterX" placeholder="选择字段" style="width: 100%">
-                <el-option v-for="field in fieldOptions" :key="field.value" :label="field.label" :value="field.value" />
-              </el-select>
-            </div>
-          </el-col>
-          <el-col :span="12">
-            <div class="control-group">
-              <label>Y轴字段</label>
-              <el-select v-model="selectedScatterY" placeholder="选择字段" style="width: 100%">
-                <el-option v-for="field in fieldOptions" :key="field.value" :label="field.label" :value="field.value" />
-              </el-select>
-            </div>
-          </el-col>
-        </el-row>
-      </div>
     </div>
 
-    <!-- 图表区域 -->
-    <div class="chart-wrapper">
-      <EChartsWrapper v-if="hasValidSelection" :options="chartOptions" height="400px" :loading="loading"
-        @click="handleChartClick" />
-      <div v-else class="no-data">请至少选择一个城市、一个数据源和一个字段</div>
+    <!-- 所有图表区域（已移除不支持多选的热力图） -->
+    <div v-if="hasValidSelection" class="charts-grid">
+      <!-- 折线图 -->
+      <div class="chart-card">
+        <div class="chart-header">折线图（趋势对比）</div>
+        <EChartsWrapper :options="lineChartOptions" height="400px" :loading="loading" @click="handleChartClick" />
+      </div>
+
+      <!-- 柱状图 -->
+      <div class="chart-card">
+        <div class="chart-header">柱状图（某日对比）</div>
+        <EChartsWrapper :options="barChartOptions" height="400px" :loading="loading" @click="handleChartClick" />
+      </div>
+
+      <!-- 雷达图 -->
+      <div class="chart-card">
+        <div class="chart-header">雷达图（多指标对比）</div>
+        <EChartsWrapper :options="radarChartOptions" height="400px" :loading="loading" @click="handleChartClick" />
+      </div>
+
+      <!-- 散点图 -->
+      <div class="chart-card">
+        <div class="chart-header">散点图（相关性分析）</div>
+        <EChartsWrapper :options="scatterChartOptions" height="400px" :loading="loading" @click="handleChartClick" />
+      </div>
     </div>
+    <div v-else class="no-data-message">请至少选择一个城市、一个数据源和一个字段</div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { errorScoreApi } from '../../apis/weatherApi'
+import { errorScoreApi } from '../../apis/score'
 import { cityApi } from '../../apis/city'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -185,15 +158,11 @@ const fieldOptions = [
 ]
 
 // ---------- 响应式数据 ----------
-const selectedCities = ref([])          // 选中的城市（最多2个）
+const selectedCities = ref([])           // 选中的城市（最多2个）
 const selectedSources = ref(['QWeather']) // 选中的数据源（最多2个）
-const selectedFields = ref([])           // 选中的字段（误差/分数类型，最多2个）
+const selectedFields = ref([])           // 选中的字段（最多2个）
 const dateRange = ref(null)              // 时间范围 [start, end]
 const mode = ref('error')                // 显示模式：'error' 或 'score'
-const chartType = ref('line')            // 图表类型
-const selectedBarDate = ref(null)        // 柱状图选中的日期
-const selectedScatterX = ref('temp')     // 散点图 X 轴字段
-const selectedScatterY = ref('humidity') // 散点图 Y 轴字段
 
 const loading = ref(false)
 const rawData = ref([])                  // 从 API 获取的原始数据列表
@@ -263,17 +232,11 @@ const fetchData = async () => {
   }
 }
 
-// ---------- 图表数据处理 ----------
-// 获取 X 轴日期（排序去重）
-const xAxisData = computed(() => {
-  if (!rawData.value.length) return []
-  const dateStrings = rawData.value.map(item => convertToLocalDate(item.target_date))
-  const uniqueDates = [...new Set(dateStrings)]
-  return uniqueDates.sort((a, b) => new Date(a) - new Date(b))
-})
+// ---------- 各图表配置生成函数 ----------
+// 1. 折线图（趋势对比）
+const lineChartOptions = computed(() => {
+  if (!hasValidSelection.value || !rawData.value.length) return {}
 
-// 折线图系列生成（城市-数据源-字段组合）
-const generateLineSeries = () => {
   const series = []
   const cityMap = new Map(cityOptions.map(c => [c.value, c.label]))
   const sourceMap = new Map(sourceOptions.map(s => [s.value, s.label]))
@@ -291,11 +254,9 @@ const generateLineSeries = () => {
         const fieldLabel = fieldMap.get(field) ?? field
 
         const name = `${cityLabel}-${sourceLabel}-${fieldLabel}`
-        // 过滤出符合条件的数据
         const filtered = rawData.value.filter(item =>
           item.city === city && item.source === source && item[mode.value === 'error' ? 'error_type' : 'score_type'] === field
         )
-        // 按日期排序
         filtered.sort((a, b) => new Date(a.target_date) - new Date(b.target_date))
         const data = filtered.map(item => mode.value === 'error' ? item.error_value : item.score)
 
@@ -310,32 +271,44 @@ const generateLineSeries = () => {
       }
     }
   }
-  return series
-}
 
-// 柱状图配置
-const getBarChartOptions = () => {
-  let targetDate = selectedBarDate.value
-  if (!targetDate && rawData.value.length) {
-    const latest = rawData.value.reduce((max, item) => max < item.target_date ? item.target_date : max, '')
-    targetDate = convertToLocalDate(latest)
+  // X轴数据：所有日期去重排序
+  const dateStrings = rawData.value.map(item => convertToLocalDate(item.target_date))
+  const uniqueDates = [...new Set(dateStrings)].sort((a, b) => new Date(a) - new Date(b))
+
+  return {
+    title: { text: `${mode.value === 'error' ? '误差' : '分数'}趋势对比`, left: 'left' },
+    tooltip: { trigger: 'axis' },
+    legend: { data: series.map(s => s.name), top: 30, left: 'center' },
+    grid: { left: '5%', right: '5%', top: '15%', bottom: '5%', containLabel: true },
+    xAxis: { type: 'category', data: uniqueDates, boundaryGap: false },
+    yAxis: { type: 'value', name: mode.value === 'error' ? '误差值' : '分数' },
+    series,
+    dataZoom: [{ type: 'slider', start: 0, end: 100, bottom: 10 }, { type: 'inside' }]
   }
+})
+
+// 2. 柱状图（某日对比，默认使用日期范围内的最后一天）
+const barChartOptions = computed(() => {
+  if (!hasValidSelection.value || !rawData.value.length) return {}
+
+  // 确定展示哪一天的数据
+  const dates = rawData.value.map(item => item.target_date).sort()
+  const targetDate = dates.length ? convertToLocalDate(dates[dates.length - 1]) : null
+  if (!targetDate) return {}
 
   const dataForDate = rawData.value.filter(item => convertToLocalDate(item.target_date) === targetDate)
-  if (!dataForDate.length) return { title: { text: '无数据' } }
+  if (!dataForDate.length) return {}
 
   const cities = [...new Set(dataForDate.map(d => d.city))]
-  const sources = selectedSources.value
   const fields = selectedFields.value
 
-  // 为了清晰，按字段分组，每个字段生成一组柱状图
   const series = fields.map(field => {
     const fieldLabel = getFieldLabel(field)
     return {
       name: fieldLabel,
       type: 'bar',
       data: cities.map(city => {
-        // 对每个城市，计算该字段在所有数据源上的平均值（或取第一个？这里简单取平均）
         const items = dataForDate.filter(d => d.city === city &&
           d[mode.value === 'error' ? 'error_type' : 'score_type'] === field)
         if (!items.length) return null
@@ -354,18 +327,18 @@ const getBarChartOptions = () => {
     yAxis: { type: 'value', name: mode.value === 'error' ? '误差值' : '分数' },
     series
   }
-}
+})
 
-// 雷达图配置（展示各字段平均值）
-const getRadarChartOptions = () => {
+// 3. 雷达图（多指标对比，展示各城市的平均值）
+const radarChartOptions = computed(() => {
+  if (!hasValidSelection.value || !rawData.value.length) return {}
+
   const cities = selectedCities.value
   const fields = selectedFields.value
-  if (!cities.length || !fields.length) return { title: { text: '请至少选择一个城市和一个字段' } }
 
-  const allData = rawData.value
-  // 指标范围：根据实际数据动态计算最大值最小值
+  // 计算每个字段的最大最小值作为指标范围
   const indicator = fields.map(field => {
-    const values = allData
+    const values = rawData.value
       .filter(item => item[mode.value === 'error' ? 'error_type' : 'score_type'] === field)
       .map(item => mode.value === 'error' ? item.error_value : item.score)
       .filter(v => v !== null && v !== undefined)
@@ -375,7 +348,7 @@ const getRadarChartOptions = () => {
   })
 
   const seriesData = cities.map(city => {
-    const cityData = allData.filter(d => d.city === city)
+    const cityData = rawData.value.filter(d => d.city === city)
     const values = fields.map(field => {
       const items = cityData.filter(d => d[mode.value === 'error' ? 'error_type' : 'score_type'] === field)
       if (!items.length) return 0
@@ -397,18 +370,21 @@ const getRadarChartOptions = () => {
     radar: { indicator, center: ['50%', '50%'], radius: '60%' },
     series: [{ type: 'radar', data: seriesData, areaStyle: {} }]
   }
-}
+})
 
-// 散点图配置（两个字段的关系）
-const getScatterChartOptions = () => {
-  const xField = selectedScatterX.value
-  const yField = selectedScatterY.value
+// 4. 散点图（相关性分析，X轴为第一个选中字段，Y轴为第二个选中字段）
+const scatterChartOptions = computed(() => {
+  if (!hasValidSelection.value || !rawData.value.length) return {}
+  const fields = selectedFields.value
+  if (fields.length < 2) return {}
+
+  const xField = fields[0]
+  const yField = fields[1]
   const cities = selectedCities.value
-  if (!cities.length) return { title: { text: '请至少选择一个城市' } }
 
   const series = cities.map(city => {
     const cityData = rawData.value.filter(d => d.city === city)
-    // 需要将数据按日期对齐：同一日期的两个字段值组成一对
+    // 将数据按日期对齐
     const dateMap = new Map()
     for (const item of cityData) {
       const date = item.target_date
@@ -442,76 +418,9 @@ const getScatterChartOptions = () => {
     yAxis: { name: getFieldLabel(yField), nameLocation: 'middle', nameGap: 30 },
     series
   }
-}
-
-// 热力图配置（日历热力图，需要单个城市）
-const getHeatmapOptions = () => {
-  const city = selectedCities.value[0]
-  const field = selectedFields.value[0]
-  if (!city || !field) return { title: { text: '请选择城市和字段' } }
-
-  const cityData = rawData.value.filter(d => d.city === city &&
-    d[mode.value === 'error' ? 'error_type' : 'score_type'] === field)
-  if (!cityData.length) return { title: { text: '所选城市无数据' } }
-
-  const data = cityData.map(item => [item.target_date, mode.value === 'error' ? item.error_value : item.score])
-  const dates = cityData.map(d => d.target_date).sort()
-  const startDate = dates[0]
-  const endDate = dates[dates.length - 1]
-
-  return {
-    title: { text: `${city} - ${getFieldLabel(field)} ${mode.value === 'error' ? '误差' : '分数'}热力图`, left: 'left' },
-    tooltip: { trigger: 'item', formatter: params => `${params.value[0]}<br/>值: ${params.value[1]}` },
-    visualMap: {
-      min: Math.min(...cityData.map(d => mode.value === 'error' ? d.error_value : d.score)),
-      max: Math.max(...cityData.map(d => mode.value === 'error' ? d.error_value : d.score)),
-      calculable: true,
-      orient: 'horizontal',
-      left: 'center',
-      bottom: 10
-    },
-    calendar: {
-      range: [startDate, endDate],
-      cellSize: ['auto', 30],
-      yearLabel: { show: true },
-      monthLabel: { show: true },
-      dayLabel: { show: true }
-    },
-    series: { type: 'heatmap', coordinateSystem: 'calendar', data }
-  }
-}
-
-// 根据当前选择的图表类型生成最终配置
-const chartOptions = computed(() => {
-  if (!hasValidSelection.value) return null
-  switch (chartType.value) {
-    case 'line': {
-      const series = generateLineSeries()
-      return {
-        title: { text: `${mode.value === 'error' ? '误差' : '分数'}趋势对比（折线图）`, left: 'left' },
-        tooltip: { trigger: 'axis' },
-        legend: { data: series.map(s => s.name), top: 30, left: 'center' },
-        grid: { left: '5%', right: '5%', top: '15%', bottom: '5%', containLabel: true },
-        xAxis: { type: 'category', data: xAxisData.value, boundaryGap: false },
-        yAxis: { type: 'value', name: mode.value === 'error' ? '误差值' : '分数' },
-        series,
-        dataZoom: [{ type: 'slider', start: 0, end: 100, bottom: 10 }, { type: 'inside' }]
-      }
-    }
-    case 'bar':
-      return getBarChartOptions()
-    case 'radar':
-      return getRadarChartOptions()
-    case 'scatter':
-      return getScatterChartOptions()
-    case 'heatmap':
-      return getHeatmapOptions()
-    default:
-      return {}
-  }
 })
 
-// 图表点击事件
+// 图表点击事件（可扩展）
 const handleChartClick = (params) => {
   console.log('图表点击：', params)
 }
@@ -558,7 +467,6 @@ const toggleFieldsExpand = () => { isFieldsExpanded.value = !isFieldsExpanded.va
 </script>
 
 <style scoped>
-/* 样式与之前保持完全一致，仅修改了容器类名 */
 .weather-quality-container {
   background: #f5f7fa;
   border-radius: 16px;
@@ -644,35 +552,36 @@ const toggleFieldsExpand = () => { isFieldsExpanded.value = !isFieldsExpanded.va
 :deep(.el-input__wrapper:hover) { box-shadow: 0 0 0 1px #3b82f6 inset; }
 :deep(.el-input__wrapper.is-focus) { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2), 0 0 0 1px #3b82f6 inset; }
 
-.chart-wrapper {
-  position: relative;
-  width: 100%;
-  min-height: 400px;
+.charts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.chart-card {
   background: #ffffff;
   border-radius: 20px;
   border: 1px solid #eef2f6;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  padding: 16px;
 }
 
-.no-data {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.chart-header {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #2c3e50;
+  border-left: 4px solid #3498db;
+  padding-left: 12px;
+}
+
+.no-data-message {
   text-align: center;
+  padding: 60px 20px;
+  background: #ffffff;
+  border-radius: 20px;
   color: #94a3b8;
-  font-size: 14px;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 12px 24px;
-  border-radius: 32px;
-  backdrop-filter: blur(4px);
-  pointer-events: none;
-}
-
-.extra-controls {
-  margin-top: 16px;
-  padding: 12px 0;
-  border-top: 1px solid #eef2f6;
+  font-size: 16px;
 }
 </style>
