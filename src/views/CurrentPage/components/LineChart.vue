@@ -114,6 +114,8 @@ const selectedCity = ref('广州')
 const isTimeView = ref(false) // false: 卡片模式, true: 趋势图模式
 const currentSource = ref('hf') // 当前数据源: 'hf' 或 'ti'
 
+
+
 // 根据当前时间（东八区）查找最接近的整点数据
 const currentHourData = computed(() => {
   const data = hoursList.value
@@ -509,7 +511,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 样式保持不变（与之前一致） */
+/* 基础样式保持不变，新增可信度区域样式 */
 .dashboard {
   max-width: 1500px;
   margin: 16px auto;
@@ -520,7 +522,7 @@ onUnmounted(() => {
 
 .dashboard-header {
   text-align: left;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .dashboard-header h2 {
@@ -528,6 +530,65 @@ onUnmounted(() => {
   font-weight: 500;
   color: #1f2f3d;
   margin: 0;
+}
+
+/* 可信度展示区域 - 显眼位置 */
+.credibility-section {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 12px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  transition: all 0.2s ease;
+}
+
+.credibility-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.label-icon {
+  font-size: 1.2rem;
+}
+
+.label-text {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1e293b;
+  letter-spacing: 0.5px;
+}
+
+.credibility-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.credibility-progress {
+  flex: 1;
+  min-width: 180px;
+}
+
+.credibility-source {
+  font-size: 0.8rem;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.credibility-tip {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 8px;
+  padding-top: 4px;
+  border-top: 1px dashed #e2e8f0;
 }
 
 /* 趋势图网格布局 */
@@ -665,6 +726,17 @@ onUnmounted(() => {
   }
   .card-icon {
     font-size: 1.5rem;
+  }
+  .credibility-section {
+    padding: 10px 16px;
+    margin-bottom: 18px;
+  }
+  .credibility-progress-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .credibility-progress {
+    width: 100%;
   }
 }
 </style>

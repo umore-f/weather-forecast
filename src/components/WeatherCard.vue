@@ -1,110 +1,171 @@
 <template>
   <div
     class="weather-card"
-    v-loading="loading"
+    :class="{ 'is-loading': loading }"
     :style="{ background: gradientBackground }"
   >
-    <div class="card-content">
-      <!-- 头部：天气图标 + 描述 + 日期/星期 -->
+    <!-- 自定义加载效果 -->
+    <div v-if="loading" class="loading-overlay">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="card-content" :class="{ 'content-blur': loading }">
+      <!-- 头部：天气图标 + 文字 & 时间（小时:分钟） -->
       <div class="header">
         <div class="weather-main">
           <span class="weather-icon">{{ weatherIcon }}</span>
-          <span class="weather-text">{{ weather?.weather_text || '暂无天气描述' }}</span>
+          <span class="weather-text">{{ weatherCondition }}</span>
         </div>
-        <div class="date-info">
-          <span class="date">{{ formattedDate }}</span>
-          <span class="weekday">{{ weekday }}</span>
+        <div class="time-info">
+          <span class="time">{{ formattedTime }}</span>
         </div>
       </div>
 
-      <!-- 当前温度卡片（小面积展示） -->
+      <!-- 当前温度卡片：大号温度 + 体感温度 -->
       <div class="current-temp-card">
         <div class="current-temp">
-          <span class="temp-value">{{ weather?.temp ?? '0' }}</span>
+          <span class="temp-value">{{ displayTemp }}</span>
           <span class="temp-unit">°C</span>
         </div>
-        <!-- <div class="feels-like" v-if="weather?.feels_like">
-          体感 {{ weather.feels_like }}°
-        </div> -->
+        <div class="feels-like">
+          体感 {{ feelsLike }}°
+        </div>
+      </div>
+
+      <!-- 底部指标：湿度 / 风速 / 紫外线 -->
+      <div class="metrics">
+        <div class="metric-item">
+          <span class="metric-icon">💧</span>
+          <div class="metric-info">
+            <span class="metric-label">湿度</span>
+            <span class="metric-value">{{ humidity }}%</span>
+          </div>
+        </div>
+        <div class="metric-item">
+          <span class="metric-icon">💨</span>
+          <div class="metric-info">
+            <span class="metric-label">风速</span>
+            <span class="metric-value">{{ windSpeed }} km/h</span>
+          </div>
+        </div>
+        <div class="metric-item">
+          <span class="metric-icon">☀️</span>
+          <div class="metric-info">
+            <span class="metric-label">紫外线</span>
+            <span class="metric-value">{{ uvIndex }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed,} from 'vue'
+import { computed } from 'vue'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+import 'dayjs/locale/zh-cn'
 
+dayjs.extend(utc)
+dayjs.extend(timezone)
+dayjs.locale('zh-cn')
+
+// 工具函数：UTC 转东八区时间（仅小时:分钟）
+function convertToLocalTime(utcTimeStr) {
+  if (!utcTimeStr) return '--:--'
+  return dayjs(utcTimeStr).tz('Asia/Shanghai').format('HH:mm')
+}
+
+// ---------- Props ----------
 const props = defineProps({
   weather: {
     type: Object,
-    required: true
+    required: true,
+    // 期望字段: temperature, feelslike, forecast_time,
+    // 可选: condition, icon, humidity, wind_speed, uv
   },
   loading: {
     type: Boolean,
     default: false
-  },
-  // 图表数据：未来几小时的温度数组，例如 [22, 23, 24, 25, 24, 23]
-  chartData: {
-    type: Array,
-    default: () => []
-  },
-  // 图表标签：对应每个时间点，例如 ['14时', '15时', ...]
-  chartLabels: {
-    type: Array,
-    default: () => []
   }
 })
-// 以下为原有的计算属性（天气图标、日期、星期、动态背景等）
+
+// ---------- 计算属性 ----------
+const displayTemp = computed(() => {
+  const temp = props.weather?.temperature
+  return temp !== undefined && temp !== null ? Math.round(temp) : '--'
+})
+
+const feelsLike = computed(() => {
+  const fl = props.weather?.feelslike
+  return fl !== undefined && fl !== null ? Math.round(fl) : '--'
+})
+
+// 格式化时间（HH:mm）
+const formattedTime = computed(() => convertToLocalTime(props.weather?.forecast_time))
+
+// 天气状况与图标 (优先使用传入的 condition/icon，否则根据温度区间简单推断)
+const weatherCondition = computed(() => {
+  if (props.weather?.condition) return props.weather.condition
+  const temp = props.weather?.temperature
+  if (temp === undefined) return '未知'
+  if (temp <= 0) return '寒冷'
+  if (temp <= 10) return '冷'
+  if (temp <= 20) return '凉爽'
+  if (temp <= 28) return '舒适'
+  return '炎热'
+})
+
 const weatherIcon = computed(() => {
-  const text = props.weather?.weather_text?.toLowerCase() || ''
-  if (text.includes('晴')) return '☀️'
-  if (text.includes('多云')) return '⛅'
-  if (text.includes('阴')) return '☁️'
-  if (text.includes('雨')) return '🌧️'
-  if (text.includes('雪')) return '❄️'
-  if (text.includes('雷')) return '⛈️'
-  if (text.includes('雾')) return '🌫️'
-  return '🌈'
+  if (props.weather?.icon) return props.weather.icon
+  const temp = props.weather?.temperature
+  if (temp === undefined) return '🌡️'
+  if (temp <= 0) return '❄️'
+  if (temp <= 10) return '🧥'
+  if (temp <= 20) return '🍂'
+  if (temp <= 28) return '☀️'
+  return '🔥'
 })
 
-const formattedDate = computed(() => {
-  const time = props.weather?.forecast_time
-  if (!time) return '--'
-  const parts = time.split('-')
-  if (parts.length >= 3) {
-    return `${parts[1]}-${parts[2]}`
-  }
-  return time
+const humidity = computed(() => {
+  const val = props.weather?.humidity
+  return val !== undefined && val !== null ? val : '--'
 })
 
-const weekday = computed(() => {
-  const time = props.weather?.forecast_time
-  if (!time) return ''
-  const date = new Date(time)
-  if (isNaN(date.getTime())) return ''
-  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-  return weekdays[date.getDay()]
+const windSpeed = computed(() => {
+  const val = props.weather?.wind_speed
+  return val !== undefined && val !== null ? Math.round(val) : '--'
 })
 
+const uvIndex = computed(() => {
+  const val = props.weather?.uv_index
+  if (val !== undefined && val !== null) return val
+  return '暂无'
+})
+
+// 动态渐变背景 (基于温度)
 const gradientBackground = computed(() => {
-  const temp = props.weather?.temp
-  if (temp === undefined || temp === null) return 'linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%)'
-  if (temp <= 0) return 'linear-gradient(135deg, #d4e0f0 0%, #b0c4de 100%)'
-  if (temp <= 15) return 'linear-gradient(135deg, #e0f0ff 0%, #c2e0f0 100%)'
-  if (temp <= 25) return 'linear-gradient(135deg, #fff5e6 0%, #ffe0b5 100%)'
-  return 'linear-gradient(135deg, #ffe6e6 0%, #ffccaa 100%)'
+  const temp = props.weather?.temperature
+  if (temp === undefined || temp === null) return 'linear-gradient(135deg, #f0f4fa 0%, #e2e8f0 100%)'
+  if (temp <= 0) return 'linear-gradient(135deg, #cbdde8 0%, #9fb7cd 100%)'
+  if (temp <= 15) return 'linear-gradient(135deg, #d9eaff 0%, #b5d1f0 100%)'
+  if (temp <= 25) return 'linear-gradient(135deg, #fff3e0 0%, #ffe0b5 100%)'
+  return 'linear-gradient(135deg, #ffded5 0%, #ffbc8c 100%)'
 })
 </script>
 
 <style scoped>
 .weather-card {
-  flex: 0 0 16%;
+  flex: 0 0 40%;
   border-radius: 28px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
   backdrop-filter: blur(2px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
 .weather-card:hover {
@@ -113,11 +174,45 @@ const gradientBackground = computed(() => {
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+/* 加载遮罩 */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 28px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #ff8c42;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .card-content {
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
   gap: 18px;
+  transition: filter 0.2s;
+}
+
+.content-blur {
+  filter: blur(2px);
 }
 
 /* 头部区域 */
@@ -151,29 +246,23 @@ const gradientBackground = computed(() => {
   letter-spacing: -0.2px;
 }
 
-.date-info {
-  text-align: right;
+.time-info {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(8px);
   padding: 6px 12px;
   border-radius: 40px;
   display: flex;
-  gap: 8px;
+  align-items: center;
 }
 
-.date {
-  font-size: 13px;
+.time {
+  font-size: 14px;
   font-weight: 600;
   color: #1f3b4c;
+  letter-spacing: 0.3px;
 }
 
-.weekday {
-  font-size: 13px;
-  font-weight: 500;
-  color: #5b6e8c;
-}
-
-/* 当前温度卡片（小面积） */
+/* 当前温度卡片 */
 .current-temp-card {
   display: flex;
   align-items: baseline;
@@ -213,31 +302,6 @@ const gradientBackground = computed(() => {
   border-radius: 30px;
 }
 
-/* 图表容器 */
-.chart-container {
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(4px);
-  border-radius: 24px;
-  padding: 12px;
-  margin: 8px 0;
-}
-
-.temp-chart {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.chart-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-  font-size: 10px;
-  font-weight: 500;
-  color: #2c3e50;
-  padding: 0 8px;
-}
-
 /* 底部指标 */
 .metrics {
   display: grid;
@@ -247,7 +311,7 @@ const gradientBackground = computed(() => {
   backdrop-filter: blur(12px);
   border-radius: 24px;
   padding: 12px 8px;
-  margin-top: 6px;
+  margin-top: 12px;
 }
 
 .metric-item {
@@ -324,10 +388,6 @@ const gradientBackground = computed(() => {
 
   .metric-info {
     align-items: center;
-  }
-
-  .chart-labels {
-    font-size: 9px;
   }
 }
 </style>
