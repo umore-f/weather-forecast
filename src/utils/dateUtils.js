@@ -6,7 +6,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 export function convertToLocalDate(utcTimeStr) {
-  return dayjs(utcTimeStr).tz('Asia/Shanghai').format('YYYY/MM/DD')
+  return dayjs(utcTimeStr).tz('Asia/Shanghai').format('YYYY-MM-DD')
 }
 
 export function compareDate(a, b) {

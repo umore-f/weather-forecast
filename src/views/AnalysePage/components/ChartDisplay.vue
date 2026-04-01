@@ -1,12 +1,19 @@
 <template>
   <div class="chart-wrapper">
-    <EChartsWrapper v-if="options" :options="options" height="400px" :loading="loading" @click="handleChartClick" />
+    <EChartsWrapper
+    :key="chartType"
+    :not-merge="true"
+    v-if="options"
+    :options="options"
+    height="400px"
+    :loading="loading"
+    @click="handleChartClick" />
     <div v-else class="no-data">请至少选择一个城市和一个字段</div>
   </div>
 </template>
 
 <script setup>
-import EChartsWrapper from '@/components/EChartsWrapper.vue' // 假设存在
+import EChartsWrapper from '@/components/EChartsWrapper.vue'
 
 defineProps({
   options: Object,

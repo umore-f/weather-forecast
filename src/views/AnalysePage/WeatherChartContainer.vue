@@ -9,8 +9,10 @@
       v-model:barDate="selectedBarDate"
       v-model:scatterX="selectedScatterX"
       v-model:scatterY="selectedScatterY"
+      @update:radarRanges="val => radarRanges = val"
     />
     <ChartDisplay :options="chartOptions" :loading="loading" @chartClick="handleChartClick" />
+    <!-- {{ chartOptions.series[0].data }} -->
   </div>
 </template>
 
@@ -30,21 +32,22 @@ const chartType = ref('line')
 const selectedBarDate = ref(null)
 const selectedScatterX = ref('temp')
 const selectedScatterY = ref('humidity')
-const selectedHeatmapCity = ref('')
-const selectedHeatmapField = ref('temp')
-const selectedHeatmapSource = ref('QWeather')
-
+// const selectedHeatmapCity = ref('')
+// const selectedHeatmapField = ref('temp')
+// const selectedHeatmapSource = ref('QWeather')
+const radarRanges = ref({})
 // 数据请求
-const { daysList, loading } = useWeatherData(selectedCities, selectedFields, selectedSource, dateRange)
+const { daysList, loading } = useWeatherData(selectedCities, selectedFields, selectedSource, dateRange, selectedBarDate)
 
 // 图表配置
 const extraConfig = {
   barDate: selectedBarDate,
   scatterX: selectedScatterX,
   scatterY: selectedScatterY,
-  heatmapCity: selectedHeatmapCity,
-  heatmapField: selectedHeatmapField,
-  heatmapSource: selectedHeatmapSource
+  heatmapCity: selectedCities,
+  heatmapField: selectedFields,
+  heatmapSource: selectedSource,
+  radarRanges
 }
 const { chartOptions } = useChartOptions(
   chartType,
@@ -54,6 +57,7 @@ const { chartOptions } = useChartOptions(
   daysList,
   extraConfig
 )
+
 
 const handleChartClick = (params) => {
   console.log('图表点击：', params)

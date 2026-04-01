@@ -1,12 +1,12 @@
 import { ref, watch } from 'vue'
 import { weatherApi } from '../apis/weatherApi'
 
-export function useWeatherData(selectedCities, selectedFields, selectedSource, dateRange) {
+export function useWeatherData(selectedCities, selectedFields, selectedSource, dateRange, selectedBarDate) {
   const daysList = ref([])
   const loading = ref(false)
 
   const fetchData = async () => {
-    if (!selectedCities.value.length || !selectedFields.value.length) {
+    if (!selectedCities.value.length && !selectedFields.value.length) {
       daysList.value = []
       loading.value = false
       return
@@ -14,7 +14,7 @@ export function useWeatherData(selectedCities, selectedFields, selectedSource, d
 
     loading.value = true
     try {
-      const range = dateRange.value ? { start: dateRange.value[0], end: dateRange.value[1] } : undefined
+      const range = dateRange.value ? { start: dateRange.value[0], end: dateRange.value[1] } : selectedBarDate.value
       const response = await weatherApi.getWeatherDaysInfo(
         selectedCities.value,
         range,
@@ -34,7 +34,7 @@ export function useWeatherData(selectedCities, selectedFields, selectedSource, d
     }
   }
 
-  watch([selectedCities, selectedFields, selectedSource, dateRange], fetchData, { immediate: true })
+  watch([selectedCities, selectedFields, selectedSource, dateRange, selectedBarDate], fetchData, { immediate: true })
 
   return { daysList, loading }
 }

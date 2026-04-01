@@ -1,9 +1,10 @@
+<!-- eslint-disable no-unused-vars -->
 <template>
   <div ref="chartContainer" class="echarts-wrapper" :style="{ height: containerHeight }">
     <v-chart
       v-if="!loading"
       ref="chart"
-      :option="computedOptions"
+      :option="options"
       :theme="theme"
       :autoresize="autoResize"
       :init-options="initOptions"
@@ -13,6 +14,7 @@
       @mouseout="handleMouseout"
       @globalout="handleGlobalout"
       @rendered="handleRendered"
+
     />
     <div v-else class="loading-overlay">
       <slot name="loading">
@@ -23,11 +25,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 // import ECharts from 'vue-echarts'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts'
 import { CalendarComponent } from 'echarts/components'
+import { TooltipComponent } from 'echarts/components';
+echarts.use([CalendarComponent, TooltipComponent]);
 // import { useResizeObserver } from '@vueuse/core' // 可选，用于更精确的尺寸监听
 echarts.use([CalendarComponent])
 const props = defineProps({
@@ -85,23 +89,23 @@ const chart = ref(null)
 const containerHeight = computed(() => props.height)
 
 // 合并选项（可以在这里做默认配置合并）
-const computedOptions = computed(() => {
-  // 如果有默认的全局配置，可以在这里合并
-  // 例如：合并默认的 tooltip、grid 等
-  return props.options
-})
+// const computedOptions = computed(() => {
+//   // 如果有默认的全局配置，可以在这里合并
+//   // 例如：合并默认的 tooltip、grid 等
+//   return props.options
+// })
 
-// 监听 options 变化，手动更新图表（vue-echarts 的 option 是响应式的，但有时需要强制更新）
-watch(
-  computedOptions,
-  (newVal) => {
-    if (chart.value) {
-      chart.value.setOption(newVal, { notMerge: false })
-      emit('updated')
-    }
-  },
-  { deep: true }
-)
+// // 监听 options 变化，手动更新图表（vue-echarts 的 option 是响应式的，但有时需要强制更新）
+// watch(
+//   computedOptions,
+//   (newVal) => {
+//     if (chart.value) {
+//       chart.value.setOption(newVal, { notMerge: false })
+//       emit('updated')
+//     }
+//   },
+//   { deep: true }
+// )
 
 
 // 组件挂载后，如果 autoResize 为 true，且容器存在，监听 resize
