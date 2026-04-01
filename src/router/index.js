@@ -15,7 +15,7 @@ const routes = [
   {
     path: '/analyse',
     name: 'analyse',
-    component: () => import('../views/AnalysePage/AnalysePage.vue')
+    component: () => import('../views/AnalysePage/WeatherChartContainer.vue')
   },
   {
     path: '/map',

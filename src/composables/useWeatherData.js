@@ -1,5 +1,5 @@
 import { ref, watch } from 'vue'
-import { weatherApi } from '../../apis/weatherApi'
+import { weatherApi } from '../apis/weatherApi'
 
 export function useWeatherData(selectedCities, selectedFields, selectedSource, dateRange) {
   const daysList = ref([])

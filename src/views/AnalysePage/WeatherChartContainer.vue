@@ -18,8 +18,8 @@
 import { ref } from 'vue'
 import ControlsPanel from './components/ControlsPanel.vue'
 import ChartDisplay from './components/ChartDisplay.vue'
-import { useWeatherData } from './composables/useWeatherData'
-import { useChartOptions } from './composables/useChartOptions'
+import { useWeatherData } from '../../composables/useWeatherData'
+import { useChartOptions } from '../../composables/useChartOptions'
 
 // 状态定义
 const selectedCities = ref([])
@@ -30,9 +30,9 @@ const chartType = ref('line')
 const selectedBarDate = ref(null)
 const selectedScatterX = ref('temp')
 const selectedScatterY = ref('humidity')
-// 热力图需要的城市和字段（暂未开放，可留）
-// const selectedHeatmapCity = ref('')
-// const selectedHeatmapField = ref('temp')
+const selectedHeatmapCity = ref('')
+const selectedHeatmapField = ref('temp')
+const selectedHeatmapSource = ref('QWeather')
 
 // 数据请求
 const { daysList, loading } = useWeatherData(selectedCities, selectedFields, selectedSource, dateRange)
@@ -42,8 +42,9 @@ const extraConfig = {
   barDate: selectedBarDate,
   scatterX: selectedScatterX,
   scatterY: selectedScatterY,
-  heatmapCity: ref(''),   // 若启用可传入
-  heatmapField: ref('')
+  heatmapCity: selectedHeatmapCity,
+  heatmapField: selectedHeatmapField,
+  heatmapSource: selectedHeatmapSource
 }
 const { chartOptions } = useChartOptions(
   chartType,

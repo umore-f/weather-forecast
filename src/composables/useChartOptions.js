@@ -50,6 +50,8 @@ export function useChartOptions(
 
   const getBarChartOptions = () => {
     let targetDate = extraConfig.barDate.value
+    console.log("!!!!!!!!!!",targetDate);
+
     if (!targetDate && daysList.value.length) {
       const latest = daysList.value.reduce((max, item) =>
         dayjs(item.forecast_time).isAfter(dayjs(max)) ? item.forecast_time : max, ''
@@ -86,9 +88,15 @@ export function useChartOptions(
   const getRadarChartOptions = () => {
     const cities = selectedCities.value
     const fields = selectedFields.value
-    if (!cities.length || !fields.length) return { title: { text: '请至少选择一个城市和一个字段' } }
+    const sources = selectedSource.value
+    if (!cities.length || !fields.length || !sources.length) {
+      return { title: { text: '请至少选择一个城市、一个字段和一个数据来源' } }
+    }
 
+    // 所有数据
     const allData = daysList.value
+
+    // 计算每个字段的最大最小值（跨所有城市、来源）
     const indicator = fields.map(field => {
       const values = allData.map(item => item[field]).filter(v => v !== null && v !== undefined)
       const max = values.length ? Math.max(...values) : 100
@@ -96,19 +104,24 @@ export function useChartOptions(
       return { name: getFieldLabel(field), max, min }
     })
 
-    const seriesData = cities.map(city => {
-      const cityData = allData.filter(d => d.city === city)
-      const values = fields.map(field => {
-        const avg = cityData.reduce((sum, d) => sum + (d[field] || 0), 0) / (cityData.length || 1)
-        return avg
-      })
-      return {
-        name: city,
-        value: values,
-        areaStyle: { color: 'rgba(59,130,246,0.3)' },
-        lineStyle: { width: 2 }
+    // 为每个城市和来源生成一个雷达图系列
+    const seriesData = []
+    for (const city of cities) {
+      for (const source of sources) {
+        const cityData = allData.filter(d => d.city === city && d.source === source)
+        if (cityData.length === 0) continue
+        const values = fields.map(field => {
+          const avg = cityData.reduce((sum, d) => sum + (d[field] || 0), 0) / cityData.length
+          return avg
+        })
+        seriesData.push({
+          name: `${city} (${source})`,
+          value: values,
+          areaStyle: { color: 'rgba(59,130,246,0.3)' },
+          lineStyle: { width: 2 }
+        })
       }
-    })
+    }
 
     return {
       title: { text: '城市天气指标雷达图（平均值）', left: 'left' },
@@ -123,19 +136,24 @@ export function useChartOptions(
     const xField = extraConfig.scatterX.value
     const yField = extraConfig.scatterY.value
     const cities = selectedCities.value
-    if (!cities.length) return { title: { text: '请至少选择一个城市' } }
+    const sources = selectedSource.value
+    if (!cities.length || !sources.length) return { title: { text: '请至少选择一个城市和一个数据来源' } }
 
-    const series = cities.map(city => {
-      const cityData = daysList.value.filter(d => d.city === city)
-      const data = cityData.map(d => [d[xField], d[yField]])
-      return {
-        name: city,
-        type: 'scatter',
-        data,
-        symbolSize: 8,
-        emphasis: { scale: true }
+    const series = []
+    for (const city of cities) {
+      for (const source of sources) {
+        const cityData = daysList.value.filter(d => d.city === city && d.source === source)
+        if (cityData.length === 0) continue
+        const data = cityData.map(d => [d[xField], d[yField]])
+        series.push({
+          name: `${city} (${source})`,
+          type: 'scatter',
+          data,
+          symbolSize: 8,
+          emphasis: { scale: true }
+        })
       }
-    }).filter(s => s.data.length > 0)
+    }
 
     return {
       title: { text: `${getFieldLabel(xField)} vs ${getFieldLabel(yField)}`, left: 'left' },
@@ -147,11 +165,14 @@ export function useChartOptions(
   }
 
   const getHeatmapOptions = () => {
-    const city = extraConfig.heatmapCity.value || selectedCities.value[0]
-    const field = extraConfig.heatmapField.value || selectedFields.value[0]
-    if (!city || !field) return { title: { text: '请选择城市和字段' } }
+    const city = extraConfig.heatmapCity.value
+    const field = extraConfig.heatmapField.value
+    const source = extraConfig.heatmapSource.value
+    console.log("!!!!!!!!!!",city,field,source);
 
-    const cityData = daysList.value.filter(d => d.city === city)
+    if (!city || !field || !source) return { title: { text: '请选择城市、字段和数据来源' } }
+
+    const cityData = daysList.value.filter(d => d.city === city && d.source === source)
     if (!cityData.length) return { title: { text: '所选城市无数据' } }
 
     const data = cityData.map(item => [item.forecast_time, item[field]])
@@ -160,7 +181,7 @@ export function useChartOptions(
     const endDate = dates[dates.length - 1]
 
     return {
-      title: { text: `${city} - ${getFieldLabel(field)} 日历热力图`, left: 'left' },
+      title: { text: `${city} (${source}) - ${getFieldLabel(field)} 日历热力图`, left: 'left' },
       tooltip: { trigger: 'item', formatter: params => `${params.value[0]}<br/>值: ${params.value[1]}` },
       visualMap: {
         min: Math.min(...cityData.map(d => d[field]).filter(v => v !== null)),
