@@ -3,11 +3,11 @@
   <div class="weather-quality-container">
     <el-tabs v-model="activeTab" type="border-card" class="analysis-tabs">
       <el-tab-pane label="多源对比分析" name="compare">
-        <ComparePanel v-model:raw-data="rawData" v-model:loading="loading" v-model:unique-dates="uniqueDates"
-          v-model:selected-cities="selectedCities" v-model:selected-sources="selectedSources"
-          v-model:selected-fields="selectedFields" v-model:date-range="dateRange" v-model:mode="mode"
-          v-model:is-playing="isPlaying" v-model:playback-step="playbackStep"
-          v-model:max-playback-step="maxPlaybackStep" @line-chart-click="handleLineChartClick" />
+        <ComparePanel v-model:rawData="rawData" v-model:loading="loading" v-model:uniqueDates="uniqueDates"
+          v-model:selectedCities="selectedCities" v-model:selectedSources="selectedSources"
+          v-model:selectedFields="selectedFields" v-model:dateRange="dateRange" v-model:mode="mode"
+          v-model:isPlaying="isPlaying" v-model:playbackStep="playbackStep"
+          v-model:maxPlaybackStep="maxPlaybackStep" @line-chart-click="handleLineChartClick" />
       </el-tab-pane>
 
       <el-tab-pane label="可信度诊断" name="diagnose">

@@ -9,7 +9,7 @@
       v-model="stepModel"
       :min="0"
       :max="maxStep"
-      :step="1"
+      :step="step"
       show-stops
       :disabled="isPlaying"
       style="width: 200px; margin-left: 12px;"

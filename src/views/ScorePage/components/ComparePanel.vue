@@ -66,10 +66,10 @@
           <div class="control-group">
             <label>时间滑块播放器</label>
             <PlayerControls
-              v-model:is-playing="isPlaying"
+              v-model:isPlaying="isPlaying"
               v-model:step="playbackStep"
-              v-model:max-step="maxPlaybackStep"
-              v-model:unique-dates="uniqueDates"
+              v-model:maxStep="maxPlaybackStep"
+              v-model:uniqueDates="uniqueDates"
             />
           </div>
         </el-col>
