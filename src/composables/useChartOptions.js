@@ -249,7 +249,7 @@ export function useChartOptions(
     }
   }
 
-  // ==================== 雷达图（多色版） ====================
+  // ==================== 雷达图 ====================
   const getRadarChartOptions = () => {
     const cities = selectedCities.value
     const fields = selectedFields.value

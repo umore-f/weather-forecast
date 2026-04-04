@@ -29,6 +29,14 @@ export const sourceOptions = [
   { label: 'visualcrossing', value: 'visualcrossing' }
 ]
 
+export const fieldScoreOptions = [
+  { label: '最高温度', value: 'tempMax' },
+  { label: '最低温度', value: 'tempMin' },
+  { label: '平均温度', value: 'temp' },
+  { label: '相对湿度', value: 'humidity' },
+  { label: '降水量', value: 'precip' },
+  { label: '气压', value: 'pressure' }
+]
 
 // 辅助：根据字段值获取label
 export const getFieldLabel = (value) => {
