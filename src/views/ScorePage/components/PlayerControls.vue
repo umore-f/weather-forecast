@@ -5,23 +5,15 @@
       <el-button size="small" :icon="'el-icon-video-pause'" @click="stop" :disabled="!isPlaying">暂停</el-button>
       <el-button size="small" :icon="'el-icon-refresh-right'" @click="reset">重置</el-button>
     </el-button-group>
-    <el-slider
-      v-model="stepModel"
-      :min="0"
-      :max="maxStep"
-      :step="step"
-      show-stops
-      :disabled="isPlaying"
-      style="width: 200px; margin-left: 12px;"
-    />
+    <el-slider v-model="stepModel" :min="0" :max="maxStep" :step=1 show-stops :disabled="isPlaying"
+      style="width: 200px; margin-left: 12px;" />
     <span class="playback-date">{{ currentDate }}</span>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { convertToLocalDate } from '../../../utils/dateUtils'
-
 const isPlaying = defineModel('isPlaying', { type: Boolean })
 const maxStep = defineModel('maxStep', { type: Number })
 const uniqueDates = defineModel('uniqueDates', { type: Array })
@@ -38,11 +30,23 @@ const currentDate = computed(() => {
   }
   return ''
 })
-const start = () => { isPlaying.value = true }
-const stop = () => { isPlaying.value = false }
+const startSlider = inject('startSlider')
+const stopSlider = inject('stopSlider')
+const resetSlider = inject('resetSlider')
+const start = () => {
+  if (startSlider) {
+    startSlider()
+  }
+}
+const stop = () => {
+  if (stopSlider) {
+    stopSlider()
+  }
+}
 const reset = () => {
-  step.value = 0
-  isPlaying.value = false
+  if (resetSlider) {
+    resetSlider()
+  }
 }
 </script>
 
@@ -52,6 +56,7 @@ const reset = () => {
   align-items: center;
   flex-wrap: wrap;
 }
+
 .playback-date {
   margin-left: 12px;
   font-size: 13px;

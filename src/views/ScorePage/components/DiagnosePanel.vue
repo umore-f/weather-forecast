@@ -12,7 +12,7 @@
     </div>
 
     <!-- 雷达图 + 箱线图 -->
-    <el-row :gutter="20">
+    <!-- <el-row :gutter="20">
       <el-col :span="12">
         <div class="diagnose-card">
           <div class="card-title">数据源综合性能雷达图</div>
@@ -25,7 +25,7 @@
           <EChartsWrapper :options="boxplotOptions" height="380px" :loading="diagnoseLoading" />
         </div>
       </el-col>
-    </el-row>
+    </el-row> -->
 
     <!-- 桑基图溯源 -->
     <div class="diagnose-card full-width">

@@ -1,19 +1,23 @@
 import { ref, watch, onBeforeUnmount } from 'vue'
 
 export function usePlayback(uniqueDates) {
+
+
   const isPlaying = ref(false)
   const playbackStep = ref(0)
   const maxPlaybackStep = ref(0)
   let playbackInterval = null
 
   const updateMaxStep = () => {
+
     maxPlaybackStep.value = uniqueDates.value.length > 0 ? uniqueDates.value.length - 1 : 0
     if (playbackStep.value > maxPlaybackStep.value) playbackStep.value = 0
   }
 
   watch(uniqueDates, updateMaxStep, { immediate: true })
-
+  
   const startPlayback = () => {
+    console.log('startPlayback 被调用了')
     if (isPlaying.value) return
     if (playbackStep.value >= maxPlaybackStep.value) playbackStep.value = 0
     isPlaying.value = true
@@ -37,6 +41,7 @@ export function usePlayback(uniqueDates) {
   }
 
   const onPlaybackStepChange = (val) => {
+
     playbackStep.value = val
   }
 

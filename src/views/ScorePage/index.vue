@@ -2,18 +2,19 @@
 <template>
   <div class="weather-quality-container">
     <el-tabs v-model="activeTab" type="border-card" class="analysis-tabs">
-      <el-tab-pane label="多源对比分析" name="compare">
-        <ComparePanel v-model:rawData="rawData" v-model:loading="loading" v-model:uniqueDates="uniqueDates"
-          v-model:selectedCities="selectedCities" v-model:selectedSources="selectedSources"
-          v-model:selectedFields="selectedFields" v-model:dateRange="dateRange" v-model:mode="mode"
-          v-model:isPlaying="isPlaying" v-model:playbackStep="playbackStep"
-          v-model:maxPlaybackStep="maxPlaybackStep" @line-chart-click="handleLineChartClick" />
+      <el-tab-pane label="误差对比分析" name="error">
+        <ErrorAnalysis />
       </el-tab-pane>
-
-      <el-tab-pane label="可信度诊断" name="diagnose">
-        <DiagnosePanel :raw-data="rawData" v-model:active-scene="activeScene" :selected-trace-date="selectedTraceDate"
-          :radar-diagnose-options="radarDiagnoseOptions" :boxplot-options="boxplotOptions"
-          :sankey-options="sankeyOptions" :diagnose-loading="diagnoseLoading" />
+      <el-tab-pane label="可信度诊断" name="score">
+        <ScoreAnalysis />
+      </el-tab-pane>
+      <el-tab-pane label="地图" name="map">
+        <!-- 地图组件待实现，同样独立筛选 -->
+        <div>地图组件（后续实现）</div>
+      </el-tab-pane>
+      <el-tab-pane label="表格" name="table">
+        <!-- 表格组件待实现 -->
+        <div>全部数据表格（后续实现）</div>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -21,40 +22,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import ComparePanel from './components/ComparePanel.vue'
-import DiagnosePanel from './components/DiagnosePanel.vue'
-import { useWeatherData } from './composables/useWeatherData'
-import { usePlayback } from './composables/usePlayback'
-import { useDiagnose } from './composables/useDiagnose'
+import ErrorAnalysis from './components/ErrorAnalysis.vue'
+import ScoreAnalysis from './components/ScoreAnalysis.vue'
 
-// 筛选条件
-const selectedCities = ref([])
-const selectedSources = ref(['QWeather'])
-const selectedFields = ref([])
-const dateRange = ref(null)
-const mode = ref('error')
-
-// 数据获取
-const { rawData, loading, uniqueDates } = useWeatherData(
-  selectedCities, selectedSources, selectedFields, dateRange, mode
-)
-
-// 播放器控制（返回响应式变量，不传递函数）
-const { isPlaying, playbackStep, maxPlaybackStep } = usePlayback(uniqueDates)
-
-// 诊断页相关
-const activeScene = ref('all')
-const selectedTraceDate = ref(null)
-const diagnoseLoading = ref(false)
-
-const { radarDiagnoseOptions, boxplotOptions, sankeyOptions } = useDiagnose(rawData, activeScene, selectedTraceDate)
-
-const handleLineChartClick = (date) => {
-  selectedTraceDate.value = date
-  activeTab.value = 'diagnose'
-}
-
-const activeTab = ref('compare')
+const activeTab = ref('error')
 </script>
 
 <style scoped>
@@ -64,7 +35,6 @@ const activeTab = ref('compare')
   padding: 24px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 }
-
 .analysis-tabs {
   border-radius: 16px;
   overflow: hidden;
