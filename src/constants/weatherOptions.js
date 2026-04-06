@@ -24,6 +24,11 @@ export const fieldOptionsShort = [
   { label: '温度 (°C)', value: 'temp' }, { label: '湿度 (%)', value: 'humidity' },
   { label: '降水量 (mm)', value: 'precip_total' },{ label: '气压 (hPa)', value: 'pressure' },
 ]
+export const fieldOptionsShort1 = [
+  { label: '最高温度 (°C)', value: 'tempMax' }, { label: '最低温度 (°C)', value: 'tempMin' },
+  { label: '温度 (°C)', value: 'temp' }, { label: '湿度 (%)', value: 'humidity' },
+  { label: '降水量 (mm)', value: 'precip' },{ label: '气压 (hPa)', value: 'pressure' },
+]
 export const sourceOptions = [
   { label: '和风天气', value: 'QWeather' },
   { label: 'tomorrow.io', value: 'tomorrow.io' },

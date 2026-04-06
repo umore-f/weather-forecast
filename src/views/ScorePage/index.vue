@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="weather-quality-container">
-    <el-tabs v-model="activeTab" type="border-card" class="analysis-tabs">
+    <el-tabs v-model="activeTab" type="border-card" class="analysis-tabs"  @tab-click="handleClick">
       <el-tab-pane label="误差对比分析" name="error">
         <ErrorAnalysis />
       </el-tab-pane>
