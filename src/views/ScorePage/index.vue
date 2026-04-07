@@ -9,11 +9,9 @@
         <ScoreAnalysis />
       </el-tab-pane>
       <el-tab-pane label="地图" name="map">
-        <!-- 地图组件待实现，同样独立筛选 -->
-        <div>地图组件（后续实现）</div>
+        <MapAnalysis />
       </el-tab-pane>
       <el-tab-pane label="表格" name="table">
-        <!-- 表格组件待实现 -->
         <div>全部数据表格（后续实现）</div>
       </el-tab-pane>
     </el-tabs>
@@ -24,6 +22,7 @@
 import { ref } from 'vue'
 import ErrorAnalysis from './components/ErrorAnalysis.vue'
 import ScoreAnalysis from './components/ScoreAnalysis.vue'
+import MapAnalysis from './components/MapAnalysis.vue';
 
 const activeTab = ref('error')
 </script>

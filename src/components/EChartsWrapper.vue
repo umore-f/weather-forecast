@@ -14,7 +14,7 @@
       @mouseout="handleMouseout"
       @globalout="handleGlobalout"
       @rendered="handleRendered"
-
+      @legendselectchanged="handleLegendSelectChanged"
     />
     <div v-else class="loading-overlay">
       <slot name="loading">
@@ -80,6 +80,7 @@ const emit = defineEmits([
   'globalout',
   'rendered',
   'updated',
+  'legendselectchanged',
 ])
 
 const chartContainer = ref(null)
@@ -138,6 +139,7 @@ const handleMouseover = (params) => emit('mouseover', params)
 const handleMouseout = (params) => emit('mouseout', params)
 const handleGlobalout = (params) => emit('globalout', params)
 const handleRendered = (params) => emit('rendered', params)
+const handleLegendSelectChanged = (params) => emit('legendselectchanged', params)
 
 // 暴露方法给父组件（例如手动 resize、获取实例等）
 defineExpose({
