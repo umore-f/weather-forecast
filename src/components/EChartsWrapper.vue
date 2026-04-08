@@ -148,6 +148,7 @@ defineExpose({
     if (chart.value) chart.value.resize()
   },
   getInstance: () => chart.value,
+  dispatchAction: (action) => chart.value?.dispatchAction(action)
 })
 </script>
 

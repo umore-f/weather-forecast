@@ -103,6 +103,16 @@ export const errorScoreApi = {
       }
     })
   },
+  getWeatherDaysScoreCityDetail({ city, dateRange }) {
+    return httpInstance({
+      url: '/score/city_detail',
+      params: {
+        city,
+        start_date: dateRange?.[0],
+        end_date: dateRange?.[1],
+      }
+    })
+  },
   getWeatherDaysScoreList({ city, source, dateRange, sortField, sortOrder, page, pageSize }) {
     const params = {
       page,

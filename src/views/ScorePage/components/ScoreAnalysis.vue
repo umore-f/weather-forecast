@@ -81,19 +81,34 @@
       <div class="heatmap-radar-layout">
         <!-- 左侧热力图 -->
         <div class="heatmap-container" v-loading="heatmapLoading">
-          <EChartsWrapper v-if="heatmapOptions.series" :options="heatmapOptions" height="480px" :auto-resize="true"
-            @click="onHeatmapClick" />
+          <EChartsWrapper ref='heatmap' v-if="heatmapOptions.series" :options="heatmapOptions" height="480px"
+            :auto-resize="true" @click="onHeatmapClick" />
           <el-empty v-else description="请选择至少一个城市和一个数据源" :image-size="80" />
         </div>
-        <!-- 右侧雷达图 -->
+        <!-- 雷达图&&折线图 -->
         <div class="radar-container" v-loading="singleCityRadarLoading">
-          <div v-if="drillCity" class="drill-city-title">
-            城市：{{ drillCity }}
-            <el-button size="small" type="primary" link @click="clearDrillCity">清除</el-button>
+
+        </div>
+
+        <div class="radar-line-layout">
+          <div class="radar-wrapper" v-loading="singleCityRadarLoading">
+            <div v-if="drillCity" class="drill-city-title">
+              城市：{{ drillCity }}
+              <el-button size="small" type="primary" link @click="clearDrillCity">清除</el-button>
+            </div>
+            <EChartsWrapper ref="inlineRadar"
+              v-show="singleCityRadarOptions.series && singleCityRadarOptions.series.length"
+              :options="singleCityRadarOptions" height="420px" :auto-resize="true" />
+            <el-empty v-show="!(singleCityRadarOptions.series && singleCityRadarOptions.series.length)"
+              description="点击左侧热力图格子，查看城市雷达图" :image-size="80" />
           </div>
-          <EChartsWrapper v-if="singleCityRadarOptions.series && singleCityRadarOptions.series.length"
-            :options="singleCityRadarOptions" height="420px" :auto-resize="true" />
-          <el-empty v-else description="点击左侧热力图格子，查看城市雷达图" :image-size="80" />
+
+          <div class="line-wrapper" v-loading="singleCityLineLoading">
+            <EChartsWrapper ref="singleCityLineChartRef"
+              v-if="singleCityLineOptions.series && singleCityLineOptions.series.length"
+              :options="singleCityLineOptions" height="400px" :auto-resize="true" />
+            <el-empty v-else description="暂无数据" :image-size="80" />
+          </div>
         </div>
       </div>
     </el-card>
@@ -385,8 +400,10 @@ const heatmapOptions = computed(() => {
   if (!heatmapData.value.length) return {}
 
   // 获取所有唯一的城市和数据源（按原始顺序）
-  const cities = [...new Map(heatmapData.value.map(item => [item.city, item.city])).values()]
-  const sources = [...new Map(heatmapData.value.map(item => [item.source, item.source])).values()]
+  // const cities = [...new Set(heatmapData.value.map(item => item.city))];
+  const cities = globalFilterCity.value
+  // const sources = [...new Set(heatmapData.value.map(item => item.source))];
+  const sources = globalFilterSource.value
 
   // eslint-disable-next-line vue/no-side-effects-in-computed-properties
   currentHeatmapCities.value = cities
@@ -524,7 +541,8 @@ watch([globalFilterCity, globalFilterSource, globalFilterDateRange], () => {
 const drillCity = ref('')                     // 当前下钻城市
 const singleCityRadarData = ref([])           // 雷达图原始数据
 const singleCityRadarLoading = ref(false)
-
+const inlineRadar = ref(null)
+const drillSource = ref('')
 // 获取单城市所有数据源的各字段平均分（用于雷达图）
 const fetchSingleCityRadar = async () => {
   if (!drillCity.value) {
@@ -542,10 +560,12 @@ const fetchSingleCityRadar = async () => {
     const res = await errorScoreApi.getWeatherDaysScoreSourceAvgByCity({
       city: drillCity.value,
       dateRange: [start_date, end_date]
+
     })
     if (res.data?.code === 200) {
       // 期望返回格式: { data: [{ source: 'CMA', temp_max_score: 85.2, ... }, ...] }
       singleCityRadarData.value = res.data.data || []
+
     } else {
       singleCityRadarData.value = []
       ElMessage.error(res.data?.message || '获取城市雷达图数据失败')
@@ -570,7 +590,11 @@ const singleCityRadarOptions = computed(() => {
   ]
   const fieldMap = ['avg_temp_max_score', 'avg_temp_min_score', 'avg_temp_score', 'avg_humidity_score', 'avg_precip_score', 'avg_pressure_score']
   const colorList = ['#5470c6', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452']
-
+  const sourceNames = ['QWeather', 'tomorrow.io', 'visualcrossing']
+  const legendSelected = {}
+  sourceNames.forEach(name => {
+    legendSelected[name] = (name === drillSource.value)  // 只选中当前点击的数据源
+  })
   const series = singleCityRadarData.value.map((item, idx) => {
     const values = fieldMap.map(f => item[f] || 0)
     return {
@@ -584,10 +608,9 @@ const singleCityRadarOptions = computed(() => {
       symbolSize: 6
     }
   })
-
   return {
     radar: { indicator: indicators, shape: 'circle', radius: '65%' },
-    legend: { data: singleCityRadarData.value.map(i => i.source), top: 0, right: 10 },
+    legend: { data: singleCityRadarData.value.map(i => i.source), top: 0, right: 10, selected: legendSelected },
     tooltip: {
       trigger: 'item',
       formatter: (params) => {
@@ -603,28 +626,157 @@ const singleCityRadarOptions = computed(() => {
       borderColor: '#333',
       textStyle: { color: '#fff' }
     },
-    series
+    series,
+    grid: {
+      left: '12%',
+      right: '8%',
+      top: '10%',
+      bottom: '8%',
+      containLabel: false,
+      backgroundColor: '#fefefe'
+    }
   }
 })
+
 const onHeatmapClick = (params) => {
   // ECharts 点击事件参数：componentType, data (数组 [xIndex, yIndex, value])
   if (params && params.data && params.data.length >= 3) {
-    // const xIndex = params.data[0]
+    const xIndex = params.data[0]
     const yIndex = params.data[1]
     const city = currentHeatmapCities.value[yIndex]
+    const source = currentHeatmapSources.value[xIndex]
     if (city) {
       drillCity.value = city
+      drillSource.value = source
       fetchSingleCityRadar()
+      fatchSingleLineData()
       ElMessage.success(`已切换到城市：${city}`)
     }
   }
 }
-
 // 清除下钻
 const clearDrillCity = () => {
   drillCity.value = ''
   singleCityRadarData.value = []
 }
+// 单城市折线图
+const singleCityLineChartRef = ref(null)
+const singleCityLineData = ref([])
+const singleCityLineLoading = ref(false)
+const fatchSingleLineData = async () => {
+  if (!drillCity.value) {
+    singleCityLineData.value = []
+    return
+  }
+  singleCityLineLoading.value = true
+  try {
+    let start_date = null, end_date = null
+    if (globalFilterDateRange.value && globalFilterDateRange.value.length === 2) {
+      start_date = globalFilterDateRange.value[0]
+      end_date = globalFilterDateRange.value[1]
+    }
+    // 调用新接口：传入城市和日期范围，后端返回所有数据源的所有字段平均分
+    const res = await errorScoreApi.getWeatherDaysScoreCityDetail({
+      city: drillCity.value,
+      dateRange: [start_date, end_date]
+    })
+    if (res.data?.code === 200) {
+      // 期望返回格式: { data: [{ source: 'CMA', temp_max_score: 85.2, ... }, ...] }
+      singleCityLineData.value = res.data.data || []
+    } else {
+      singleCityLineData.value = []
+      ElMessage.error(res.data?.message || '获取城市雷达图数据失败')
+    }
+  } catch (err) {
+    console.error(err)
+    singleCityLineData.value = []
+  } finally {
+    singleCityLineLoading.value = false
+  }
+}
+
+const singleCityLineOptions = computed(() => {
+  if (!singleCityLineData.value.length) return {}
+  const sourceMap = new Map()
+  singleCityLineData.value.forEach(item => {
+    const {
+      source,
+      target_date,
+      // humidity_score,
+      // precip_score,
+      // pressure_score,
+      // temp_score,
+      // temp_max_score,
+      // temp_min_score,
+    } = item
+    if (!sourceMap.has(source)) {
+      sourceMap.set(source, { dates: [], scores: [] })
+    }
+    const group = sourceMap.get(source)
+    group.dates.push(target_date)
+    group.scores.push(item[heatmapField.value])
+  })
+  // eslint-disable-next-line no-unused-vars
+  for (const [source, group] of sourceMap.entries()) {
+    const combined = group.dates?.map((d, idx) => ({ date: d, score: group.scores[idx] }))
+    combined?.sort((a, b) => dayjs(a.date).valueOf() - dayjs(b.date).valueOf())
+    group.dates = combined?.map(c => c.date)
+    group.scores = combined.map(c => c.score)
+  }
+  const allDates = [...new Set(singleCityLineData.value.map(item => item.target_date))].sort((a, b) => dayjs(a).valueOf() - dayjs(b).valueOf())
+  const series = []
+  const colorList = ['#5470c6', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
+  let colorIdx = 0
+  const sourceNames = ['QWeather', 'tomorrow.io', 'visualcrossing']
+  const legendSelected = {}
+  sourceNames.forEach(name => {
+    legendSelected[name] = (name === drillSource.value)  // 只选中当前点击的数据源
+  })
+  for (const [source] of sourceMap.entries()) {
+    const data = allDates.map(date => {
+      const record = singleCityLineData.value.find(r => r.source === source && r.target_date === date)
+      return record ? record[heatmapField.value] : null
+    })
+    series.push({
+      name: source,
+      type: 'line',
+      data: data,
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { width: 3, color: colorList[colorIdx % colorList.length], shadowColor: 'rgba(0,0,0,0.1)', shadowBlur: 5 },
+      itemStyle: { color: colorList[colorIdx % colorList.length], borderColor: '#fff', borderWidth: 2 },
+      areaStyle: { opacity: 0.1, color: colorList[colorIdx % colorList.length] },
+      connectNulls: false,
+      label: { show: false },
+      emphasis: { focus: 'series' }
+    })
+    colorIdx++
+  }
+  return {
+    tooltip: {
+      trigger: 'axis', formatter: (params) => {
+        let html = params[0].axisValue + '<br/>'
+        params.forEach(p => { if (p.value !== null) html += `${p.marker} ${p.seriesName}: ${p.value.toFixed(1)}<br/>` })
+        return html
+      },
+      backgroundColor: 'rgba(0,0,0,0.7)', borderColor: '#333', textStyle: { color: '#fff' }
+    },
+    legend: { data: Array.from(sourceMap.keys()), top: 25, right: 10, orient: 'horizontal', textStyle: { color: '#333', fontWeight: 500 }, selected: legendSelected },
+    // grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true, backgroundColor: '#fafafa', borderWidth: 0 },
+    xAxis: { type: 'category', data: allDates, name: '日期', axisLabel: { rotate: 30, formatter: (value) => dayjs(value).format('MM-DD'), fontSize: 11 }, axisLine: { lineStyle: { color: '#ccc' } } },
+    yAxis: { type: 'value', name: '总分', min: 0, max: 100, splitLine: { lineStyle: { type: 'dashed', color: '#e5e7eb' } } },
+    series: series,
+    grid: {
+      left: '12%',
+      right: '8%',
+      top: '30%',
+      bottom: '8%',
+      containLabel: false,
+      backgroundColor: '#fefefe'
+    }
+  }
+})
 // ===================== 3. 折线图 =====================
 const lineData = ref([])
 const lineLoading = ref(false)
@@ -797,7 +949,6 @@ watch(lineChartRef, (val) => {
 })
 
 const onRadarLegendChange = (params) => {
-
   if (!lineInstance.value) return
   const { name, selected } = params
   const actionType = selected[name] ? 'legendSelect' : 'legendUnSelect'
@@ -821,7 +972,8 @@ const dimensions = [
   { key: 'temp_min_score', label: '最低温', max: 100, min: 0 },
   { key: 'humidity_score', label: '湿度', max: 100, min: 0 },
   { key: 'precip_score', label: '降水', max: 100, min: 0 },
-  { key: 'pressure_score', label: '气压', max: 100, min: 0 }
+  { key: 'pressure_score', label: '气压', max: 100, min: 0 },
+  { key: 'total_score', label: '总分', max: 100, min: 0 }
 ]
 const fetchParallelData = async () => {
   if (!globalFilterCity.value.length && !globalFilterSource.value.length && !globalFilterDateRange.value) return
@@ -852,7 +1004,7 @@ const parallelOptions = computed(() => {
   for (const record of parallelData.value) {
     const city = record.city
     if (!cityGroups.has(city)) cityGroups.set(city, [])
-    const sample = dimensions.map(dim => record[dim.key] ?? 0)
+    const sample = dimensions.map(dim => record[dim.key] ?? null)
     cityGroups.get(city).push(sample)
   }
   const parallelAxis = dimensions.map((dim, idx) => ({
@@ -868,17 +1020,24 @@ const parallelOptions = computed(() => {
   }))
   const cityList = Array.from(cityGroups.keys())
   const colorList = ['#5470c6', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
+
   const series = cityList.map((city, idx) => ({
     name: city,
     type: 'parallel',
     data: cityGroups.get(city).map(sample => ({ value: sample })),
-    lineStyle: { width: 1.5, opacity: 0.7, color: colorList[idx % colorList.length], type: 'solid' },
+    large: true,
+    largeThreshold: 500,
+    sampling: 'lttb',
+    progressive: 200,
+    progressiveThreshold: 300,
+    lineStyle: { width: 0.5, opacity: 0.7, color: colorList[idx % colorList.length], type: 'solid' },
     tooltip: { show: true }
   }))
   return {
     backgroundColor: '#ffffff',
-    legend: { data: cityList, bottom: 30, textStyle: { color: '#333', fontSize: 12 }, itemGap: 20 },
+    legend: { type: 'scroll', data: cityList, bottom: -5, left: 10, textStyle: { color: '#333', fontSize: 12 }, itemGap: 20 },
     tooltip: {
+      triggerOn: 'click',
       trigger: 'item', backgroundColor: 'rgba(0,0,0,0.8)', borderColor: '#777', borderWidth: 1, textStyle: { color: '#fff' }, formatter: (params) => {
         const city = params.seriesName
         const values = params.value
@@ -889,7 +1048,7 @@ const parallelOptions = computed(() => {
     },
     parallelAxis: parallelAxis,
     visualMap: { show: true, min: 0, max: 100, dimension: 0, inRange: { color: ['#ee6666', '#fac858', '#5470c6'] }, calculable: true, textStyle: { color: '#333' }, itemWidth: 30 },
-    parallel: { left: '5%', right: '13%', bottom: 80, top: 20, parallelAxisDefault: { type: 'value', nameLocation: 'middle', nameGap: 50, nameTextStyle: { color: '#333', fontSize: 12 }, axisLine: { lineStyle: { color: '#aaa' } }, axisTick: { lineStyle: { color: '#ccc' } }, splitLine: { show: false }, axisLabel: { color: '#333' } } },
+    parallel: { left: '10%', right: '13%', bottom: 40, top: 20, parallelAxisDefault: { type: 'value', nameLocation: 'middle', nameGap: 50, nameTextStyle: { color: '#333', fontSize: 12 }, axisLine: { lineStyle: { color: '#aaa' } }, axisTick: { lineStyle: { color: '#ccc' } }, splitLine: { show: false }, axisLabel: { color: '#333' } } },
     series: series
   }
 })
