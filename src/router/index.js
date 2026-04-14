@@ -3,8 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   // 动态路由示例
   {
-    path: '/',
-    name: 'current',
+    path: '/home',
+    name: 'home',
     component: () => import('../views/CurrentPage/CurrentWeather.vue')
   },
   {

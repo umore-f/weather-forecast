@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <el-container>
-      <el-aside style="width: 6vw;display: flex;justify-self: center;align-items: start;"><AsideNav/></el-aside>
+      <el-header><GlobalHeaderNav/></el-header>
       <el-main>
         <router-view/>
       </el-main>
@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import AsideNav from './components/AsideNav.vue';
+import GlobalHeaderNav from './components/GlobalHeaderNav.vue';
 </script>
 
 <style scoped></style>

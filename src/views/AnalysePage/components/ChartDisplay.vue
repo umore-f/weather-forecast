@@ -5,7 +5,7 @@
     :not-merge="true"
     v-if="options"
     :options="options"
-    height="400px"
+    height="600px"
     :loading="loading"
     @click="handleChartClick" />
     <div v-else class="no-data">请至少选择一个城市和一个字段</div>

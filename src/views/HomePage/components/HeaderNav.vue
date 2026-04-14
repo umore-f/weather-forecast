@@ -29,6 +29,7 @@
           inactive-text="tomorrow.io"
           class="switch"
           @change="switchSource"
+          size="large"
         />
       </div>
       <div class="switch-container1">
@@ -40,6 +41,7 @@
           inactive-text="实时"
           class="switch"
           @change="switchTime"
+          size="large"
         />
       </div>
     </div>
@@ -82,7 +84,7 @@ import { emitter } from '../../../utils/eventBus'
 
 const searchValue = ref('北京')
 const showSource = ref(true)
-const showTime = ref(true)
+const showTime = ref(false)
 
 const remoteSearch = async (queryString, cb) => {
   if (!queryString) {

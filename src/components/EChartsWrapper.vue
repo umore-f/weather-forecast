@@ -33,7 +33,6 @@ import { CalendarComponent } from 'echarts/components'
 import { TooltipComponent } from 'echarts/components';
 echarts.use([CalendarComponent, TooltipComponent]);
 // import { useResizeObserver } from '@vueuse/core' // 可选，用于更精确的尺寸监听
-echarts.use([CalendarComponent])
 const props = defineProps({
   // ECharts 配置项
   options: {

@@ -29,10 +29,6 @@
           </el-select>
         </el-col>
         <el-col :span="6">
-          <el-date-picker v-model="globalDateRange" type="daterange" range-separator="至" start-placeholder="开始"
-            end-placeholder="结束" value-format="YYYY-MM-DD" style="width: 100%" />
-        </el-col>
-        <el-col :span="6">
           <el-select v-model="globalFields" multiple collapse-tags placeholder="天气字段（可多选）" clearable filterable>
             <template #header>
               <el-checkbox v-model="fieldCheckAll" :indeterminate="fieldIndeterminate" @change="handleFieldCheckAll">
@@ -42,58 +38,73 @@
             <el-option v-for="f in fieldOptionsShort1" :key="f.value" :label="f.label" :value="f.value" />
           </el-select>
         </el-col>
+        <el-col :span="6">
+          <div class="date-quick-buttons">
+            <el-button size="small" @click="setQuickDate('today')">今天</el-button>
+            <el-button size="small" @click="setQuickDate('7days')">最近7天</el-button>
+            <el-button size="small" @click="setQuickDate('30days')">最近30天</el-button>
+          </div>
+          <el-date-picker v-model="globalDateRange" type="daterange" range-separator="至" start-placeholder="开始"
+            end-placeholder="结束" value-format="YYYY-MM-DD" style="width: 100%" />
+        </el-col>
+
       </el-row>
       <el-row style="margin-top: 16px">
         <el-col :span="24">
-          <el-button type="primary" @click="handleGlobalQuery" :loading="globalQueryLoading">查询</el-button>
+          <el-button type="primary" @click="handleGlobalQuery" :loading="globalQueryLoading">刷新</el-button>
           <el-button @click="resetGlobalFilters">重置</el-button>
         </el-col>
       </el-row>
     </el-card>
 
-    <!-- 1. 箱线图卡片 -->
-    <el-card class="chart-card" shadow="hover" style="margin-top: 24px">
+    <!-- 合并卡片：箱线图 + 热力图 -->
+    <el-card class="chart-card merged-chart-card" shadow="hover" style="margin-top: 24px">
       <template #header>
         <div class="card-header">
-          <span>📊 误差分布箱线图（按数据来源）</span>
-          <el-tooltip content="展示各数据源在【所选第一个字段】上的误差分布" placement="top">
-            <el-icon>
-              <QuestionFilled />
-            </el-icon>
-          </el-tooltip>
-          <el-select v-model="selectedField" placeholder="天气字段（单选）" clearable filterable style="width: 200px;">
-            <el-option v-for="f in fieldOptionsShort1" :key="f.value" :label="f.label" :value="f.value" />
-          </el-select>
+          <span>📊 误差分布对比（箱线图 / 热力图）</span>
+          <div class="header-actions">
+            <el-select v-model="selectedField" @change="changeSingleField" placeholder="箱线图天气字段（单选）" clearable filterable style="width: 200px;">
+              <el-option v-for="f in fieldOptionsShort1" :key="f.value" :label="f.label" :value="f.value" />
+            </el-select>
+            <el-tooltip content="热力图受全局【天气字段】筛选影响" placement="top">
+              <el-icon>
+                <QuestionFilled />
+              </el-icon>
+            </el-tooltip>
+          </div>
         </div>
       </template>
-      <div class="chart-container" v-loading="boxLoading">
-        <EChartsWrapper v-if="boxOptions.series && selectedField" :options="boxOptions" height="400px"
-          :auto-resize="true" />
-        <el-empty v-else description="请选择筛选条件（至少选择一个字段）并点击查询" :image-size="80" />
+      <div class="charts-row">
+        <!-- 箱线图区域 -->
+        <div class="chart-half" v-loading="boxLoading">
+          <div class="chart-sub-header">
+            <span>📦 误差分布箱线图（按数据来源）</span>
+            <span class="field-hint" v-if="selectedField">字段：{{ getFieldLabel(selectedField) }}</span>
+            <span class="field-hint warning" v-else>未选择字段</span>
+          </div>
+          <div class="chart-container">
+            <EChartsWrapper ref='chartBox' v-if="boxOptions.series && selectedField" :options="boxOptions"
+              height="360px" :auto-resize="true" />
+            <el-empty v-else description="请选择天气字段" :image-size="80" />
+          </div>
+        </div>
+        <!-- 热力图区域 -->
+        <div class="chart-half" v-loading="heatLoading">
+          <div class="chart-sub-header">
+            <span>🔥 平均误差热力图（数据来源 vs 天气字段）</span>
+            <span v-if="globalFields.length" class="field-hint">已筛选字段：{{ globalFields.length }}个</span>
+            <span v-else class="field-hint warning">未筛选字段（展示全部）</span>
+          </div>
+          <div class="chart-container">
+            <EChartsWrapper ref="chartHeat" v-if="heatOptions.series" :options="heatOptions" height="360px"
+              :auto-resize="true" @click="onHeatmapClick" />
+            <el-empty v-else description="请选择城市和来源后查询" :image-size="80" />
+          </div>
+        </div>
       </div>
     </el-card>
 
-    <!-- 2. 热力图卡片 -->
-    <el-card class="chart-card" shadow="hover" style="margin-top: 24px">
-      <template #header>
-        <div class="card-header">
-          <span>🔥 平均误差热力图（数据来源 vs 天气字段）</span>
-          <el-tooltip content="颜色越深表示该数据源在该字段上的平均误差越大" placement="top">
-            <el-icon>
-              <QuestionFilled />
-            </el-icon>
-          </el-tooltip>
-          <span v-if="globalFields.length" class="field-hint">已筛选字段：{{ globalFields.length }}个</span>
-          <span v-else class="field-hint warning">未筛选字段（展示全部）</span>
-        </div>
-      </template>
-      <div class="chart-container" v-loading="heatLoading">
-        <EChartsWrapper v-if="heatOptions.series" :options="heatOptions" height="400px" :auto-resize="true" />
-        <el-empty v-else description="请选择筛选条件并点击查询" :image-size="80" />
-      </div>
-    </el-card>
-
-    <!-- 3. 误差明细表格卡片 -->
+    <!-- 误差明细表格卡片 -->
     <el-card class="table-card" shadow="hover" style="margin-top: 24px">
       <template #header>
         <div class="card-header">
@@ -102,7 +113,7 @@
         </div>
       </template>
       <el-table :data="tableData" border stripe height="400" v-loading="tableLoading" @sort-change="handleTableSort"
-        style="margin-top: 12px">
+        style="margin-top: 12px;width: auto;">
         <el-table-column prop="city" label="城市" width="100" />
         <el-table-column prop="source" label="数据来源" width="120" />
         <el-table-column prop="target_date" label="日期" sortable="custom" width="120" />
@@ -127,17 +138,17 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import { errorScoreApi } from '@/apis/score'
 import { cityOptions, fieldOptionsShort1, sourceOptions } from '@/constants/weatherOptions'
-
+import dayjs from 'dayjs'
 // -------------------- 全局筛选状态 --------------------
 const globalCity = ref([])
 const globalSource = ref([])
 const globalDateRange = ref(null)
-const globalFields = ref([])          // 多选字段
+const globalFields = ref([])
 const globalQueryLoading = ref(false)
 
 // 全选逻辑 - 城市
@@ -160,7 +171,7 @@ const handleCityCheckAll = (val) => {
 }
 
 // 全选逻辑 - 字段
-const fieldCheckAll = ref(false)
+const fieldCheckAll = ref(true)
 const fieldIndeterminate = ref(false)
 watch(globalFields, (val) => {
   if (val.length === 0) {
@@ -178,16 +189,27 @@ const handleFieldCheckAll = (val) => {
   globalFields.value = val ? fieldOptionsShort1.map(f => f.value) : []
 }
 
+// 字段标签映射
+const fieldLabelMap = {
+  humidity: '湿度',
+  pressure: '气压',
+  precip: '降雨量',
+  tempMax: '最高温',
+  tempMin: '最低温',
+  temp: '温度',
+}
+const getFieldLabel = (field) => fieldLabelMap[field] || field
+
 // -------------------- 箱线图状态 --------------------
 const boxData = ref([])
 const boxLoading = ref(false)
 const selectedField = ref('')
 
 const fetchBoxData = async () => {
-  // 校验：必须选择城市、来源，且至少有一个字段
-  if (!globalCity.value.length) { boxData.value = []; return }
-  if (!globalSource.value.length) { boxData.value = []; return }
-  if (!selectedField.value) { boxData.value = []; return }
+  if (!globalCity.value.length || !globalSource.value.length || !selectedField.value) {
+    boxData.value = []
+    return
+  }
   boxLoading.value = true
   try {
     const res = await errorScoreApi.getWeatherDaysErrorsStatistics(
@@ -211,7 +233,6 @@ const fetchBoxData = async () => {
   }
 }
 
-// 箱线图配置
 const xAxisBoxSource = computed(() => boxData.value.map(item => item.source))
 const boxDataSeries = computed(() => boxData.value.map(item => item.data))
 const boxOptions = computed(() => {
@@ -234,6 +255,8 @@ const boxOptions = computed(() => {
 // -------------------- 热力图状态 --------------------
 const heatData = ref([])
 const heatLoading = ref(false)
+const currentHeatmapSources = ref([])
+const currentHeatmapFields = ref([])
 
 const fetchHeatData = async () => {
   if (!globalCity.value.length || !globalSource.value.length) {
@@ -249,7 +272,6 @@ const fetchHeatData = async () => {
     })
     if (res.data?.code === 200) {
       let rawData = res.data.data || []
-      // 如果全局选择了字段，则只保留选中字段的数据
       if (globalFields.value.length) {
         rawData = rawData.map(item => ({
           source: item.source,
@@ -269,15 +291,6 @@ const fetchHeatData = async () => {
   } finally {
     heatLoading.value = false
   }
-}
-
-const fieldLabelMap = {
-  humidity: '湿度',
-  pressure: '气压',
-  precip: '降雨量',
-  tempMax: '最高温',
-  tempMin: '最低温',
-  temp: '温度',
 }
 
 const heatOptions = computed(() => {
@@ -300,6 +313,10 @@ const heatOptions = computed(() => {
 
   const sources = Array.from(sourceSet).sort()
   const fields = Array.from(fieldSet).sort()
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+  currentHeatmapSources.value = sources
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+  currentHeatmapFields.value = fields
 
   const data = []
   fields.forEach((field, xIdx) => {
@@ -360,7 +377,20 @@ const heatOptions = computed(() => {
   }
 })
 
-// -------------------- 表格独立状态（分页、排序） --------------------
+const onHeatmapClick = (params) => {
+  // ECharts 点击事件参数：componentType, data (数组 [xIndex, yIndex, value])
+  if (params && params.data && params.data.length >= 3) {
+    const xIndex = params.data[0]
+    // const yIndex = params.data[1]
+    // const source = currentHeatmapSources.value[yIndex]
+    const fields = currentHeatmapFields.value[xIndex]
+    selectedField.value = fields
+    ElMessage({ message: `已切换到字段：${getFieldLabel(fields)}，箱线图将自动更新`, type: 'success' })
+    // 可选：手动触发一次箱线图查询，确保立即刷新
+    fetchBoxData()
+  }
+}
+// -------------------- 表格独立状态 --------------------
 const tableData = ref([])
 const tableLoading = ref(false)
 const currentPage = ref(1)
@@ -391,7 +421,7 @@ const fetchTableData = async () => {
     const res = await errorScoreApi.getWeatherDaysErrorsPaging({
       source: globalSource.value,
       city: globalCity.value,
-      error_type: globalFields.value,        // 支持多选字段
+      error_type: globalFields.value,
       dateRange: globalDateRange.value,
       page: currentPage.value,
       pageSize: pageSize.value,
@@ -441,7 +471,6 @@ const handleCurrentChange = (newPage) => {
   fetchTableData()
 }
 
-// 导出CSV
 const exportTableCSV = () => {
   const headers = ['城市', '数据来源', '日期', '天气字段', '误差值', 'EWMA误差']
   const rows = tableData.value.map(item => [
@@ -457,7 +486,7 @@ const exportTableCSV = () => {
   URL.revokeObjectURL(link.href)
 }
 
-// 全局查询（重置表格分页和排序）
+// 全局查询
 const handleGlobalQuery = async () => {
   if (!globalCity.value.length) {
     ElMessage.warning('请至少选择一个城市')
@@ -469,11 +498,9 @@ const handleGlobalQuery = async () => {
   }
   globalQueryLoading.value = true
   try {
-    // 重置表格分页和排序
     currentPage.value = 1
     sortField.value = ''
     sortOrder.value = ''
-    // 并行请求三个图表数据
     await Promise.all([
       fetchBoxData(),
       fetchHeatData(),
@@ -484,13 +511,11 @@ const handleGlobalQuery = async () => {
   }
 }
 
-// 重置所有筛选条件
 const resetGlobalFilters = () => {
   globalCity.value = []
   globalSource.value = []
   globalDateRange.value = null
   globalFields.value = []
-  // 清空所有图表数据
   boxData.value = []
   heatData.value = []
   tableData.value = []
@@ -498,16 +523,12 @@ const resetGlobalFilters = () => {
   currentPage.value = 1
   sortField.value = ''
   sortOrder.value = ''
-  ElMessage.info('已重置所有筛选条件')
 }
 
-// 监听筛选条件变化自动查询（可选，也可完全依赖手动查询按钮）
-// 这里实现防抖自动查询，提升体验
 let autoQueryTimer = null
 watch([globalCity, globalSource, globalDateRange, globalFields, selectedField], () => {
   if (autoQueryTimer) clearTimeout(autoQueryTimer)
   autoQueryTimer = setTimeout(() => {
-    // 只有城市和来源都有值时自动查询，避免无效请求
     if (globalCity.value.length && globalSource.value.length) {
       handleGlobalQuery()
     }
@@ -515,6 +536,64 @@ watch([globalCity, globalSource, globalDateRange, globalFields, selectedField], 
 })
 
 const getErrorTag = (val) => val < 2 ? 'success' : val < 5 ? 'warning' : 'danger'
+
+
+// 默认值（可根据业务调整）
+const DEFAULT_CITIES = ['北京', '上海']  // 取前两个热门城市
+const DEFAULT_SOURCES = sourceOptions.map(s => s.value)  // 全选数据源
+const DEFAULT_DATE_RANGE = [
+  dayjs().subtract(6, 'day').format('YYYY-MM-DD'),
+  dayjs().format('YYYY-MM-DD')
+]  // 最近7天
+// const DEFAULT_FIELDS = []  // 热力图默认展示全部字段，表格默认不筛选字段
+
+onMounted(() => {
+  if (globalCity.value.length === 0) {
+    globalCity.value = DEFAULT_CITIES
+  }
+  if (globalSource.value.length === 0) {
+    globalSource.value = DEFAULT_SOURCES
+  }
+  if (!globalDateRange.value) {
+    globalDateRange.value = DEFAULT_DATE_RANGE
+  }
+  // 字段默认为空（热力图展示全部，表格不筛选）
+  // globalFields.value = DEFAULT_FIELDS
+  globalFields.value = fieldOptionsShort1.map(f => f.value)
+  // 箱线图默认选第一个字段
+  if (fieldOptionsShort1.length && !selectedField.value) {
+    selectedField.value = fieldOptionsShort1[0].value
+  }
+  // 自动触发一次查询
+  handleGlobalQuery()
+})
+
+const setQuickDate = (type) => {
+  const today = dayjs()
+  let start, end
+  switch (type) {
+    case 'today':
+      start = today.format('YYYY-MM-DD')
+      end = today.format('YYYY-MM-DD')
+      break
+    case '7days':
+      start = today.subtract(6, 'day').format('YYYY-MM-DD')
+      end = today.format('YYYY-MM-DD')
+      break
+    case '30days':
+      start = today.subtract(29, 'day').format('YYYY-MM-DD')
+      end = today.format('YYYY-MM-DD')
+      break
+    default: return
+  }
+  globalDateRange.value = [start, end]
+  ElMessage.success(`时间切换成功`)
+}
+
+const changeSingleField = (value) => {
+  
+  ElMessage({ message: `已切换到字段：${fieldLabelMap[value]}，箱线图将自动更新`, type: 'success' })
+} 
 </script>
 
 <style scoped>
@@ -536,10 +615,47 @@ const getErrorTag = (val) => val < 2 ? 'success' : val < 5 ? 'warning' : 'danger
   font-weight: 600;
   font-size: 16px;
   color: #1e293b;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.merged-chart-card .card-header {
+  margin-bottom: 8px;
+}
+
+.charts-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.chart-half {
+  flex: 1;
+  min-width: 300px;
+  border-radius: 12px;
+  background: #fefefe;
+  transition: all 0.2s;
+}
+
+.chart-sub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  padding: 0 8px;
 }
 
 .field-hint {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: normal;
   color: #3b82f6;
   background: #eff6ff;
@@ -553,12 +669,27 @@ const getErrorTag = (val) => val < 2 ? 'success' : val < 5 ? 'warning' : 'danger
 }
 
 .chart-container {
-  min-height: 420px;
-  margin-top: 12px;
+  min-height: 380px;
+  width: 100%;
+}
+
+.date-quick-buttons {
+  margin-bottom: 8px;
 }
 
 :deep(.el-table th) {
   background-color: #f8fafc;
   font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .charts-row {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .chart-half {
+    width: 100%;
+  }
 }
 </style>

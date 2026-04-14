@@ -1,5 +1,6 @@
 <template>
   <div class="map-analysis">
+    <!-- 筛选卡片（保持不变） -->
     <el-card class="filter-card" shadow="never">
       <el-row :gutter="20">
         <el-col :span="6">
@@ -28,8 +29,8 @@
           <div class="filter-item">
             <label>显示模式</label>
             <el-radio-group v-model="chartMode" @change="onModeChange" size="small">
-              <el-radio-button label="map">🗺️ 省份地图</el-radio-button>
-              <el-radio-button label="bar">📊 条形图</el-radio-button>
+              <el-radio-button label="map">省份地图</el-radio-button>
+              <el-radio-button label="bar">条形图</el-radio-button>
             </el-radio-group>
             <el-checkbox v-model="autoSwitch" style="margin-left: 12px;" @change="onAutoSwitchChange">
               自动切换 (2s)
@@ -39,6 +40,7 @@
       </el-row>
     </el-card>
 
+    <!-- 图表卡片：改用 EChartsWrapper -->
     <el-card class="map-card" shadow="hover" style="margin-top: 20px">
       <template #header>
         <div class="card-header">
@@ -50,21 +52,22 @@
           </el-tooltip>
         </div>
       </template>
-      <div v-loading="loading" class="map-container">
-        <div ref="mapChartRef" style="width: 100%; height: 600px;"></div>
-      </div>
+
+      <!-- EChartsWrapper 封装组件 -->
+      <EChartsWrapper ref="echartsWrapperRef" :options="currentChartOption" :loading="loading" height="600px"
+        @click="handleChartClick" @rendered="handleChartRendered" />
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { errorScoreApi } from '@/apis/score'
 import { sourceOptions, cityCoordinates, cityToProvince } from '@/constants/weatherOptions'
-
+import EChartsWrapper from '@/components/EChartsWrapper.vue' // 路径按实际调整
 
 // 筛选条件
 const selectedSources = ref([])
@@ -76,37 +79,34 @@ const chartMode = ref('map')
 const autoSwitch = ref(false)
 let timer = null
 
-// 图表实例与数据
-let chart = null
-let geoJsonData = null
-const mapChartRef = ref(null)
-let resizeHandler = null
-
 // 存储省份级别数据
-let lastProvinceData = []      // [{ name, value, citiesDetails }]
-let lastProvinceDetails = {}   // 用于 tooltip 详细展示
+const lastProvinceData = ref([])      // [{ name, value, cities }]
+const lastProvinceDetails = ref({})   // 用于 tooltip 详情
+
+// 地图注册状态
+const mapRegistered = ref(false)
 
 const cities = Object.keys(cityCoordinates)
 
-// 加载 GeoJSON
-const loadGeoJson = async () => {
-  const geoUrl = new URL('@/assets/map/China.geojson', import.meta.url).href
-  const response = await fetch(geoUrl)
-  if (!response.ok) throw new Error('加载地图数据失败')
-  geoJsonData = await response.json()
+// 加载并注册中国地图 GeoJSON（仅执行一次）
+const registerChinaMap = async () => {
+  if (mapRegistered.value) return
+  try {
+    const geoUrl = new URL('@/assets/map/China.geojson', import.meta.url).href
+    const response = await fetch(geoUrl)
+    if (!response.ok) throw new Error('加载地图数据失败')
+    const geoJsonData = await response.json()
+    echarts.registerMap('china', geoJsonData)
+    mapRegistered.value = true
+  } catch (err) {
+    console.error(err)
+    ElMessage.error('地图数据加载失败')
+  }
 }
 
-// 初始化地图（仅注册，不设置任何系列）
-const initMap = () => {
-  if (!mapChartRef.value || !geoJsonData) return
-  if (chart) chart.dispose()
-  chart = echarts.init(mapChartRef.value)
-  echarts.registerMap('china', geoJsonData)
-  // 不设置任何 option，等待数据后渲染
-}
-
-// 构建省份地图配置（区域着色）
+// 构建地图配置
 const buildMapOption = (provinceData, provinceDetails) => {
+  if (!provinceData.length) return {}
   const scores = provinceData.map(p => p.value)
   const minScore = Math.min(...scores)
   const maxScore = Math.max(...scores)
@@ -117,57 +117,60 @@ const buildMapOption = (provinceData, provinceDetails) => {
       min: minScore,
       max: maxScore,
       calculable: true,
-      inRange: { color: ['#91c7ae', '#f39c12', '#e74c3c'] }, // 低->高 绿橙红
+      inRange: { color: ['#91c7ae', '#f39c12', '#e74c3c'] },
       outOfRange: { color: ['#ccc'] },
       text: ['高分', '低分'],
       textStyle: { color: '#333' }
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: (params) => {
+        const provinceName = params.name
+        const details = provinceDetails[provinceName]
+        if (!details) return `${provinceName}<br/>暂无数据`
+        let html = `<strong>${provinceName}</strong><br/>平均最高分: ${details.avgMaxScore.toFixed(2)}<br/>`
+        html += `包含城市:<br/>`
+        for (const city of details.cities) {
+          html += `&nbsp;&nbsp;${city.name} (最高分: ${city.maxScore.toFixed(2)}, 最佳来源: ${city.bestSource})<br/>`
+          html += `&nbsp;&nbsp;&nbsp;&nbsp;各来源: `
+          for (const [src, score] of Object.entries(city.allScores)) {
+            html += `${src}: ${score.toFixed(2)} `
+          }
+          html += `<br/>`
+        }
+        return html
+      }
     },
     series: [{
       name: '省份平均最高分',
       type: 'map',
       map: 'china',
-      roam: true,
+      // roam: true,
+      roam: false,
       zoom: 1.2,
       label: {
-        show: false,              // 默认不显示地名
-        emphasis: { show: true }  // 悬浮时显示地名
+        show: false,
+        emphasis: { show: true }
       },
       emphasis: {
         label: { show: true },
         itemStyle: { areaColor: '#ffd966' }
       },
-      tooltip: {
-        trigger: 'item',
-        formatter: (params) => {
-          const provinceName = params.name
-          const details = provinceDetails[provinceName]
-          if (!details) return `${provinceName}<br/>暂无数据`
-          let html = `<strong>${provinceName}</strong><br/>平均最高分: ${details.avgMaxScore.toFixed(2)}<br/>`
-          html += `包含城市:<br/>`
-          for (const city of details.cities) {
-            html += `&nbsp;&nbsp;${city.name} (最高分: ${city.maxScore.toFixed(2)}, 最佳来源: ${city.bestSource})<br/>`
-            html += `&nbsp;&nbsp;&nbsp;&nbsp;各来源: `
-            for (const [src, score] of Object.entries(city.allScores)) {
-              html += `${src}: ${score.toFixed(2)} `
-            }
-            html += `<br/>`
-          }
-          return html
-        }
-      },
-      data: provinceData.map(p => ({ name: p.name, value: p.value }))
+      animationDurationUpdate: 1000,  
+      universalTransition: true,
+      data: provinceData.map(p => ({ name: p.name, value: p.value })),
+      
     }]
   }
 }
 
-// 构建条形图配置（按省份平均最高分降序）
+// 构建条形图配置
 const buildBarOption = (provinceData, provinceDetails) => {
-  // 按平均最高分降序排序
-  const sorted = [...provinceData].sort((a, b) => b.value - a.value)
+  if (!provinceData.length) return {}
+  const sorted = [...provinceData].sort((a, b) => a.value - b.value)
   const names = sorted.map(p => p.name)
   const values = sorted.map(p => p.value)
 
-  // 为每个省份分配不同颜色
   const colorPalette = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec489a', '#06b6d4', '#f97316']
   const colors = names.map((_, idx) => colorPalette[idx % colorPalette.length])
 
@@ -193,27 +196,28 @@ const buildBarOption = (provinceData, provinceDetails) => {
         return html
       }
     },
+    animationDurationUpdate: 1000,
     series: [{
       name: '平均最高分',
       type: 'bar',
       data: values,
       itemStyle: { color: (params) => colors[params.dataIndex], borderRadius: [0, 4, 4, 0] },
-      label: { show: true, position: 'right', formatter: '{c}' }
+      label: { show: true, position: 'right', formatter: '{c}' },
+      universalTransition: true
     }],
     grid: { containLabel: true, left: 80, right: 20 }
   }
 }
 
-// 渲染当前模式
-const renderByMode = () => {
-  if (!chart || !lastProvinceData.length) return
-  const option = chartMode.value === 'map'
-    ? buildMapOption(lastProvinceData, lastProvinceDetails)
-    : buildBarOption(lastProvinceData, lastProvinceDetails)
-  chart.setOption(option, { notMerge: false })
-}
+// 当前图表配置（计算属性自动响应数据与模式变化）
+const currentChartOption = computed(() => {
+  if (!lastProvinceData.value.length) return {}
+  return chartMode.value === 'map'
+    ? buildMapOption(lastProvinceData.value, lastProvinceDetails.value)
+    : buildBarOption(lastProvinceData.value, lastProvinceDetails.value)
+})
 
-// 获取原始数据并聚合到省份
+// 获取数据并更新 lastProvinceData/lastProvinceDetails
 const fetchAndProcessData = async () => {
   if (selectedSources.value.length < 2) {
     ElMessage.warning('请至少选择两个数据来源')
@@ -226,9 +230,8 @@ const fetchAndProcessData = async () => {
       source: selectedSources.value,
       field: 'total_score'
     }
-    if (dateRange.value) {
-      params.dateRange = dateRange.value
-    }
+    if (dateRange.value) params.dateRange = dateRange.value
+
     const response = await errorScoreApi.getWeatherDaysScoreByCitySource(params)
     if (response.data?.code !== 200) {
       ElMessage.error(response.data?.message || '获取数据失败')
@@ -236,7 +239,7 @@ const fetchAndProcessData = async () => {
     }
     const rawData = response.data.data || []
 
-    // 构建城市->来源->平均分映射
+    // 城市->来源->平均分映射
     const citySourceMap = new Map()
     for (const item of rawData) {
       const { city, source, avg_value } = item
@@ -244,13 +247,12 @@ const fetchAndProcessData = async () => {
       citySourceMap.get(city).set(source, avg_value)
     }
 
-    // 计算每个城市的最高分，并按省份聚合
-    const provinceMap = new Map()  // provinceName -> { totalMaxSum, count, cities: [] }
+    // 省份聚合
+    const provinceMap = new Map()
     for (const city of cities) {
       const sourceMap = citySourceMap.get(city)
       if (!sourceMap || sourceMap.size === 0) continue
 
-      // 计算该城市的最高分和对应数据源
       let maxScore = -Infinity
       let bestSource = ''
       const scores = {}
@@ -288,7 +290,7 @@ const fetchAndProcessData = async () => {
       return false
     }
 
-    // 生成省份级别数据
+    // 生成最终数据
     const provinceData = []
     const provinceDetails = {}
     for (const [province, provData] of provinceMap.entries()) {
@@ -304,8 +306,9 @@ const fetchAndProcessData = async () => {
       }
     }
 
-    lastProvinceData = provinceData
-    lastProvinceDetails = provinceDetails
+    lastProvinceData.value = provinceData
+    lastProvinceDetails.value = provinceDetails
+
     return true
   } catch (err) {
     console.error(err)
@@ -316,20 +319,28 @@ const fetchAndProcessData = async () => {
   }
 }
 
-// 查询并渲染
+// 查询按钮触发
 const fetchDataAndRender = async () => {
-  const success = await fetchAndProcessData()
-  if (success && chart) {
-    renderByMode()
-  }
+  await registerChinaMap() // 确保地图已注册
+  await fetchAndProcessData()
+}
+watch([selectedSources, dateRange], () => {
+  fetchDataAndRender()
+})
+// 重置
+const resetFilters = () => {
+  selectedSources.value = []
+  dateRange.value = null
+  lastProvinceData.value = []
+  lastProvinceDetails.value = []
 }
 
-// 模式变化时重新渲染
+// 模式手动切换
 const onModeChange = () => {
-  if (lastProvinceData.length) renderByMode()
+  // 可在此添加额外逻辑，例如上报切换事件
 }
 
-// 自动切换
+// 自动切换逻辑
 const startAutoSwitch = () => {
   if (timer) clearInterval(timer)
   if (!autoSwitch.value) return
@@ -347,43 +358,25 @@ const onAutoSwitchChange = (val) => {
   if (val) startAutoSwitch()
   else stopAutoSwitch()
 }
+// 当自动切换开启且 chartMode
 watch(chartMode, () => {
   if (autoSwitch.value) startAutoSwitch()
 })
 
-// 重置
-const resetFilters = () => {
-  selectedSources.value = []
-  dateRange.value = null
-  if (chart) {
-    chart.clear()
-  }
-  lastProvinceData = []
-  lastProvinceDetails = {}
+// 图表事件处理（示例）
+const handleChartClick = (params) => {
+  console.log('图表点击:', params)
+}
+const handleChartRendered = () => {
+  // console.log('图表渲染完成')
 }
 
 // 生命周期
-onMounted(async () => {
-  try {
-    await loadGeoJson()
-    initMap()
-  } catch (err) {
-    console.error(err)
-    ElMessage.error('地图数据加载失败')
-  }
-  resizeHandler = () => chart?.resize()
-  window.addEventListener('resize', resizeHandler)
+onMounted(() => {
+  registerChinaMap() // 提前加载地图数据
 })
 
 onBeforeUnmount(() => {
-  if (chart) {
-    chart.dispose()
-    chart = null
-  }
-  if (resizeHandler) {
-    window.removeEventListener('resize', resizeHandler)
-    resizeHandler = null
-  }
   stopAutoSwitch()
 })
 </script>
@@ -418,9 +411,5 @@ onBeforeUnmount(() => {
   font-size: 16px;
   color: #1e293b;
   margin-bottom: 12px;
-}
-
-.map-container {
-  min-height: 600px;
 }
 </style>

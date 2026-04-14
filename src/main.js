@@ -2,6 +2,7 @@
 import './style.css'
 import { createApp } from 'vue'
 import App from './App.vue'
+
 // element-puls图标
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 // 和风天气图标
@@ -13,6 +14,8 @@ import ECharts from 'vue-echarts';
 // 引入css文件
 import '@/assets/styles/weather-styles.css'
 // 引入emitter
+
+import 'element-plus/dist/index.css'
 import emitter from './utils/echarts'
 import EChartsWrapper from './components/EChartsWrapper.vue'
 import router from './router'

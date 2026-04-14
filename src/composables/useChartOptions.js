@@ -104,7 +104,7 @@ export function useChartOptions(
       },
       legend: {
         data: styledSeries.map(s => s.name),
-        top: 20,
+        top: 40,
         left: 'center',
         backgroundColor: 'rgba(255,255,255,0.7)',
         borderRadius: 8,
@@ -217,7 +217,7 @@ export function useChartOptions(
       },
       legend: {
         data: series.map(s => s.name),
-        top: 20,
+        top: 35,
         left: 'center',
         backgroundColor: 'rgba(255,255,255,0.7)',
         borderRadius: 8,
@@ -302,11 +302,6 @@ export function useChartOptions(
       const range = max - min
       max += range * 0.5
       min -= range * 0.5
-
-      // 可选：对 min/max 四舍五入，避免显示过长小数（非必须，因为 axisLabel 已控制显示）
-      // min = parseFloat(min.toFixed(2))
-      // max = parseFloat(max.toFixed(2))
-
       return { name: getFieldLabel(field), min, max }
     })
 
@@ -354,7 +349,7 @@ export function useChartOptions(
       },
       legend: {
         data: seriesData.map(s => s.name),
-        top: 20,
+        top: 35,
         left: 'center',
         backgroundColor: 'rgba(255,255,255,0.7)',
         borderRadius: 8,

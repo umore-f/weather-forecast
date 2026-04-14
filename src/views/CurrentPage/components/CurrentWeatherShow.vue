@@ -1,31 +1,45 @@
+<!-- eslint-disable no-undef -->
+<!-- eslint-disable no-undef -->
 <template>
   <div>
     <div class="weather-card">
-      <!-- 天气卡片列表（水平滚动） -->
-       <div class="reliability-card1">
+      <!-- 天气卡片列表 -->
+      <div class="reliability-card1">
         <WeatherHoursCard v-for="weather in filteredDaysList" :weather="weather"
         :key="weather.id || weather.forecast_time" />
       </div>
       <!-- 可信度卡片 -->
-      <div v-if="currentScoreList.length" class="reliability-card">
+      <div v-if="currentSourceScoreItems.length" class="reliability-card">
         <div class="reliability-header">
           <span class="reliability-title">📊 数据源可信度</span>
           <span class="reliability-source">{{ currentSourceName }}</span>
         </div>
         <div class="reliability-items">
-          <div v-for="item in sortedScoreList" :key="item.score_type" class="reliability-item"
-            :class="{ 'total-item': item.score_type === 'totalScore' }">
+          <!-- 遍历当前数据源的各个评分维度，使用 Element Plus 进度条展示 -->
+          <div v-for="item in currentSourceScoreItems" :key="item.key" class="reliability-item"
+            :class="{ 'total-item': item.isTotal }">
             <div class="item-label">
-              <span>{{ getScoreTypeName(item.score_type) }}</span>
+              <span>{{ item.label }}</span>
               <span class="item-score">{{ formatScore(item.score) }}%</span>
             </div>
-            <el-progress :percentage="item.score" :stroke-width="item.score_type === 'totalScore' ? 10 : 6"
-              :color="getProgressColor(item.score)" :show-text="false" />
+            <el-progress
+              :percentage="item.score"
+              :format="() => formatScore(item.score)"
+              :color="getProgressColor(item.score)"
+              :stroke-width="8"
+              :show-text="true"
+            />
           </div>
         </div>
       </div>
+      <div v-else-if="sortedScoreList.length === 0 && !sortedScoreListLoading" class="reliability-card">
+        <div class="reliability-header">
+          <span class="reliability-title">📊 数据源可信度</span>
+          <span class="reliability-source">暂无评分数据</span>
+        </div>
+        <div style="text-align: center; padding: 20px; color: #999;">请选择城市或稍后重试</div>
+      </div>
     </div>
-
   </div>
 </template>
 
@@ -43,21 +57,16 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 // 数据状态
-const daysList = ref([])           // 当前显示的天气数据
-const hfdaysList = ref([])         // 和风天气原始数据
-const tidaysList = ref([])         // tomorrow.io天气原始数据
-const heFengScoreList = ref([])    // 和风可信度数据
-const tiScoreList = ref([])        // tomorrow.io可信度数据
-const currentScoreList = ref([])   // 当前显示的可信度数据
+const daysList = ref([])
+const hfdaysList = ref([])
+const tidaysList = ref([])
+const heFengScoreList = ref([])
+const tiScoreList = ref([])
+const currentScoreList = ref([])
 const loading = ref(false)
 const error = ref(null)
 const selectedCity = ref('北京')
 const currentSource = ref(true)    // true=和风, false=tomorrow.io
-
-// 获取昨天日期
-const yesterdayDate = computed(() => {
-  return dayjs().tz('Asia/Shanghai').subtract(1, 'day').format('YYYY-MM-DD')
-})
 
 // 当前数据源名称
 const currentSourceName = computed(() => {
@@ -85,28 +94,52 @@ const filterRecentHours = (list, hours = 1) => {
 
 const filteredDaysList = computed(() => filterRecentHours(daysList.value))
 
-// 可信度列表排序（总分置顶）
-const sortedScoreList = computed(() => {
-  return [...currentScoreList.value].sort((a, b) => {
-    if (a.score_type === 'totalScore') return -1
-    if (b.score_type === 'totalScore') return 1
-    return 0
-  })
+// ---------- 可信度评分数据处理 ----------
+// 接口返回的原始数据（多数据源各维度平均分）
+const sortedScoreList = ref([])
+const sortedScoreListLoading = ref(false)
+
+// 根据当前数据源（和风/Tomorrow.io）从 sortedScoreList 中提取对应的评分对象
+const currentSourceRawScore = computed(() => {
+  const targetSource = currentSource.value ? 'QWeather' : 'tomorrow.io'
+  const matched = sortedScoreList.value.find(item => item.source === targetSource)
+  if (matched) return matched
+  return null
 })
 
-// 得分类型映射
-const getScoreTypeName = (type) => {
-  const map = {
-    totalScore: '综合得分',
-    temp: '温度',
-    humidity: '湿度',
-    pressure: '气压',
-    tempMax: '最高温',
-    tempMin: '最低温',
-    precip: '降水量'
+// 将原始评分对象转换为前端进度条列表（包含字段映射、标签、是否总分）
+const currentSourceScoreItems = computed(() => {
+  const raw = currentSourceRawScore.value
+  if (!raw) return []
+
+  const getValue = (fieldName) => {
+    if (raw[fieldName] !== undefined) return raw[fieldName]
+    return null
   }
-  return map[type] || type
-}
+
+  const items = [
+    { key: 'temp', label: '温度评分', field: 'avg_temp_score', isTotal: false },
+    { key: 'humidity', label: '湿度评分', field: 'avg_humidity_score', isTotal: false },
+    { key: 'pressure', label: '气压评分', field: 'avg_pressure_score', isTotal: false },
+    { key: 'temp_max', label: '最高温评分', field: 'avg_temp_max_score', isTotal: false },
+    { key: 'temp_min', label: '最低温评分', field: 'avg_temp_min_score', isTotal: false },
+    { key: 'precip', label: '降水量评分', field: 'avg_precip_score', isTotal: false },
+    { key: 'total', label: '综合得分', field: 'avg_total_score', isTotal: true }
+  ]
+
+  return items
+    .map(item => {
+      let score = getValue(item.field)
+      if (score === null || score === undefined) return null
+      // 确保分数在 0-100 之间
+      const numericScore = Number(score)
+      return {
+        ...item,
+        score: numericScore
+      }
+    })
+    .filter(item => item !== null)
+})
 
 const formatScore = (score) => {
   return score !== undefined && score !== null ? Math.round(score * 10) / 10 : '--'
@@ -159,25 +192,33 @@ const fetchDataTi = async (city) => {
   }
 }
 
-const fetchDataScore = async (city, source) => {
-  const cityToUse = city || selectedCity.value
-  const date = yesterdayDate.value
+// 获取城市所有数据源各维度平均分
+const fetchSingleCityScore = async () => {
+  if (!selectedCity.value) {
+    sortedScoreList.value = []
+    return
+  }
+  sortedScoreListLoading.value = true
   try {
-    const response = await errorScoreApi.getWeatherDaysScore(cityToUse, '2026-03-28', source)
-    const result = response.data
-    if (result.code === 200) {
-      if (source === 'QWeather') {
-        heFengScoreList.value = result.data
-        if (currentSource.value) currentScoreList.value = heFengScoreList.value
-      } else if (source === 'tomorrow.io') {
-        tiScoreList.value = result.data
-        if (!currentSource.value) currentScoreList.value = tiScoreList.value
-      }
+    let start_date = '2026-3-26', end_date = '2027-3-26'
+    const res = await errorScoreApi.getWeatherDaysScoreSourceAvgByCity({
+      city: selectedCity.value,
+      dateRange: [start_date, end_date]
+    })
+    if (res.data?.code === 200) {
+      sortedScoreList.value = res.data.data || []
+      heFengScoreList.value = sortedScoreList.value
+      tiScoreList.value = sortedScoreList.value
     } else {
-      console.warn(`获取${source}可信度失败:`, result.message)
+      sortedScoreList.value = []
+      // eslint-disable-next-line no-undef
+      ElMessage.error(res.data?.message || '获取城市雷达图数据失败')
     }
   } catch (err) {
-    console.error(`获取${source}可信度出错:`, err)
+    console.error(err)
+    sortedScoreList.value = []
+  } finally {
+    sortedScoreListLoading.value = false
   }
 }
 
@@ -187,8 +228,7 @@ const handleCityChange = (cityName) => {
   selectedCity.value = cityName
   fetchDataTi(cityName)
   fetchDataHeFeng(cityName)
-  fetchDataScore(cityName, 'QWeather')
-  fetchDataScore(cityName, 'tomorrow.io')
+  fetchSingleCityScore()   // 切换城市时重新获取评分数据
 }
 
 // 数据源切换事件
@@ -204,8 +244,7 @@ onMounted(() => {
   emitter.on('source', switchSource)
   fetchDataTi()
   fetchDataHeFeng()
-  fetchDataScore(selectedCity.value, 'QWeather')
-  fetchDataScore(selectedCity.value, 'tomorrow.io')
+  fetchSingleCityScore()
 })
 
 onUnmounted(() => {
@@ -228,17 +267,14 @@ onUnmounted(() => {
   gap: 16px;
   padding-bottom: 4px;
   overflow: visible;
-  width: 400px;      /* 固定宽度 */
-  flex-shrink: 0;    /* 禁止收缩 */
+  width: 400px;
+  flex-shrink: 0;
 }
 .weather-card::-webkit-scrollbar {
   display: none;
 }
-/* .weather-card > * {
-  flex-shrink: 0;
-} */
 
-/* 可信度卡片样式（与天气卡片风格一致） */
+/* 可信度卡片样式 */
 .reliability-card {
   flex: 0 0 600px;
   border-radius: 28px;
@@ -257,10 +293,7 @@ onUnmounted(() => {
   box-shadow: 0 20px 30px rgba(0, 0, 0, 0.12);
   border-color: rgba(255, 255, 255, 0.5);
 }
-/* .weather-card > .reliability-card1 > * {
-  flex-shrink: 1;
-  width: 280px;
-} */
+
 .reliability-header {
   display: flex;
   justify-content: space-between;
@@ -320,7 +353,7 @@ onUnmounted(() => {
   font-size: 13px;
 }
 
-/* 响应式：小屏幕下进度条卡片占满宽度，下方天气卡片正常滚动 */
+/* 响应式 */
 @media (max-width: 768px) {
   .weather-card {
     flex-direction: column;

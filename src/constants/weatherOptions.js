@@ -12,12 +12,11 @@ export const cityOptions = [
 export const fieldOptions = [
   { label: '最高温度 (°C)', value: 'temp_max' }, { label: '最低温度 (°C)', value: 'temp_min' },
   { label: '温度 (°C)', value: 'temp' }, { label: '湿度 (%)', value: 'humidity' },
-  { label: '风速 (km/h)', value: 'wind_speed' }, { label: '风向', value: 'wind_direction' },
+  { label: '风速 (km/h)', value: 'wind_speed' },
   { label: '降水量 (mm)', value: 'precip_total' }, { label: '降水概率 (%)', value: 'precip_prob' },
   { label: '气压 (hPa)', value: 'pressure' }, { label: '云量 (%)', value: 'cloud_cover' },
   { label: '能见度 (km)', value: 'visibility' }, { label: '紫外线指数', value: 'uv_index' },
   { label: '露点 (°C)', value: 'dew' }, { label: '阵风 (km/h)', value: 'wind_gust' },
-  { label: '日出时间', value: 'sunrise' }, { label: '日落时间', value: 'sunset' }
 ]
 export const fieldOptionsShort = [
   { label: '最高温度 (°C)', value: 'temp_max' }, { label: '最低温度 (°C)', value: 'temp_min' },
@@ -67,27 +66,27 @@ export const cityCoordinates = {
 }
 export const cityToProvince = {
   // 直辖市
-  '北京': '北京',
-  '上海': '上海',
-  '天津': '天津',
-  '重庆': '重庆',
+  '北京': '北京市',
+  '上海': '上海市',
+  '天津': '天津市',
+  '重庆': '重庆市',
   // 省份城市
-  '广州': '广东',
-  '深圳': '广东',
-  '杭州': '浙江',
-  '成都': '四川',
-  '南京': '江苏',
-  '武汉': '湖北',
-  '苏州': '江苏',
-  '长沙': '湖南',
-  '青岛': '山东',
-  '西安': '陕西',
-  '郑州': '河南',
-  '合肥': '安徽',
-  '宁波': '浙江',
-  '无锡': '江苏',
-  '济南': '山东',
-  '福州': '福建'
+  '广州': '广东省',
+  '深圳': '广东省',
+  '杭州': '浙江省',
+  '成都': '四川省',
+  '南京': '江苏省',
+  '武汉': '湖北省',
+  '苏州': '江苏省',
+  '长沙': '湖南省',
+  '青岛': '山东省',
+  '西安': '陕西省',
+  '郑州': '河南省',
+  '合肥': '安徽省',
+  '宁波': '浙江省',
+  '无锡': '江苏省',
+  '济南': '山东省',
+  '福州': '福建省'
 }
 // 辅助：根据字段值获取label
 export const getFieldLabel = (value) => {
