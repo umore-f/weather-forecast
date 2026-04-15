@@ -20,15 +20,15 @@ export const errorScoreApi = {
       }
     })
   },
-  getWeatherDaysErrorsStatistics(source, error_type, dataRange, city) {
+  getWeatherDaysErrorsStatistics(source, dataRange, city, error_type) {
     return httpInstance({
       url: '/errors/statistics',
       params: {
         source,
-        error_type,
         start_date: dataRange[0],
         end_date: dataRange[1],
         city,
+        metric:error_type,
       }
     })
   },
@@ -43,13 +43,12 @@ export const errorScoreApi = {
       }
     })
   },
-  getWeatherDaysErrorsPaging({ source, city, dateRange, error_type, page, pageSize, sortField, sortOrder }) {
+  getWeatherDaysErrorsPaging({ source, city, dateRange, page, pageSize, sortField, sortOrder }) {
     return httpInstance({
       url: '/errors/list',
       params: {
         city,
         source,
-        error_type,
         start_date: dateRange?.[0],
         end_date: dateRange?.[1],
         page,

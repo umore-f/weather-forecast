@@ -28,7 +28,7 @@
             <el-option v-for="s in sourceOptions" :key="s.value" :label="s.label" :value="s.value" />
           </el-select>
         </el-col>
-        <el-col :span="6">
+        <!-- <el-col :span="6">
           <el-select v-model="globalFields" multiple collapse-tags placeholder="天气字段（可多选）" clearable filterable>
             <template #header>
               <el-checkbox v-model="fieldCheckAll" :indeterminate="fieldIndeterminate" @change="handleFieldCheckAll">
@@ -37,7 +37,7 @@
             </template>
             <el-option v-for="f in fieldOptionsShort1" :key="f.value" :label="f.label" :value="f.value" />
           </el-select>
-        </el-col>
+        </el-col> -->
         <el-col :span="6">
           <div class="date-quick-buttons">
             <el-button size="small" @click="setQuickDate('today')">今天</el-button>
@@ -63,7 +63,8 @@
         <div class="card-header">
           <span>📊 误差分布对比（箱线图 / 热力图）</span>
           <div class="header-actions">
-            <el-select v-model="selectedField" @change="changeSingleField" placeholder="箱线图天气字段（单选）" clearable filterable style="width: 200px;">
+            <el-select v-model="selectedField" @change="changeSingleField" placeholder="箱线图天气字段（单选）" clearable
+              filterable style="width: 200px;">
               <el-option v-for="f in fieldOptionsShort1" :key="f.value" :label="f.label" :value="f.value" />
             </el-select>
             <el-tooltip content="热力图受全局【天气字段】筛选影响" placement="top">
@@ -117,14 +118,65 @@
         <el-table-column prop="city" label="城市" width="100" />
         <el-table-column prop="source" label="数据来源" width="120" />
         <el-table-column prop="target_date" label="日期" sortable="custom" width="120" />
-        <el-table-column prop="error_type" label="天气字段" width="120" />
-        <el-table-column prop="error_value" label="误差值" sortable="custom" width="100">
+        <el-table-column prop="temp" label="气温原始误差" sortable="custom" width="180">
           <template #default="{ row }">
-            <el-tag :type="getErrorTag(row.error_value)" size="small">{{ row.error_value.toFixed(2) }}</el-tag>
+            <el-tag size="small">{{ row.temp.toFixed(2) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="ewma_error" label="EWMA误差" sortable="custom" width="120">
-          <template #default="{ row }">{{ row.ewma_error?.toFixed(2) || '-' }}</template>
+        <el-table-column prop="temp_ewma_error" label="气温ewma误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.temp_ewma_error.toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="temp_max" label="最高温度原始误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.temp_max.toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="temp_max_ewma_error" label="最高温ewma误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.temp_max_ewma_error.toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="temp_min" label="最低温原始误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.temp_min.toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="temp_min_ewma_error" label="最低温ewma误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.temp_min_ewma_error.toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="humidity" label="潮湿度原始误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.humidity.toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="humidity_ewma_error" label="潮湿度ewma误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.humidity_ewma_error.toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="precip" label="降雨量原始误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.precip.toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="precip_ewma_error" label="降雨量ewma误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.precip_ewma_error.toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="pressure" label="大气压原始误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.pressure.toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="pressure_ewma_error" label="大气压ewma误差" sortable="custom" width="180">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.pressure_ewma_error.toFixed(2) }}</el-tag>
+          </template>
         </el-table-column>
       </el-table>
       <el-config-provider :locale="customPaginationLocale">
@@ -184,18 +236,18 @@ watch(globalFields, (val) => {
     fieldIndeterminate.value = true
   }
 })
-const handleFieldCheckAll = (val) => {
-  fieldIndeterminate.value = false
-  globalFields.value = val ? fieldOptionsShort1.map(f => f.value) : []
-}
+// const handleFieldCheckAll = (val) => {
+//   fieldIndeterminate.value = false
+//   globalFields.value = val ? fieldOptionsShort1.map(f => f.value) : []
+// }
 
 // 字段标签映射
 const fieldLabelMap = {
   humidity: '湿度',
   pressure: '气压',
   precip: '降雨量',
-  tempMax: '最高温',
-  tempMin: '最低温',
+  temp_max: '最高温',
+  temp_min: '最低温',
   temp: '温度',
 }
 const getFieldLabel = (field) => fieldLabelMap[field] || field
@@ -214,9 +266,9 @@ const fetchBoxData = async () => {
   try {
     const res = await errorScoreApi.getWeatherDaysErrorsStatistics(
       globalSource.value,
-      selectedField.value,
       globalDateRange.value,
-      globalCity.value
+      globalCity.value,
+      selectedField.value,
     )
     if (res.data?.code === 200) {
       boxData.value = res.data.data || []
@@ -272,14 +324,6 @@ const fetchHeatData = async () => {
     })
     if (res.data?.code === 200) {
       let rawData = res.data.data || []
-      if (globalFields.value.length) {
-        rawData = rawData.map(item => ({
-          source: item.source,
-          data: Object.fromEntries(
-            Object.entries(item.data).filter(([field]) => globalFields.value.includes(field))
-          )
-        })).filter(item => Object.keys(item.data).length > 0)
-      }
       heatData.value = rawData
     } else {
       heatData.value = []
@@ -421,7 +465,6 @@ const fetchTableData = async () => {
     const res = await errorScoreApi.getWeatherDaysErrorsPaging({
       source: globalSource.value,
       city: globalCity.value,
-      error_type: globalFields.value,
       dateRange: globalDateRange.value,
       page: currentPage.value,
       pageSize: pageSize.value,
@@ -535,7 +578,7 @@ watch([globalCity, globalSource, globalDateRange, globalFields, selectedField], 
   }, 500)
 })
 
-const getErrorTag = (val) => val < 2 ? 'success' : val < 5 ? 'warning' : 'danger'
+// const getErrorTag = (val) => val < 2 ? 'success' : val < 5 ? 'warning' : 'danger'
 
 
 // 默认值（可根据业务调整）
@@ -591,7 +634,7 @@ const setQuickDate = (type) => {
 }
 
 const changeSingleField = (value) => {
-  
+
   ElMessage({ message: `已切换到字段：${fieldLabelMap[value]}，箱线图将自动更新`, type: 'success' })
 } 
 </script>
@@ -604,6 +647,7 @@ const changeSingleField = (value) => {
 .global-filter-card,
 .chart-card,
 .table-card {
+  display: flex;
   border-radius: 16px;
   margin-bottom: 0;
 }
