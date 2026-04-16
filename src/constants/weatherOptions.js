@@ -1,4 +1,4 @@
-
+import dayjs from 'dayjs'
 export const cityOptions = [
   { label: '北京', value: '北京' }, { label: '上海', value: '上海' }, { label: '广州', value: '广州' },
   { label: '深圳', value: '深圳' }, { label: '杭州', value: '杭州' }, { label: '成都', value: '成都' },
@@ -93,3 +93,11 @@ export const getFieldLabel = (value) => {
   const field = fieldOptions.find(f => f.value === value)
   return field ? field.label : value
 }
+
+// 默认值（可根据业务调整）
+export const DEFAULT_CITIES = ['北京', '上海']  // 取前两个热门城市
+export const DEFAULT_SOURCES = sourceOptions.map(s => s.value)  // 全选数据源
+export const DEFAULT_DATE_RANGE = [
+  dayjs().subtract(6, 'day').format('YYYY-MM-DD'),
+  dayjs().format('YYYY-MM-DD')
+]  // 最近7天

@@ -28,7 +28,7 @@ export const errorScoreApi = {
         start_date: dataRange[0],
         end_date: dataRange[1],
         city,
-        metric:error_type,
+        metric: error_type,
       }
     })
   },
@@ -40,6 +40,30 @@ export const errorScoreApi = {
         source,
         start_date: dateRange?.[0],
         end_date: dateRange?.[1],
+      }
+    })
+  },
+  getWeatherDaysErrorsAvgBySource({ source, city, dateRange, errorType }) {
+    return httpInstance({
+      url: '/errors/trend',
+      params: {
+        city,
+        source,
+        start_date: dateRange?.[0],
+        end_date: dateRange?.[1],
+        metric: errorType,
+      }
+    })
+  },
+  getWeatherDaysErrorsAvgByCity({ source, city, dateRange, errorType }) {
+    return httpInstance({
+      url: '/errors/heatmap',
+      params: {
+        city,
+        source,
+        start_date: dateRange?.[0],
+        end_date: dateRange?.[1],
+        metric: errorType,
       }
     })
   },

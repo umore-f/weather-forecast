@@ -28,19 +28,15 @@
             <el-option v-for="s in sourceOptions" :key="s.value" :label="s.label" :value="s.value" />
           </el-select>
         </el-col>
-        <!-- <el-col :span="6">
-          <el-select v-model="globalFields" multiple collapse-tags placeholder="天气字段（可多选）" clearable filterable>
-            <template #header>
-              <el-checkbox v-model="fieldCheckAll" :indeterminate="fieldIndeterminate" @change="handleFieldCheckAll">
-                全选
-              </el-checkbox>
-            </template>
+        <el-col :span="6">
+          <el-select v-model="selectedField" @change="changeSingleField" placeholder="天气字段（单选）" clearable filterable
+            style="width: 200px;">
             <el-option v-for="f in fieldOptionsShort1" :key="f.value" :label="f.label" :value="f.value" />
           </el-select>
-        </el-col> -->
+        </el-col>
         <el-col :span="6">
           <div class="date-quick-buttons">
-            <el-button size="small" @click="setQuickDate('today')">今天</el-button>
+            <el-button size="small" @click="setQuickDate('yesterday')">昨天</el-button>
             <el-button size="small" @click="setQuickDate('7days')">最近7天</el-button>
             <el-button size="small" @click="setQuickDate('30days')">最近30天</el-button>
           </div>
@@ -63,10 +59,6 @@
         <div class="card-header">
           <span>📊 误差分布对比（箱线图 / 热力图）</span>
           <div class="header-actions">
-            <el-select v-model="selectedField" @change="changeSingleField" placeholder="箱线图天气字段（单选）" clearable
-              filterable style="width: 200px;">
-              <el-option v-for="f in fieldOptionsShort1" :key="f.value" :label="f.label" :value="f.value" />
-            </el-select>
             <el-tooltip content="热力图受全局【天气字段】筛选影响" placement="top">
               <el-icon>
                 <QuestionFilled />
@@ -103,8 +95,38 @@
           </div>
         </div>
       </div>
+      <!-- 折线图 -->
+      <div class="charts-row">
+        <div class="chart-half" v-loading="lineLoading">
+          <div class="chart-sub-header">
+            <span>平均误差趋势图</span>
+            <span class="field-hint" v-if="selectedField">字段：{{ getFieldLabel(selectedField) }}</span>
+            <span class="field-hint warning" v-else>未选择字段</span>
+          </div>
+          <div class="chart-container">
+            <EChartsWrapper ref="chartLine" v-if="lineOptions.series" :options="lineOptions" height="360px"
+              :auto-resize="true" />
+            <el-empty v-else description="请选择城市和来源后查询" :image-size="80" />
+          </div>
+        </div>
+      </div>
     </el-card>
-
+    <!-- 城市热力图 -->
+    <el-card class="chart-card merged-chart-card" shadow="hover" style="margin-top: 24px">
+      <div class="charts-row">
+        <!-- 城市热力图区域 -->
+        <div class="chart-half" v-loading="heatCityLoading">
+          <div class="chart-sub-header">
+            <span>🔥 平均误差热力图（数据来源 vs 城市）</span>
+          </div>
+          <div class="chart-container">
+            <EChartsWrapper ref="chartHeatCity" v-if="heatCityOptions.series" :options="heatCityOptions" height="500px"
+              :auto-resize="true" />
+            <el-empty v-else description="请选择城市和来源后查询" :image-size="80" />
+          </div>
+        </div>
+      </div>
+    </el-card>
     <!-- 误差明细表格卡片 -->
     <el-card class="table-card" shadow="hover" style="margin-top: 24px">
       <template #header>
@@ -194,7 +216,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import { errorScoreApi } from '@/apis/score'
-import { cityOptions, fieldOptionsShort1, sourceOptions } from '@/constants/weatherOptions'
+import { cityOptions, fieldOptionsShort1, sourceOptions, DEFAULT_CITIES, DEFAULT_SOURCES, DEFAULT_DATE_RANGE } from '@/constants/weatherOptions'
 import dayjs from 'dayjs'
 // -------------------- 全局筛选状态 --------------------
 const globalCity = ref([])
@@ -429,11 +451,232 @@ const onHeatmapClick = (params) => {
     // const source = currentHeatmapSources.value[yIndex]
     const fields = currentHeatmapFields.value[xIndex]
     selectedField.value = fields
-    ElMessage({ message: `已切换到字段：${getFieldLabel(fields)}，箱线图将自动更新`, type: 'success' })
-    // 可选：手动触发一次箱线图查询，确保立即刷新
-    fetchBoxData()
+    if (selectedField.value) {
+      ElMessage({ message: `已切换到字段：${getFieldLabel(fields)}，图表将自动更新`, type: 'success' })
+    }
+
   }
 }
+
+// -------------------- 折现图状态 --------------------
+const lineData = ref([])
+const lineLoading = ref(false)
+
+const fetchLineData = async () => {
+  if (!globalCity.value.length || !globalSource.value.length) {
+    lineData.value = []
+    return
+  }
+  lineLoading.value = true
+  try {
+    const res = await errorScoreApi.getWeatherDaysErrorsAvgBySource({
+      source: globalSource.value,
+      city: globalCity.value,
+      dateRange: globalDateRange.value,
+      errorType: selectedField.value
+    })
+    if (res.data?.code === 200) {
+      let rawData = res.data.data || []
+      lineData.value = rawData
+    } else {
+      lineData.value = []
+      ElMessage.error(res.data?.message || '获取折现图数据失败')
+    }
+  } catch (err) {
+    console.error(err)
+    lineData.value = []
+  } finally {
+    lineLoading.value = false
+  }
+}
+const unitMap = {
+  temp: '°C',
+  temp_max: '°C',
+  temp_min: '°C',
+  humidity: '%',
+  precip: 'mm',
+  pressure: 'hPa'
+};
+const lineOptions = computed(() => {
+  if (!lineData.value.length) return {}
+  // 1. 提取所有日期（x轴），需要合并所有 source 的日期并去重排序
+  const allDatesSet = new Set();
+  lineData.value.forEach(series => {
+    series.data.forEach(point => allDatesSet.add(point.date));
+  });
+  const xAxisData = Array.from(allDatesSet).sort(); // 升序排列
+
+  // 2. 为每个 source 构造 series
+  const series = lineData.value.map(series => {
+    // 构建日期到值的映射
+    const valueMap = new Map();
+    series.data.forEach(point => valueMap.set(point.date, point.value));
+
+    // 按 xAxisData 顺序填充数据（没有值的日期填充 null）
+    const data = xAxisData.map(date => {
+      const val = valueMap.get(date);
+      return val !== undefined ? val : null;
+    });
+
+    return {
+      name: series.source,
+      type: 'line',
+      data: data,
+      smooth: true,
+      connectNulls: false, // 断点不连接
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { width: 2 },
+    };
+  });
+  return {
+    tooltip: {
+      trigger: 'axis',
+      valueFormatter: (value) => value?.toFixed(2) + `${unitMap[selectedField.value] || ''}`, // 根据指标调整单位
+    },
+    legend: {
+      data: lineData.value.map(s => s.source),
+      top: 0,
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true,
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: xAxisData,
+      axisLabel: {
+        rotate: 30, // 日期过多时可旋转
+      },
+    },
+    yAxis: {
+      type: 'value',
+      name: `误差值 (${unitMap[selectedField.value] || ''})`,
+    },
+    series: series,
+  };
+})
+
+// -------------------- 城市热力图状态 --------------------
+const heatCityData = ref([])
+const heatCityLoading = ref(false)
+
+const fetchHeatCityData = async () => {
+  if (!globalCity.value.length || !globalSource.value.length) {
+    heatCityData.value = []
+    return
+  }
+  heatCityLoading.value = true
+  try {
+    const res = await errorScoreApi.getWeatherDaysErrorsAvgByCity({
+      source: globalSource.value,
+      city: globalCity.value,
+      dateRange: globalDateRange.value,
+      errorType: selectedField.value,
+    })
+    if (res.data?.code === 200) {
+      let rawData = res.data.data || []
+      heatCityData.value = rawData
+    } else {
+      heatCityData.value = []
+      ElMessage.error(res.data?.message || '获取热力图数据失败')
+    }
+  } catch (err) {
+    console.error(err)
+    heatCityData.value = []
+  } finally {
+    heatCityLoading.value = false
+  }
+}
+
+const heatCityOptions = computed(() => {
+  if (!heatCityData.value.length) return {}
+
+  const cities = globalCity.value
+  const sources = globalSource.value
+
+  // 构建二维数据矩阵
+  const seriesData = [];
+  for (let i = 0; i < cities.length; i++) {
+    for (let j = 0; j < sources.length; j++) {
+      const item = heatCityData.value.find(d => d.city === cities[i] && d.source === sources[j]);
+      if (item) {
+        seriesData.push([j, i, item.avg_value]); // [x轴索引, y轴索引, 值]
+      } else {
+        seriesData.push([j, i, null]);
+      }
+    }
+  }
+
+  return {
+    tooltip: {
+      position: 'top',
+      formatter: (params) => {
+        const city = cities[params.data[1]];
+        const source = sources[params.data[0]];
+        const value = params.data[2];
+        return `${city}<br/>${source}<br/>平均误差: ${value?.toFixed(2)}`;
+      },
+    },
+    xAxis: {
+      type: 'category',
+      data: sources,
+      name: '数据来源',
+      axisLabel: { rotate: 0, fontWeight: 500, fontSize: 12 },
+      axisLine: { lineStyle: { color: '#ccc' } }
+    },
+    yAxis: {
+      type: 'category',
+      data: cities,
+      name: '城市',
+      axisLabel: { fontSize: 12, fontWeight: 500 },
+      axisLine: { lineStyle: { color: '#ccc' } }
+    },
+    visualMap: {
+      min: 0,
+      max: 18,
+      calculable: true,
+      orient: 'vertical',
+      left: 'left',
+      inRange: {
+        color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+      }
+    },
+    series: [{
+      name: selectedField.value,
+      type: 'heatmap',
+      data: seriesData,
+      label: {
+        show: true,
+        formatter: (params) => params.data[2]?.toFixed(1) || '',
+      },
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 10,
+          shadowColor: 'rgba(0,0,0,0.5)'
+        }
+      },
+      itemStyle: {
+        borderRadius: 4,
+        borderColor: '#fff',
+        borderWidth: 1
+      }
+    }],
+    grid: {
+      left: '12%',
+      right: '8%',
+      top: '10%',
+      bottom: '8%',
+      containLabel: true,
+      backgroundColor: '#fefefe'
+    }
+  };
+})
+
+
 // -------------------- 表格独立状态 --------------------
 const tableData = ref([])
 const tableLoading = ref(false)
@@ -547,7 +790,9 @@ const handleGlobalQuery = async () => {
     await Promise.all([
       fetchBoxData(),
       fetchHeatData(),
-      fetchTableData()
+      fetchTableData(),
+      fetchLineData(),
+      fetchHeatCityData(),
     ])
   } finally {
     globalQueryLoading.value = false
@@ -581,13 +826,7 @@ watch([globalCity, globalSource, globalDateRange, globalFields, selectedField], 
 // const getErrorTag = (val) => val < 2 ? 'success' : val < 5 ? 'warning' : 'danger'
 
 
-// 默认值（可根据业务调整）
-const DEFAULT_CITIES = ['北京', '上海']  // 取前两个热门城市
-const DEFAULT_SOURCES = sourceOptions.map(s => s.value)  // 全选数据源
-const DEFAULT_DATE_RANGE = [
-  dayjs().subtract(6, 'day').format('YYYY-MM-DD'),
-  dayjs().format('YYYY-MM-DD')
-]  // 最近7天
+
 // const DEFAULT_FIELDS = []  // 热力图默认展示全部字段，表格默认不筛选字段
 
 onMounted(() => {
@@ -615,9 +854,12 @@ const setQuickDate = (type) => {
   const today = dayjs()
   let start, end
   switch (type) {
-    case 'today':
-      start = today.format('YYYY-MM-DD')
-      end = today.format('YYYY-MM-DD')
+    case 'yesterday':
+      // 修改为昨天
+      // eslint-disable-next-line no-case-declarations
+      const yesterday = today.subtract(1, 'day')
+      start = yesterday.format('YYYY-MM-DD')
+      end = yesterday.format('YYYY-MM-DD')
       break
     case '7days':
       start = today.subtract(6, 'day').format('YYYY-MM-DD')
@@ -634,8 +876,8 @@ const setQuickDate = (type) => {
 }
 
 const changeSingleField = (value) => {
-
-  ElMessage({ message: `已切换到字段：${fieldLabelMap[value]}，箱线图将自动更新`, type: 'success' })
+  if (!value) return 
+  ElMessage({ message: `已切换到字段：${fieldLabelMap[value]}，图表将自动更新`, type: 'success' })
 } 
 </script>
 

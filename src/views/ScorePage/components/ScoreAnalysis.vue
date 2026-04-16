@@ -20,6 +20,11 @@
           </el-select>
         </el-col>
         <el-col :xs="24" :sm="8">
+          <div class="date-quick-buttons">
+            <el-button size="small" @click="setQuickDate('yesterday')">昨天</el-button>
+            <el-button size="small" @click="setQuickDate('7days')">最近7天</el-button>
+            <el-button size="small" @click="setQuickDate('30days')">最近30天</el-button>
+          </div>
           <el-date-picker v-model="globalFilterDateRange" type="daterange" range-separator="至" start-placeholder="开始"
             end-placeholder="结束" value-format="YYYY-MM-DD" style="width: 100%" />
         </el-col>
@@ -70,7 +75,7 @@
               <el-option label="降水" value="precip_score" />
               <el-option label="气压" value="pressure_score" />
             </el-select>
-            <el-tooltip content="点击左侧热力图格子，右侧显示该城市各数据源的6维得分雷达图" placement="top">
+            <el-tooltip content="点击热力图格子，显示该城市各数据源的6维得分雷达图" placement="top">
               <el-icon class="help-icon">
                 <QuestionFilled />
               </el-icon>
@@ -79,9 +84,9 @@
         </div>
       </template>
       <div class="heatmap-radar-layout">
-        <!-- 左侧热力图 -->
+        <!-- 热力图 -->
         <div class="heatmap-container" v-loading="heatmapLoading">
-          <EChartsWrapper ref='heatmap' v-if="heatmapOptions.series" :options="heatmapOptions" height="480px"
+          <EChartsWrapper ref='heatmap' v-if="heatmapOptions.series" :options="heatmapOptions" height="500px"
             :auto-resize="true" @click="onHeatmapClick" />
           <el-empty v-else description="请选择至少一个城市和一个数据源" :image-size="80" />
         </div>
@@ -100,14 +105,14 @@
               v-show="singleCityRadarOptions.series && singleCityRadarOptions.series.length"
               :options="singleCityRadarOptions" height="420px" :auto-resize="true" />
             <el-empty v-show="!(singleCityRadarOptions.series && singleCityRadarOptions.series.length)"
-              description="点击左侧热力图格子，查看城市雷达图" :image-size="80" />
+              description="点击热力图格子，查看城市雷达图" :image-size="80" />
           </div>
 
           <div class="line-wrapper" v-loading="singleCityLineLoading">
             <EChartsWrapper ref="singleCityLineChartRef"
               v-if="singleCityLineOptions.series && singleCityLineOptions.series.length"
               :options="singleCityLineOptions" height="400px" :auto-resize="true" />
-            <el-empty v-else description="暂无数据" :image-size="80" />
+            <el-empty v-else description="点击热力图格子，查看城市折线图" :image-size="80" />
           </div>
         </div>
       </div>
@@ -203,7 +208,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled, Filter, Download } from '@element-plus/icons-vue'
 import { errorScoreApi } from '@/apis/score'
-import { cityOptions, sourceOptions } from '@/constants/weatherOptions'
+import { cityOptions, sourceOptions, DEFAULT_CITIES, DEFAULT_SOURCES, DEFAULT_DATE_RANGE } from '@/constants/weatherOptions'
 import dayjs from 'dayjs'
 
 // 自定义分页文案
@@ -217,7 +222,30 @@ const customPaginationLocale = {
     }
   }
 }
-
+const setQuickDate = (type) => {
+  const today = dayjs()
+  let start, end
+  switch (type) {
+    case 'yesterday':
+      // 修改为昨天
+      // eslint-disable-next-line no-case-declarations
+      const yesterday = today.subtract(1, 'day')
+      start = yesterday.format('YYYY-MM-DD')
+      end = yesterday.format('YYYY-MM-DD')
+      break
+    case '7days':
+      start = today.subtract(6, 'day').format('YYYY-MM-DD')
+      end = today.format('YYYY-MM-DD')
+      break
+    case '30days':
+      start = today.subtract(29, 'day').format('YYYY-MM-DD')
+      end = today.format('YYYY-MM-DD')
+      break
+    default: return
+  }
+  globalFilterDateRange.value = [start, end]
+  ElMessage.success(`时间切换成功`)
+}
 // ===================== 全局筛选条件 =====================
 const globalFilterCity = ref([])
 const globalFilterSource = ref([])
@@ -400,9 +428,7 @@ const heatmapOptions = computed(() => {
   if (!heatmapData.value.length) return {}
 
   // 获取所有唯一的城市和数据源（按原始顺序）
-  // const cities = [...new Set(heatmapData.value.map(item => item.city))];
   const cities = globalFilterCity.value
-  // const sources = [...new Set(heatmapData.value.map(item => item.source))];
   const sources = globalFilterSource.value
 
   // eslint-disable-next-line vue/no-side-effects-in-computed-properties
@@ -459,7 +485,7 @@ const heatmapOptions = computed(() => {
       orient: 'vertical',
       left: 'left',
       inRange: {
-        color: ['#d73027', '#fee090', '#66bd63']   // 红 -> 黄 -> 绿
+        color: ['#a50026', '#d73027', '#f46d43', '#fdae61', '#fee090', '#ffffbf', '#e0f3f8', '#abd9e9', '#74add1', '#4575b4', '#313695']
       },
       textStyle: { color: '#333' }
     },
@@ -1170,6 +1196,16 @@ const resetGlobalFilters = () => {
 }
 
 onMounted(() => {
+  if (globalFilterCity.value.length === 0) {
+    globalFilterCity.value = DEFAULT_CITIES
+  }
+  if (globalFilterSource.value.length === 0) {
+    globalFilterSource.value = DEFAULT_SOURCES
+  }
+  if (!globalFilterDateRange.value) {
+    globalFilterDateRange.value = DEFAULT_DATE_RANGE
+  }
+  // 自动触发一次查询
   refreshAllCharts()
 })
 </script>
@@ -1179,7 +1215,9 @@ onMounted(() => {
   display: flex;
   gap: 20px;
 }
-
+.date-quick-buttons {
+  margin-bottom: 8px;
+}
 .radar-line-layout .radar-wrapper,
 .radar-line-layout .line-wrapper {
   flex: 1;
