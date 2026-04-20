@@ -1,5 +1,3 @@
-<!-- eslint-disable no-undef -->
-<!-- eslint-disable no-undef -->
 <template>
   <div>
     <div class="weather-card">
@@ -49,6 +47,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { weatherApi } from '../../../apis/weatherApi'
 import { errorScoreApi } from '../../../apis/score'
 import { emitter } from '../../../utils/eventBus'
+import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -67,6 +66,13 @@ const loading = ref(false)
 const error = ref(null)
 const selectedCity = ref('北京')
 const currentSource = ref(true)    // true=和风, false=tomorrow.io
+
+// 可信度评分数据状态
+const sortedScoreList = ref([])
+const sortedScoreListLoading = ref(false)
+
+// 轮询定时器ID
+const pollingTimer = ref(null)
 
 // 当前数据源名称
 const currentSourceName = computed(() => {
@@ -93,11 +99,6 @@ const filterRecentHours = (list, hours = 1) => {
 }
 
 const filteredDaysList = computed(() => filterRecentHours(daysList.value))
-
-// ---------- 可信度评分数据处理 ----------
-// 接口返回的原始数据（多数据源各维度平均分）
-const sortedScoreList = ref([])
-const sortedScoreListLoading = ref(false)
 
 // 根据当前数据源（和风/Tomorrow.io）从 sortedScoreList 中提取对应的评分对象
 const currentSourceRawScore = computed(() => {
@@ -211,7 +212,6 @@ const fetchSingleCityScore = async () => {
       tiScoreList.value = sortedScoreList.value
     } else {
       sortedScoreList.value = []
-      // eslint-disable-next-line no-undef
       ElMessage.error(res.data?.message || '获取城市雷达图数据失败')
     }
   } catch (err) {
@@ -222,34 +222,72 @@ const fetchSingleCityScore = async () => {
   }
 }
 
-// 城市切换事件
-const handleCityChange = (cityName) => {
-  if (!cityName) return
-  selectedCity.value = cityName
-  fetchDataTi(cityName)
-  fetchDataHeFeng(cityName)
-  fetchSingleCityScore()   // 切换城市时重新获取评分数据
+// ---------- 统一刷新所有数据 ----------
+const refreshAllData = async () => {
+  // 同时请求两个天气源和评分数据（不等待彼此完成，提升并发）
+  await Promise.allSettled([
+    fetchDataTi(selectedCity.value),
+    fetchDataHeFeng(selectedCity.value),
+    fetchSingleCityScore()
+  ])
 }
 
-// 数据源切换事件
+// ---------- 轮询控制 ----------
+const startPolling = () => {
+  // 避免重复启动
+  if (pollingTimer.value) return
+
+  const poll = async () => {
+    await refreshAllData()
+    // 递归调度，2小时后再次执行
+    pollingTimer.value = setTimeout(poll, 2 * 60 * 60 * 1000) // 7200000 ms
+  }
+
+  // 立即执行第一次拉取（不再依赖 onMounted 中的手动调用）
+  poll()
+}
+
+const stopPolling = () => {
+  if (pollingTimer.value) {
+    clearTimeout(pollingTimer.value)
+    pollingTimer.value = null
+  }
+}
+
+// ---------- 事件处理 ----------
+// 城市切换事件（重置轮询）
+const handleCityChange = (cityName) => {
+  if (!cityName) return
+  // 停止旧轮询
+  stopPolling()
+  // 更新城市
+  selectedCity.value = cityName
+  // 立即刷新新城市的数据
+  refreshAllData()
+  // 重新启动轮询（基于新城市）
+  startPolling()
+}
+
+// 数据源切换事件（仅切换显示，不刷新数据）
 const switchSource = (useHeFeng) => {
   currentSource.value = useHeFeng
   daysList.value = useHeFeng ? hfdaysList.value : tidaysList.value
   currentScoreList.value = useHeFeng ? heFengScoreList.value : tiScoreList.value
 }
 
-// 初始化加载
+// 生命周期
 onMounted(() => {
   emitter.on('cityName', handleCityChange)
   emitter.on('source', switchSource)
-  fetchDataTi()
-  fetchDataHeFeng()
-  fetchSingleCityScore()
+  // 启动轮询（会自动执行第一次数据拉取）
+  startPolling()
 })
 
 onUnmounted(() => {
   emitter.off('cityName', handleCityChange)
   emitter.off('source', switchSource)
+  // 清除定时器
+  stopPolling()
 })
 </script>
 

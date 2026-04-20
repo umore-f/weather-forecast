@@ -98,6 +98,6 @@ export const getFieldLabel = (value) => {
 export const DEFAULT_CITIES = ['北京', '上海']  // 取前两个热门城市
 export const DEFAULT_SOURCES = sourceOptions.map(s => s.value)  // 全选数据源
 export const DEFAULT_DATE_RANGE = [
-  dayjs().subtract(6, 'day').format('YYYY-MM-DD'),
+  dayjs().subtract(30, 'day').format('YYYY-MM-DD'),
   dayjs().format('YYYY-MM-DD')
 ]  // 最近7天

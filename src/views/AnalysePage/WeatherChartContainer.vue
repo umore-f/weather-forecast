@@ -62,6 +62,7 @@ const { chartOptions } = useChartOptions(
 const handleChartClick = (params) => {
   console.log('图表点击：', params)
 }
+
 </script>
 
 <style scoped>
@@ -71,5 +72,4 @@ const handleChartClick = (params) => {
   padding: 24px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
 }
-/* 其他容器样式可根据需要保留 */
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="custom-tabs-wrapper">
-    <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+    <el-tabs v-model="activeTab" @tab-click="handleTabClick" style="display: flex; justify-content: space-between;">
       <el-tab-pane name="home" label="首页">
         <template #label>
           <span>
@@ -10,29 +10,11 @@
         </template>
       </el-tab-pane>
 
-      <el-tab-pane name="map" label="">
-        <template #label>
-          <span>
-            <el-icon :size="20"><MapLocation /></el-icon>
-            <span style="margin-left: 6px;">地图</span>
-          </span>
-        </template>
-      </el-tab-pane>
-
       <el-tab-pane name="analyse">
         <template #label>
           <span>
             <el-icon :size="20"><TrendCharts /></el-icon>
             <span style="margin-left: 6px;">分析</span>
-          </span>
-        </template>
-      </el-tab-pane>
-
-      <el-tab-pane name="settings">
-        <template #label>
-          <span>
-            <el-icon :size="20"><Setting /></el-icon>
-            <span style="margin-left: 6px;">设置</span>
           </span>
         </template>
       </el-tab-pane>
@@ -68,8 +50,10 @@ const handleTabClick = (tab) => {
 
 <style scoped>
 .custom-tabs-wrapper {
-  display: flex;
-  justify-content: space-between;
   margin-top: 20px;
+}
+.custom-tabs-wrapper :deep(.el-tabs__nav) {
+    justify-content: space-evenly;
+    width: stretch;
 }
 </style>

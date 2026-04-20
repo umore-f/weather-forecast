@@ -78,7 +78,7 @@
         <div class="control-group">
           <label>数据来源</label>
           <el-select v-model="selectedSourceModel" placeholder="请选择数据源" :multiple="!isHeatmap"
-            :multiple-limit="isHeatmap ? undefined : 2" style="width: 100%">
+            :multiple-limit="isHeatmap ? undefined : 3" style="width: 100%">
             <el-option v-for="source in sourceOptions" :key="source.value" :label="source.label" :value="source.value" />
           </el-select>
         </div>
