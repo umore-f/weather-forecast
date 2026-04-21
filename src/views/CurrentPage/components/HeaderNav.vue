@@ -65,11 +65,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { cityApi } from '@/apis/city'
 import { emitter } from '../../../utils/eventBus'
+import { useUserPreferences } from '@/composables/useUserPreferences'
 
+// 用户设置
+const { defaultCities, defaultSources, loaded } = useUserPreferences()
 const searchValue = ref('')
 const showSource = ref(true)
 const showTime = ref(false)
@@ -105,7 +108,30 @@ const remoteSearch = async (queryString, cb) => {
     cb([])
   }
 }
+// 监听用户设置加载完成，应用默认城市和数据源
+watch(loaded, (isLoaded) => {
+  if (!isLoaded) return
 
+  // 处理默认城市
+  if (defaultCities.value && defaultCities.value.length > 0) {
+    const defaultCity = defaultCities.value[0]
+    searchValue.value = defaultCity
+    // 触发城市变更事件，通知其他组件
+    emitter.emit('cityName', defaultCity)
+  } else {
+    searchValue.value = '北京'
+    emitter.emit('cityName', '北京')
+  }
+  // 处理默认数据源
+  if (defaultSources.value && defaultSources.value.length > 0) {
+    const firstSource = defaultSources.value[0]
+    showSource.value = (firstSource === 'QWeather')   // true=和风, false=tomorrow.io
+    emitter.emit('source', showSource.value)
+  } else {
+    showSource.value = 'QWeather'
+    emitter.emit('source', 'QWeather')  // 未登录或无设置，开关置为未选中（或禁用）
+  }
+}, { immediate: true })
 const handleSelect = (item) => {
   emitter.emit('cityName', item.value)
 }
@@ -113,8 +139,6 @@ const switchSource = (showSource) => {
   emitter.emit('source', showSource)
 }
 const switchTime = (showTime) => {
-  console.log("发送数据",showTime,emitter);
-
   emitter.emit('time', showTime)
 }
 </script>

@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import HeaderNav from '../HomePage/components/HeaderNav.vue';
+import HeaderNav from './components/HeaderNav.vue';
 import LineChart from './components/LineChart.vue';
 import CurrentWeatherShow from './components/CurrentWeatherShow.vue'
 </script>

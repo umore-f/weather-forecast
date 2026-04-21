@@ -43,7 +43,7 @@
 
 <script setup>
 import WeatherHoursCard from '../../../components/WeatherCard.vue'
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, } from 'vue'
 import { weatherApi } from '../../../apis/weatherApi'
 import { errorScoreApi } from '../../../apis/score'
 import { emitter } from '../../../utils/eventBus'
@@ -55,6 +55,7 @@ import timezone from 'dayjs/plugin/timezone'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
+
 // 数据状态
 const daysList = ref([])
 const hfdaysList = ref([])
@@ -64,8 +65,8 @@ const tiScoreList = ref([])
 const currentScoreList = ref([])
 const loading = ref(false)
 const error = ref(null)
-const selectedCity = ref('北京')
-const currentSource = ref(true)    // true=和风, false=tomorrow.io
+const selectedCity = ref('')
+const currentSource = ref(null)    // true=和风, false=tomorrow.io
 
 // 可信度评分数据状态
 const sortedScoreList = ref([])
@@ -295,7 +296,7 @@ onUnmounted(() => {
 .weather-card {
   height: 95%;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   overflow-x: auto;
   flex-wrap: nowrap;
   scrollbar-width: none;
@@ -305,7 +306,7 @@ onUnmounted(() => {
   gap: 16px;
   padding-bottom: 4px;
   overflow: visible;
-  width: 400px;
+  width: 500px;
   flex-shrink: 0;
 }
 .weather-card::-webkit-scrollbar {
@@ -359,7 +360,7 @@ onUnmounted(() => {
 .reliability-items {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  /* gap: 2px; */
   flex: 1;
 }
 

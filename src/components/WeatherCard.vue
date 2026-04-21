@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="weather-card"
-    :class="{ 'is-loading': loading }"
-    :style="{ background: gradientBackground }"
-  >
+  <div class="weather-card" :class="{ 'is-loading': loading }" :style="{ background: gradientBackground }">
     <!-- 自定义加载效果 -->
     <div v-if="loading" class="loading-overlay">
       <div class="spinner"></div>
@@ -15,6 +11,7 @@
         <div class="weather-main">
           <span class="weather-icon">{{ weatherIcon }}</span>
           <span class="weather-text">{{ weatherCondition }}</span>
+          <span class="weather-text">{{ weatherPrecipitation }}</span>
         </div>
         <div class="time-info">
           <span class="time">{{ formattedTime }}</span>
@@ -22,6 +19,7 @@
       </div>
 
       <!-- 当前温度卡片：大号温度 + 体感温度 -->
+
       <div class="current-temp-card">
         <div class="current-temp">
           <span class="temp-value">{{ displayTemp }}</span>
@@ -56,6 +54,7 @@
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -102,6 +101,10 @@ const feelsLike = computed(() => {
   return fl !== undefined && fl !== null ? Math.round(fl) : '--'
 })
 
+const weatherPrecipitation = computed(() => {
+  const p = props.weather?.precipitation
+  return p > 0 ? '雨' : ''
+})
 // 格式化时间（HH:mm）
 const formattedTime = computed(() => convertToLocalTime(props.weather?.forecast_time))
 
@@ -120,11 +123,20 @@ const weatherCondition = computed(() => {
 const weatherIcon = computed(() => {
   if (props.weather?.icon) return props.weather.icon
   const temp = props.weather?.temperature
-  if (temp === undefined) return '🌡️'
-  if (temp <= 0) return '❄️'
-  if (temp <= 10) return '🧥'
-  if (temp <= 20) return '🍂'
-  if (temp <= 28) return '☀️'
+  const precipitation = props.weather?.precipitation
+  if (precipitation > 0) {
+    if (temp === undefined) return '🌡️ 💧'
+    if (temp <= 0) return '❄️ 💧'
+    if (temp <= 10) return '🧥 💧'
+    if (temp <= 20) return '🍂 💧'
+    if (temp <= 28) return '☀️ 💧'
+  } else {
+    if (temp === undefined) return '🌡️'
+    if (temp <= 0) return '❄️'
+    if (temp <= 10) return '🧥'
+    if (temp <= 20) return '🍂'
+    if (temp <= 28) return '☀️'
+  }
   return '🔥'
 })
 
@@ -157,7 +169,7 @@ const gradientBackground = computed(() => {
 
 <style scoped>
 .weather-card {
-  flex: 0 0 40%;
+  flex: 0 0 80%;
   border-radius: 28px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
@@ -200,14 +212,17 @@ const gradientBackground = computed(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .card-content {
   padding: 20px 16px;
+  width: 90%;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  /* gap: 18px; */
   transition: filter 0.2s;
 }
 
@@ -236,7 +251,7 @@ const gradientBackground = computed(() => {
 
 .weather-icon {
   font-size: 28px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .weather-text {
@@ -271,7 +286,7 @@ const gradientBackground = computed(() => {
   backdrop-filter: blur(8px);
   padding: 8px 16px;
   border-radius: 40px;
-  margin: 4px 0;
+  margin: 36px 0;
 }
 
 .current-temp {
@@ -297,21 +312,21 @@ const gradientBackground = computed(() => {
   font-size: 13px;
   font-weight: 500;
   color: #5b6e8c;
-  background: rgba(255,255,240,0.6);
+  background: rgba(255, 255, 240, 0.6);
   padding: 4px 10px;
   border-radius: 30px;
 }
 
 /* 底部指标 */
 .metrics {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  display: flex;
+  justify-content: space-around;
+  width: 90%;
   background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(12px);
   border-radius: 24px;
   padding: 12px 8px;
-  margin-top: 12px;
+  margin-top: 24px;
 }
 
 .metric-item {
