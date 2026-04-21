@@ -34,7 +34,7 @@ httpInstance.interceptors.response.use(
         localStorage.removeItem('token')
         localStorage.removeItem('user')
         localStorage.removeItem('role')
-        window.location.href = '/login'
+        console.warn('认证失败，请重新登录')
       }
       console.error('响应错误:', error.response.status, error.response.data)
     } else if (error.request) {

@@ -35,8 +35,8 @@ export const sourceOptions = [
 ]
 
 export const fieldScoreOptions = [
-  { label: '最高温度', value: 'tempMax' },
-  { label: '最低温度', value: 'tempMin' },
+  { label: '最高温度', value: 'temp_max' },
+  { label: '最低温度', value: 'temp_min' },
   { label: '平均温度', value: 'temp' },
   { label: '相对湿度', value: 'humidity' },
   { label: '降水量', value: 'precip' },

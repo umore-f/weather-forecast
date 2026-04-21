@@ -83,14 +83,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { QuestionFilled } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { errorScoreApi } from '@/apis/score'
-import { sourceOptions, cityCoordinates, cityToProvince, DEFAULT_SOURCES, DEFAULT_DATE_RANGE } from '@/constants/weatherOptions'
+import { sourceOptions, cityCoordinates, cityToProvince } from '@/constants/weatherOptions'
 import EChartsWrapper from '@/components/EChartsWrapper.vue'
-
+import { useUserPreferences } from '@/composables/useUserPreferences'
+const { defaultSources, defaultDateStart, defaultDateEnd, loaded } = useUserPreferences()
 // 筛选条件
 const selectedSources = ref([])
 const dateRange = ref(null)
@@ -420,7 +421,7 @@ const handleChartClick = async (params) => {
     const provinceName = params.name
     const detail = provinceDetails.value[provinceName]
     if (detail && detail.cities.length) {
-      const cityListHtml = detail.cities.map(c => 
+      const cityListHtml = detail.cities.map(c =>
         `<div style="margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
           <b>${c.name}</b><br/>
           最高分: ${c.maxScore.toFixed(2)} (来源: ${c.bestSource})<br/>
@@ -439,7 +440,7 @@ const handleChartClick = async (params) => {
     const cityName = params.name
     const cityDetail = cityScatterData.value.find(c => c.name === cityName)
     if (cityDetail) {
-      const srcLines = Object.entries(cityDetail.allScores).map(([src, sc]) => 
+      const srcLines = Object.entries(cityDetail.allScores).map(([src, sc]) =>
         `${src}: ${sc.toFixed(2)}`
       ).join('<br/>')
       await ElMessageBox.alert(
@@ -460,17 +461,19 @@ const handleChartRendered = () => {
 }
 
 // 初始化默认值
-onMounted(() => {
-  if (selectedSources.value.length === 0) {
-    selectedSources.value = [...DEFAULT_SOURCES]
+watch(loaded, (isLoaded) => {
+  if (isLoaded) {
+    if (defaultSources.value && defaultSources.value.length) {
+      selectedSources.value = [...defaultSources.value]
+    }
+    if (defaultDateStart.value && defaultDateEnd.value) {
+      dateRange.value = [defaultDateStart.value, defaultDateEnd.value]
+    }
+    registerChinaMap().then(() => {
+      fetchDataAndRender()
+    })
   }
-  if (!dateRange.value) {
-    dateRange.value = DEFAULT_DATE_RANGE ? [...DEFAULT_DATE_RANGE] : null
-  }
-  registerChinaMap().then(() => {
-    fetchDataAndRender()
-  })
-})
+}, { immediate: true })
 </script>
 
 <style>

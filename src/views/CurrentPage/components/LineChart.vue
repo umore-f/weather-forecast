@@ -494,6 +494,7 @@ watch(hoursList, () => {
 }, { deep: false })
 
 watch(windPieData, () => updateWindPie(), { deep: true })
+// watch(latestData, () => updateCardGauges(), { deep: false })
 
 // 生命周期
 onMounted(() => {
@@ -678,6 +679,7 @@ onUnmounted(() => {
   line-height: 1.2;
 }
 
+/* 手动刷新按钮 */
 .refresh-btn-wrapper {
   text-align: center;
   margin-top: 20px;
@@ -707,6 +709,7 @@ onUnmounted(() => {
   cursor: not-allowed;
 }
 
+/* 移动端适配 */
 @media (max-width: 768px) {
   .dashboard {
     padding: 12px;

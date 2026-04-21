@@ -1,31 +1,25 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
-  // 动态路由示例
   {
     path: '/home',
     name: 'home',
-    component: () => import('../views/CurrentPage/CurrentWeather.vue')
-  },
-  {
-    path: '/about',
-    name: 'about',
-    component: () => import('../views/AboutPage/AboutPage.vue')
+    component: () => import('@/views/CurrentPage/CurrentWeather.vue')
   },
   {
     path: '/analyse',
     name: 'analyse',
-    component: () => import('../views/AnalysePage/WeatherChartContainer.vue')
+    component: () => import('@/views/AnalysePage/WeatherChartContainer.vue')
   },
   {
     path: '/score',
     name: 'score',
-    component: () => import('../views/ScorePage/index.vue')
+    component: () => import('@/views/ScorePage/index.vue')
   },
   {
     path: '/user',
     name: 'user',
-    component: () => import('../views/UserPage/UserPage.vue')
+    component: () => import('@/views/UserPage/UserPage.vue'),
   },
 ]
 

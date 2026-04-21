@@ -261,7 +261,7 @@ const handleCityChange = (cityName) => {
   // 停止旧轮询
   stopPolling()
   // 更新城市
-  selectedCity.value = cityName
+    selectedCity.value = cityName
   // 立即刷新新城市的数据
   refreshAllData()
   // 重新启动轮询（基于新城市）

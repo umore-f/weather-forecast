@@ -1,6 +1,10 @@
 <template>
   <div class="error-analysis">
     <!-- 全局筛选卡片（玻璃态） -->
+    {{ globalDateRange }}
+    {{ globalCity }}
+    {{ globalSource }}
+    {{ selectedField }}
     <el-card class="global-filter-card" shadow="never">
       <template #header>
         <div class="card-header">
@@ -9,7 +13,9 @@
             <span>全局筛选条件</span>
           </div>
           <el-tooltip content="所有图表将基于以下条件展示数据" placement="top">
-            <el-icon class="help-icon"><QuestionFilled /></el-icon>
+            <el-icon class="help-icon">
+              <QuestionFilled />
+            </el-icon>
           </el-tooltip>
         </div>
       </template>
@@ -31,7 +37,7 @@
         </el-col>
         <el-col :xs="24" :sm="12" :md="6">
           <el-select v-model="selectedField" @change="changeSingleField" placeholder="天气字段（单选）" clearable filterable>
-            <el-option v-for="f in fieldOptionsShort1" :key="f.value" :label="f.label" :value="f.value" />
+            <el-option v-for="f in fieldOptionsShort" :key="f.value" :label="f.label" :value="f.value" />
           </el-select>
         </el-col>
         <el-col :xs="24" :sm="12" :md="6">
@@ -47,11 +53,15 @@
       <el-row style="margin-top: 20px">
         <el-col :span="24" class="filter-actions">
           <el-button type="primary" @click="handleGlobalQuery" :loading="globalQueryLoading" class="query-btn">
-            <el-icon><Refresh /></el-icon> 刷新
+            <el-icon>
+              <Refresh />
+            </el-icon> 刷新
           </el-button>
           <el-button @click="resetGlobalFilters" class="reset-btn">重置</el-button>
           <el-tag v-if="globalCity.length && globalSource.length" type="info" effect="plain" class="filter-tag">
-            <el-icon><Filter /></el-icon>
+            <el-icon>
+              <Filter />
+            </el-icon>
             已选 {{ globalCity.length }} 个城市 · {{ globalSource.length }} 个数据源
           </el-tag>
         </el-col>
@@ -68,7 +78,9 @@
           </div>
           <div class="header-actions">
             <el-tooltip content="箱线图和折线图受【天气字段】影响；热力图展示所有字段的平均误差" placement="top">
-              <el-icon class="help-icon"><QuestionFilled /></el-icon>
+              <el-icon class="help-icon">
+                <QuestionFilled />
+              </el-icon>
             </el-tooltip>
           </div>
         </div>
@@ -127,7 +139,9 @@
           <div class="header-actions">
             <span v-if="selectedField" class="field-badge">{{ getFieldLabel(selectedField) }}</span>
             <el-tooltip content="颜色越深表示误差越大" placement="top">
-              <el-icon class="help-icon"><QuestionFilled /></el-icon>
+              <el-icon class="help-icon">
+                <QuestionFilled />
+              </el-icon>
             </el-tooltip>
           </div>
         </div>
@@ -148,7 +162,9 @@
             <span>误差明细数据</span>
           </div>
           <el-button size="small" type="primary" @click="exportTableCSV" class="export-btn">
-            <el-icon><Download /></el-icon> 导出 CSV
+            <el-icon>
+              <Download />
+            </el-icon> 导出 CSV
           </el-button>
         </div>
       </template>
@@ -158,40 +174,52 @@
         <el-table-column prop="source" label="数据来源" width="120" />
         <el-table-column prop="target_date" label="日期" sortable="custom" width="120" />
         <el-table-column prop="temp" label="气温原始误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp)">{{ row.temp.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp)">{{ row.temp.toFixed(2)
+              }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="temp_ewma_error" label="气温EWMA误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp_ewma_error)">{{ row.temp_ewma_error.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp_ewma_error)">{{
+            row.temp_ewma_error.toFixed(2) }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="temp_max" label="最高温原始误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp_max)">{{ row.temp_max.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp_max)">{{ row.temp_max.toFixed(2)
+              }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="temp_max_ewma_error" label="最高温EWMA误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp_max_ewma_error)">{{ row.temp_max_ewma_error.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp_max_ewma_error)">{{
+            row.temp_max_ewma_error.toFixed(2) }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="temp_min" label="最低温原始误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp_min)">{{ row.temp_min.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp_min)">{{ row.temp_min.toFixed(2)
+              }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="temp_min_ewma_error" label="最低温EWMA误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp_min_ewma_error)">{{ row.temp_min_ewma_error.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.temp_min_ewma_error)">{{
+            row.temp_min_ewma_error.toFixed(2) }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="humidity" label="湿度原始误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.humidity)">{{ row.humidity.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.humidity)">{{ row.humidity.toFixed(2)
+              }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="humidity_ewma_error" label="湿度EWMA误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.humidity_ewma_error)">{{ row.humidity_ewma_error.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.humidity_ewma_error)">{{
+            row.humidity_ewma_error.toFixed(2) }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="precip" label="降雨量原始误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.precip)">{{ row.precip.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.precip)">{{ row.precip.toFixed(2)
+              }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="precip_ewma_error" label="降雨量EWMA误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.precip_ewma_error)">{{ row.precip_ewma_error.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.precip_ewma_error)">{{
+            row.precip_ewma_error.toFixed(2) }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="pressure" label="气压原始误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.pressure)">{{ row.pressure.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.pressure)">{{ row.pressure.toFixed(2)
+              }}</el-tag></template>
         </el-table-column>
         <el-table-column prop="pressure_ewma_error" label="气压EWMA误差" sortable="custom" width="150">
-          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.pressure_ewma_error)">{{ row.pressure_ewma_error.toFixed(2) }}</el-tag></template>
+          <template #default="{ row }"><el-tag size="small" :type="getErrorTag(row.pressure_ewma_error)">{{
+            row.pressure_ewma_error.toFixed(2) }}</el-tag></template>
         </el-table-column>
       </el-table>
       <el-config-provider :locale="customPaginationLocale">
@@ -204,12 +232,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled, Refresh, Filter, Download } from '@element-plus/icons-vue'
 import { errorScoreApi } from '@/apis/score'
-import { cityOptions, fieldOptionsShort1, sourceOptions, DEFAULT_CITIES, DEFAULT_SOURCES, DEFAULT_DATE_RANGE } from '@/constants/weatherOptions'
+import { cityOptions, fieldOptionsShort, sourceOptions } from '@/constants/weatherOptions'
 import dayjs from 'dayjs'
+import { useUserPreferences } from '@/composables/useUserPreferences'
+const { defaultCities, defaultSources, defaultFields, defaultDateStart, defaultDateEnd, loaded } = useUserPreferences()
 
 // -------------------- 全局筛选状态 --------------------
 const globalCity = ref([])
@@ -691,14 +721,24 @@ const changeSingleField = (value) => {
   ElMessage.success(`已切换到字段：${getFieldLabel(value)}，图表将自动更新`)
 }
 
-onMounted(() => {
-  if (!globalCity.value.length) globalCity.value = DEFAULT_CITIES
-  if (!globalSource.value.length) globalSource.value = DEFAULT_SOURCES
-  if (!globalDateRange.value) globalDateRange.value = DEFAULT_DATE_RANGE
-  globalFields.value = fieldOptionsShort1.map(f => f.value)
-  if (fieldOptionsShort1.length && !selectedField.value) selectedField.value = fieldOptionsShort1[0].value
-  handleGlobalQuery()
-})
+// 监听 loaded 变为 true 时，再将设置值赋给本地变量
+watch(loaded, (isLoaded) => {
+  if (isLoaded) {
+    if (defaultCities.value && defaultCities.value.length) {
+      globalCity.value = [...defaultCities.value]
+    }
+    if (defaultSources.value && defaultSources.value.length) {
+      globalSource.value = [...defaultSources.value]
+    }
+    if (defaultFields.value && defaultFields.value.length) {
+      selectedField.value = defaultFields.value[0]
+    }
+    if (defaultDateStart.value && defaultDateEnd.value) {
+      globalDateRange.value = [defaultDateStart.value, defaultDateEnd.value]
+    }
+    handleGlobalQuery()
+  }
+}, { immediate: true })  // immediate 确保如果已经加载完成则立即执行
 </script>
 
 <style scoped>
@@ -757,6 +797,7 @@ onMounted(() => {
   cursor: pointer;
   transition: color 0.2s;
 }
+
 .help-icon:hover {
   color: #3b82f6;
 }
@@ -782,6 +823,7 @@ onMounted(() => {
   box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
   transition: all 0.2s;
 }
+
 .query-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
@@ -790,6 +832,7 @@ onMounted(() => {
 .reset-btn {
   transition: all 0.2s;
 }
+
 .reset-btn:hover {
   transform: translateY(-1px);
 }
@@ -845,10 +888,12 @@ onMounted(() => {
   background: #eff6ff;
   color: #1e40af;
 }
+
 .field-badge.warning {
   background: #fffbeb;
   color: #d97706;
 }
+
 .field-badge.info {
   background: #e6f7e6;
   color: #2e7d32;
@@ -864,24 +909,29 @@ onMounted(() => {
   border-radius: 20px;
   overflow: hidden;
 }
+
 :deep(.el-table th) {
   background: #f8fafc;
   font-weight: 600;
   color: #1e293b;
 }
+
 :deep(.el-table .even-row) {
   background-color: #fafbff;
 }
+
 :deep(.el-tag--success) {
   background-color: #e0f2fe;
   border-color: #bae6fd;
   color: #0369a1;
 }
+
 :deep(.el-tag--warning) {
   background-color: #ffedd5;
   border-color: #fed7aa;
   color: #b45309;
 }
+
 :deep(.el-tag--danger) {
   background-color: #fee2e2;
   border-color: #fecaca;
@@ -892,12 +942,14 @@ onMounted(() => {
 :deep(.el-pagination) {
   padding: 16px 0 8px;
 }
+
 :deep(.el-pagination .btn-prev),
 :deep(.el-pagination .btn-next),
 :deep(.el-pagination .el-pager li) {
   border-radius: 8px;
   margin: 0 4px;
 }
+
 :deep(.el-pagination .el-pager li.active) {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
@@ -909,10 +961,13 @@ onMounted(() => {
   .error-analysis {
     padding: 12px;
   }
+
   .card-header {
     font-size: 16px;
   }
-  .chart-half, .chart-full {
+
+  .chart-half,
+  .chart-full {
     padding: 12px;
   }
 }

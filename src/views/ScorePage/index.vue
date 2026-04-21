@@ -11,9 +11,6 @@
       <el-tab-pane label="地图" name="map">
         <MapAnalysis />
       </el-tab-pane>
-      <!-- <el-tab-pane label="表格" name="table">
-        <div>全部数据表格</div>
-      </el-tab-pane> -->
     </el-tabs>
   </div>
 </template>

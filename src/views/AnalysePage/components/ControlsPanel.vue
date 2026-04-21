@@ -1,5 +1,6 @@
 <template>
   <div class="controls-panel">
+
     <!-- 城市 -->
     <div class="control-group">
       <div class="control-header">
@@ -372,6 +373,7 @@ watch(localChartType, (newType) => {
 .control-group {
   margin-bottom: 24px;
 }
+
 .control-group:last-child {
   margin-bottom: 0;
 }
@@ -397,6 +399,7 @@ watch(localChartType, (newType) => {
   padding: 0 6px;
   transition: color 0.2s, transform 0.2s;
 }
+
 .control-header .el-button--text:hover {
   color: #3b82f6;
   transform: translateX(2px);
@@ -411,12 +414,14 @@ watch(localChartType, (newType) => {
   max-height: none;
   overflow: visible;
 }
+
 .horizontal-checkbox-group:not(.expanded) {
   max-height: 52px;
   overflow: hidden;
   mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 }
+
 .horizontal-checkbox-group.expanded {
   max-height: 500px;
   overflow-y: auto;
@@ -432,25 +437,30 @@ watch(localChartType, (newType) => {
   margin-right: 0;
   transition: all 0.15s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
+
 :deep(.el-checkbox__input) {
   margin-right: 8px;
 }
+
 :deep(.el-checkbox__label) {
   font-size: 14px;
   color: #334155;
   padding-left: 0;
   font-weight: 500;
 }
+
 :deep(.el-checkbox.is-checked) {
   background: #ffffff;
   border-color: #3b82f6;
   box-shadow: 0 0 0 1px #3b82f6;
   transform: scale(0.98);
 }
+
 :deep(.el-checkbox.is-checked .el-checkbox__label) {
   color: #1e40af;
   font-weight: 600;
 }
+
 :deep(.el-checkbox:hover) {
   border-color: #cbd5e1;
   transform: translateY(-1px);
@@ -463,6 +473,7 @@ watch(localChartType, (newType) => {
   gap: 8px;
   margin-bottom: 12px;
 }
+
 .date-quick-buttons .el-button {
   border-radius: 10px;
   padding: 5px 12px;
@@ -476,9 +487,11 @@ watch(localChartType, (newType) => {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02), inset 0 0 0 1px #e2e8f0;
   transition: all 0.2s;
 }
+
 :deep(.el-input__wrapper:hover) {
   box-shadow: 0 0 0 1px #3b82f6 inset;
 }
+
 :deep(.el-input__wrapper.is-focus) {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2), 0 0 0 1px #3b82f6 inset;
 }
@@ -490,6 +503,7 @@ watch(localChartType, (newType) => {
   border-top: 1px solid #eef2f6;
   position: relative;
 }
+
 .extra-controls::before {
   content: '';
   position: absolute;
@@ -507,6 +521,7 @@ watch(localChartType, (newType) => {
   background: #f1f5f9;
   border-radius: 16px;
 }
+
 .range-item {
   display: flex;
   align-items: center;
@@ -514,6 +529,7 @@ watch(localChartType, (newType) => {
   flex-wrap: wrap;
   gap: 8px;
 }
+
 .field-label {
   width: 100px;
   font-size: 14px;
@@ -524,6 +540,7 @@ watch(localChartType, (newType) => {
   border-radius: 20px;
   text-align: center;
 }
+
 .range-buttons {
   margin-top: 16px;
   text-align: right;
@@ -531,6 +548,7 @@ watch(localChartType, (newType) => {
   gap: 12px;
   justify-content: flex-end;
 }
+
 .range-buttons .el-button {
   border-radius: 20px;
   padding: 8px 20px;
@@ -540,12 +558,15 @@ watch(localChartType, (newType) => {
 @media (max-width: 1400px) {
   .horizontal-checkbox-group { grid-template-columns: repeat(5, 1fr); }
 }
+
 @media (max-width: 1200px) {
   .horizontal-checkbox-group { grid-template-columns: repeat(4, 1fr); }
 }
+
 @media (max-width: 992px) {
   .horizontal-checkbox-group { grid-template-columns: repeat(3, 1fr); }
 }
+
 @media (max-width: 768px) {
   .controls-panel { padding: 20px; }
   .horizontal-checkbox-group { grid-template-columns: repeat(2, 1fr); }

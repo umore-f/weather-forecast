@@ -263,12 +263,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled, Filter, Download } from '@element-plus/icons-vue'
 import { errorScoreApi } from '@/apis/score'
-import { cityOptions, sourceOptions, DEFAULT_CITIES, DEFAULT_SOURCES, DEFAULT_DATE_RANGE } from '@/constants/weatherOptions'
+import { cityOptions, sourceOptions } from '@/constants/weatherOptions'
 import dayjs from 'dayjs'
+import { useUserPreferences } from '@/composables/useUserPreferences'
+const { defaultCities, defaultSources, defaultDateStart, defaultDateEnd, loaded } = useUserPreferences()
 
 // 分页国际化
 const customPaginationLocale = {
@@ -931,12 +933,20 @@ const resetGlobalFilters = () => {
   refreshAllCharts()
 }
 
-onMounted(() => {
-  if (!globalFilterCity.value.length) globalFilterCity.value = DEFAULT_CITIES
-  if (!globalFilterSource.value.length) globalFilterSource.value = DEFAULT_SOURCES
-  if (!globalFilterDateRange.value) globalFilterDateRange.value = DEFAULT_DATE_RANGE
-  refreshAllCharts()
-})
+watch(loaded, (isLoaded) => {
+  if (isLoaded) {
+    if (defaultCities.value && defaultCities.value.length) {
+      globalFilterCity.value = [...defaultCities.value]
+    }
+    if (defaultSources.value && defaultSources.value.length) {
+      globalFilterSource.value = [...defaultSources.value]
+    }
+    if (defaultDateStart.value && defaultDateEnd.value) {
+      globalFilterDateRange.value = [defaultDateStart.value, defaultDateEnd.value]
+    }
+    refreshAllCharts()
+  }
+}, { immediate: true })
 
 // 辅助函数
 const progressColor = (percentage) => {
