@@ -27,6 +27,15 @@
           </span>
         </template>
       </el-tab-pane>
+
+      <el-tab-pane name="user">
+        <template #label>
+          <span>
+            <el-icon :size="20"><User /></el-icon>
+            <span style="margin-left: 6px;">个人</span>
+          </span>
+        </template>
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>

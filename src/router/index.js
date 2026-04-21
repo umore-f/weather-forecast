@@ -22,6 +22,11 @@ const routes = [
     name: 'score',
     component: () => import('../views/ScorePage/index.vue')
   },
+  {
+    path: '/user',
+    name: 'user',
+    component: () => import('../views/UserPage/UserPage.vue')
+  },
 ]
 
 const router = createRouter({

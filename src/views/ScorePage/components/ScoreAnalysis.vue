@@ -15,7 +15,8 @@
           </el-select>
         </el-col>
         <el-col :xs="24" :sm="8">
-          <el-select v-model="globalFilterSource" multiple collapse-tags placeholder="数据来源" clearable style="width: 100%">
+          <el-select v-model="globalFilterSource" multiple collapse-tags placeholder="数据来源" clearable
+            style="width: 100%">
             <el-option v-for="s in sourceOptions" :key="s.value" :label="s.label" :value="s.value" />
           </el-select>
         </el-col>
@@ -33,8 +34,11 @@
         <el-col :span="24">
           <el-button type="primary" @click="refreshAllCharts" :loading="globalLoading" class="query-btn">查询</el-button>
           <el-button @click="resetGlobalFilters" class="reset-btn">重置</el-button>
-          <el-tag v-if="globalFilterCity.length && globalFilterSource.length" type="info" effect="plain" class="filter-tag">
-            <el-icon><Filter /></el-icon>
+          <el-tag v-if="globalFilterCity.length && globalFilterSource.length" type="info" effect="plain"
+            class="filter-tag">
+            <el-icon>
+              <Filter />
+            </el-icon>
             已选 {{ globalFilterCity.length }} 个城市 · {{ globalFilterSource.length }} 个数据源
           </el-tag>
         </el-col>
@@ -65,12 +69,15 @@
             <div class="card-header">
               <span><span class="header-icon">🏆</span> 数据源综合得分排名</span>
               <el-tooltip content="柱顶显示得分及排名，得分最高为第1名" placement="top">
-                <el-icon class="help-icon"><QuestionFilled /></el-icon>
+                <el-icon class="help-icon">
+                  <QuestionFilled />
+                </el-icon>
               </el-tooltip>
             </div>
           </template>
           <div class="chart-container" v-loading="barLoading">
-            <EChartsWrapper v-if="barOptions.series" :options="barOptions" height="400px" :auto-resize="true" @click="handleBarClick" />
+            <EChartsWrapper v-if="barOptions.series" :options="barOptions" height="400px" :auto-resize="true"
+              @click="handleBarClick" />
             <el-empty v-else description="请选择筛选条件并点击查询" :image-size="80" />
           </div>
         </el-card>
@@ -81,13 +88,15 @@
             <div class="card-header">
               <span><span class="header-icon">📡</span> 各数据源维度得分对比（雷达图）</span>
               <el-tooltip content="展示不同数据源在六个维度的平均得分" placement="top">
-                <el-icon class="help-icon"><QuestionFilled /></el-icon>
+                <el-icon class="help-icon">
+                  <QuestionFilled />
+                </el-icon>
               </el-tooltip>
             </div>
           </template>
           <div class="chart-container" v-loading="radarLoading">
-            <EChartsWrapper ref="radarChartRef" v-if="radarOptions.series && radarOptions.series.length" :options="radarOptions"
-              height="400px" :auto-resize="true" @legendselectchanged="onRadarLegendChange" />
+            <EChartsWrapper ref="radarChartRef" v-if="radarOptions.series && radarOptions.series.length"
+              :options="radarOptions" height="400px" :auto-resize="true" @legendselectchanged="onRadarLegendChange" />
             <el-empty v-else description="暂无数据" :image-size="80" />
           </div>
         </el-card>
@@ -102,13 +111,15 @@
             <div class="card-header">
               <span><span class="header-icon">📈</span> 各数据源综合得分趋势</span>
               <el-tooltip content="展示不同数据源随时间的总分变化趋势" placement="top">
-                <el-icon class="help-icon"><QuestionFilled /></el-icon>
+                <el-icon class="help-icon">
+                  <QuestionFilled />
+                </el-icon>
               </el-tooltip>
             </div>
           </template>
           <div class="chart-container" v-loading="lineLoading">
-            <EChartsWrapper ref="lineChartRef" v-if="lineOptions.series && lineOptions.series.length" :options="lineOptions"
-              height="400px" :auto-resize="true" @legendselectchanged="onLineLegendChange" />
+            <EChartsWrapper ref="lineChartRef" v-if="lineOptions.series && lineOptions.series.length"
+              :options="lineOptions" height="400px" :auto-resize="true" @legendselectchanged="onLineLegendChange" />
             <el-empty v-else description="暂无数据" :image-size="80" />
           </div>
         </el-card>
@@ -133,13 +144,15 @@
                   <el-option label="气压" value="pressure_score" />
                 </el-select>
                 <el-tooltip content="点击热力图格子，显示该城市各数据源的6维得分雷达图及趋势" placement="top">
-                  <el-icon class="help-icon"><QuestionFilled /></el-icon>
+                  <el-icon class="help-icon">
+                    <QuestionFilled />
+                  </el-icon>
                 </el-tooltip>
               </div>
             </div>
           </template>
           <div class="heatmap-wrapper" v-loading="heatmapLoading">
-            <EChartsWrapper ref="heatmapChartRef" v-if="heatmapOptions.series" :options="heatmapOptions" height="450px"
+            <EChartsWrapper ref="heatmapChartRef" v-if="heatmapOptions.series" :options="heatmapOptions" height="600px"
               :auto-resize="true" @click="onHeatmapClick" />
             <el-empty v-else description="请选择至少一个城市和一个数据源" :image-size="80" />
           </div>
@@ -158,8 +171,8 @@
             </div>
           </template>
           <div class="chart-container" v-loading="singleCityRadarLoading">
-            <EChartsWrapper v-if="singleCityRadarOptions.series && singleCityRadarOptions.series.length" :options="singleCityRadarOptions"
-              height="400px" :auto-resize="true" />
+            <EChartsWrapper v-if="singleCityRadarOptions.series && singleCityRadarOptions.series.length"
+              :options="singleCityRadarOptions" height="400px" :auto-resize="true" />
             <el-empty v-else description="点击热力图格子，查看城市雷达图" :image-size="80" />
           </div>
         </el-card>
@@ -172,8 +185,8 @@
             </div>
           </template>
           <div class="chart-container" v-loading="singleCityLineLoading">
-            <EChartsWrapper v-if="singleCityLineOptions.series && singleCityLineOptions.series.length" :options="singleCityLineOptions"
-              height="400px" :auto-resize="true" />
+            <EChartsWrapper v-if="singleCityLineOptions.series && singleCityLineOptions.series.length"
+              :options="singleCityLineOptions" height="400px" :auto-resize="true" />
             <el-empty v-else description="暂无趋势数据" :image-size="80" />
           </div>
         </el-card>
@@ -188,7 +201,9 @@
             <div class="card-header">
               <span><span class="header-icon">📊</span> 平行坐标图（按城市分组）</span>
               <el-tooltip content="每个城市的多条线代表不同数据源+日期的得分，线越多对比越丰富" placement="top">
-                <el-icon class="help-icon"><QuestionFilled /></el-icon>
+                <el-icon class="help-icon">
+                  <QuestionFilled />
+                </el-icon>
               </el-tooltip>
             </div>
           </template>
@@ -210,7 +225,9 @@
             <div class="card-header">
               <span><span class="header-icon">📋</span> 得分明细数据</span>
               <el-button size="small" type="primary" @click="exportTableCSV" class="export-btn">
-                <el-icon><Download /></el-icon> 导出 CSV
+                <el-icon>
+                  <Download />
+                </el-icon> 导出 CSV
               </el-button>
             </div>
           </template>
@@ -221,7 +238,8 @@
             <el-table-column prop="target_date" label="日期" sortable="custom" width="120" />
             <el-table-column prop="total_score" label="总分" sortable="custom" width="100">
               <template #default="{ row }">
-                <el-progress :percentage="row.total_score" :format="() => row.total_score.toFixed(1)" :color="progressColor" />
+                <el-progress :percentage="row.total_score" :format="() => row.total_score.toFixed(1)"
+                  :color="progressColor" />
               </template>
             </el-table-column>
             <el-table-column prop="temp_max_score" label="最高温" sortable="custom" width="100" />
@@ -233,9 +251,10 @@
           </el-table>
 
           <el-config-provider :locale="customPaginationLocale">
-            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50, 100]"
-              :total="total" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
-              @current-change="handleCurrentChange" style="margin-top: 16px; justify-content: flex-end;" />
+            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize"
+              :page-sizes="[10, 20, 50, 100]" :total="total" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange" @current-change="handleCurrentChange"
+              style="margin-top: 16px; justify-content: flex-end;" />
           </el-config-provider>
         </el-card>
       </el-col>
@@ -506,7 +525,22 @@ const radarOptions = computed(() => {
   return {
     radar: { indicator: indicators, shape: 'circle', radius: '65%', name: { textStyle: { fontSize: 12, color: '#4b5563' } }, splitArea: { areaStyle: { color: ['rgba(84,112,198,0.05)', 'rgba(84,112,198,0.02)'] } } },
     legend: { data: radarData.value.map(i => i.source), top: 0, right: 10, textStyle: { color: '#333', fontWeight: 500 } },
-    tooltip: { trigger: 'item', formatter: (params) => { /* 省略，同原逻辑 */ return '' } },
+    tooltip: {
+      trigger: 'item',
+      formatter: (params) => {
+        const seriesName = params.seriesName
+        const values = params.value          // 数组，顺序与 indicators 一致
+        if (!values || !fieldMapping) return seriesName
+
+        let result = `${seriesName}<br/>`
+        fieldMapping.forEach((field, idx) => {
+          const rawVal = values[idx] ?? 0
+          const formattedVal = rawVal.toFixed(2)   // 保留两位小数
+          result += `${field.label}: ${formattedVal}<br/>`
+        })
+        return result
+      }
+    },
     series
   }
 })
@@ -559,7 +593,22 @@ const lineOptions = computed(() => {
     idx++
   }
   return {
-    tooltip: { trigger: 'axis' },
+    tooltip: {
+      trigger: 'axis', formatter: function (params) {
+        // params 是一个数组，每个元素对应一个系列（source）
+        if (!params || params.length === 0) return ''
+        // 第一行显示日期（x轴的值）
+        let result = params[0].axisValue + '<br/>'
+        params.forEach(p => {
+          const value = p.value
+          // 将数值格式化为保留两位小数，若为 null 则显示 '-'
+          const formattedValue = (value !== null && value !== undefined) ? value.toFixed(2) : '-'
+          // p.marker 是系列的颜色标记，p.seriesName 是系列名称
+          result += `${p.marker} ${p.seriesName}: ${formattedValue}<br/>`
+        })
+        return result
+      }
+    },
     legend: { data: Array.from(sourceMap.keys()), top: 0, right: 10 },
     xAxis: { type: 'category', data: allDates, name: '日期', axisLabel: { rotate: 30, formatter: v => dayjs(v).format('MM-DD') } },
     yAxis: { type: 'value', name: '平均总分', min: 0, max: 100, splitLine: { lineStyle: { type: 'dashed' } } },
@@ -675,7 +724,26 @@ const singleCityRadarOptions = computed(() => {
     lineStyle: { color: colorList[idx % colorList.length], width: 2 },
     itemStyle: { color: colorList[idx % colorList.length] }
   }))
-  return { radar: { indicator: indicators }, legend: { data: singleCityRadarData.value.map(i => i.source) }, series }
+  return {
+    radar: { indicator: indicators },
+    legend: { data: singleCityRadarData.value.map(i => i.source) },
+    tooltip: {                      // 添加 tooltip 配置
+      trigger: 'item',
+      formatter: (params) => {
+        const seriesName = params.seriesName
+        const values = params.value  // 数组，顺序与 indicators 一致
+        if (!values || !fieldMapping) return seriesName
+        let result = `${seriesName}<br/>`
+        fieldMapping.forEach((field, idx) => {
+          const rawVal = values[idx] ?? 0
+          const formattedVal = rawVal.toFixed(2)   // 保留两位小数
+          result += `${field.label}: ${formattedVal}<br/>`
+        })
+        return result
+      }
+    },
+    series
+  }
 })
 
 const fetchSingleCityLine = async () => {
@@ -930,12 +998,16 @@ const tableRowClassName = ({ rowIndex }) => (rowIndex % 2 === 0 ? 'even-row' : '
   cursor: pointer;
   transition: color 0.2s;
 }
-.help-icon:hover { color: #3b82f6; }
+
+.help-icon:hover {
+  color: #3b82f6;
+}
 
 /* KPI 卡片 */
 .kpi-row {
   margin-bottom: 24px;
 }
+
 .kpi-card {
   background: white;
   border-radius: 24px;
@@ -945,34 +1017,51 @@ const tableRowClassName = ({ rowIndex }) => (rowIndex % 2 === 0 ? 'even-row' : '
   gap: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   transition: all 0.2s;
-  border: 1px solid rgba(0,0,0,0.03);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
+
 .kpi-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
 }
+
 .kpi-icon {
   font-size: 24px;
   opacity: 0.8;
 }
+
 .kpi-content {
   flex: 1;
 }
+
 .kpi-title {
   font-size: 12px;
   color: #64748b;
   letter-spacing: 0.5px;
 }
+
 .kpi-value {
   font-size: 12px;
   font-weight: 700;
   color: #1e293b;
   margin-top: 4px;
 }
-.kpi-primary .kpi-value { color: #3b82f6; }
-.kpi-success .kpi-value { color: #10b981; }
-.kpi-warning .kpi-value { color: #f59e0b; }
-.kpi-info .kpi-value { color: #8b5cf6; }
+
+.kpi-primary .kpi-value {
+  color: #3b82f6;
+}
+
+.kpi-success .kpi-value {
+  color: #10b981;
+}
+
+.kpi-warning .kpi-value {
+  color: #f59e0b;
+}
+
+.kpi-info .kpi-value {
+  color: #8b5cf6;
+}
 
 /* 图表容器 */
 .chart-container {
@@ -980,6 +1069,7 @@ const tableRowClassName = ({ rowIndex }) => (rowIndex % 2 === 0 ? 'even-row' : '
   border-radius: 20px;
   padding: 8px;
 }
+
 .heatmap-wrapper {
   background: #ffffff;
   border-radius: 20px;
@@ -992,14 +1082,17 @@ const tableRowClassName = ({ rowIndex }) => (rowIndex % 2 === 0 ? 'even-row' : '
   display: flex;
   gap: 8px;
 }
+
 .query-btn {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   border: none;
-  box-shadow: 0 2px 6px rgba(59,130,246,0.3);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
 }
+
 .reset-btn {
   transition: all 0.2s;
 }
+
 .filter-tag {
   margin-left: 12px;
   background: #eef2ff;
@@ -1012,28 +1105,46 @@ const tableRowClassName = ({ rowIndex }) => (rowIndex % 2 === 0 ? 'even-row' : '
   border-radius: 20px;
   overflow: hidden;
 }
+
 :deep(.el-table th) {
   background: #f8fafc;
   font-weight: 600;
   color: #1e293b;
 }
+
 :deep(.el-table .even-row) {
   background-color: #fafbff;
 }
+
 :deep(.el-progress-bar__outer) {
   background-color: #e2e8f0;
   border-radius: 12px;
 }
+
 :deep(.el-progress-bar__inner) {
   border-radius: 12px;
 }
 
 /* 响应式 */
 @media (max-width: 768px) {
-  .score-analysis { padding: 12px; }
-  .kpi-card { padding: 16px; }
-  .kpi-icon { font-size: 36px; }
-  .kpi-value { font-size: 24px; }
-  .card-header { font-size: 16px; }
+  .score-analysis {
+    padding: 12px;
+  }
+
+  .kpi-card {
+    padding: 16px;
+  }
+
+  .kpi-icon {
+    font-size: 36px;
+  }
+
+  .kpi-value {
+    font-size: 24px;
+  }
+
+  .card-header {
+    font-size: 16px;
+  }
 }
 </style>
