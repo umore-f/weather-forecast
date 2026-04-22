@@ -3,8 +3,8 @@
   <div class="score-analysis">
     <!-- ========== 全局筛选栏（玻璃态） ========== -->
     <el-card class="global-filter-card" shadow="never">
-      <el-row :gutter="16" align="middle">
-        <el-col :xs="24" :sm="8">
+      <el-row :gutter="12">
+        <el-col :xs="24" :sm="12" :md="9">
           <el-select v-model="globalFilterCity" multiple collapse-tags placeholder="城市" clearable style="width: 100%">
             <template #header>
               <el-checkbox v-model="cityCheckAll" :indeterminate="cityIndeterminate" @change="handleGlobalCityCheckAll">
@@ -14,13 +14,13 @@
             <el-option v-for="c in cityOptions" :key="c.value" :label="c.label" :value="c.value" />
           </el-select>
         </el-col>
-        <el-col :xs="24" :sm="8">
+        <el-col :xs="24" :sm="12" :md="9">
           <el-select v-model="globalFilterSource" multiple collapse-tags placeholder="数据来源" clearable
             style="width: 100%">
             <el-option v-for="s in sourceOptions" :key="s.value" :label="s.label" :value="s.value" />
           </el-select>
         </el-col>
-        <el-col :xs="24" :sm="8">
+        <el-col :xs="24" :sm="12" :md="6">
           <div class="date-quick-buttons">
             <el-button size="small" @click="setQuickDate('yesterday')">昨天</el-button>
             <el-button size="small" @click="setQuickDate('7days')">最近7天</el-button>
@@ -30,9 +30,13 @@
             end-placeholder="结束" value-format="YYYY-MM-DD" style="width: 100%" />
         </el-col>
       </el-row>
-      <el-row style="margin-top: 16px">
-        <el-col :span="24">
-          <el-button type="primary" @click="refreshAllCharts" :loading="globalLoading" class="query-btn">查询</el-button>
+      <el-row style="margin-top: 20px">
+        <el-col :span="24" class="filter-actions">
+          <el-button type="primary" @click="refreshAllCharts" :loading="globalLoading" class="query-btn">
+            <el-icon>
+              <Refresh />
+            </el-icon> 刷新
+          </el-button>
           <el-button @click="resetGlobalFilters" class="reset-btn">重置</el-button>
           <el-tag v-if="globalFilterCity.length && globalFilterSource.length" type="info" effect="plain"
             class="filter-tag">
@@ -265,7 +269,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { QuestionFilled, Filter, Download } from '@element-plus/icons-vue'
+import { QuestionFilled, Filter, Download, Refresh } from '@element-plus/icons-vue'
 import { errorScoreApi } from '@/apis/score'
 import { cityOptions, sourceOptions } from '@/constants/weatherOptions'
 import dayjs from 'dayjs'
@@ -947,7 +951,10 @@ watch(loaded, (isLoaded) => {
     refreshAllCharts()
   }
 }, { immediate: true })
-
+// 选择刷新
+watch([globalFilterCity,globalFilterSource,globalFilterDateRange],()=>{
+  refreshAllCharts()
+})
 // 辅助函数
 const progressColor = (percentage) => {
   if (percentage >= 80) return '#67C23A'
@@ -984,7 +991,12 @@ const tableRowClassName = ({ rowIndex }) => (rowIndex % 2 === 0 ? 'even-row' : '
   transform: translateY(-2px);
   box-shadow: 0 16px 30px rgba(0, 0, 0, 0.08);
 }
-
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 /* 卡片头部 */
 .card-header {
   display: flex;

@@ -1,12 +1,8 @@
 <template>
   <div class="error-analysis">
     <!-- 全局筛选卡片（玻璃态） -->
-    {{ globalDateRange }}
-    {{ globalCity }}
-    {{ globalSource }}
-    {{ selectedField }}
     <el-card class="global-filter-card" shadow="never">
-      <template #header>
+      <!-- <template #header>
         <div class="card-header">
           <div class="header-title">
             <span class="header-icon">⚙️</span>
@@ -18,7 +14,7 @@
             </el-icon>
           </el-tooltip>
         </div>
-      </template>
+      </template> -->
       <el-row :gutter="20">
         <el-col :xs="24" :sm="12" :md="6">
           <el-select v-model="globalCity" multiple collapse-tags placeholder="城市" clearable filterable>
@@ -841,7 +837,7 @@ watch(loaded, (isLoaded) => {
   background: #eef2ff;
   border: none;
   color: #1e40af;
-  margin-left: auto;
+  margin-left: 12px;
 }
 
 /* ========== 图表布局 ========== */

@@ -25,12 +25,12 @@
           <span class="temp-value">{{ displayTemp }}</span>
           <span class="temp-unit">°C</span>
         </div>
-        <div class="feels-like">
+        <!-- <div class="feels-like">
           体感 {{ feelsLike }}°
-        </div>
+        </div> -->
       </div>
 
-      <!-- 底部指标：湿度 / 风速 / 紫外线 -->
+      <!-- 底部指标：湿度 / 大气压 / 降雨量 -->
       <div class="metrics">
         <div class="metric-item">
           <span class="metric-icon">💧</span>
@@ -42,8 +42,8 @@
         <div class="metric-item">
           <span class="metric-icon">💨</span>
           <div class="metric-info">
-            <span class="metric-label">风速</span>
-            <span class="metric-value">{{ windSpeed }} km/h</span>
+            <span class="metric-label">大气压</span>
+            <span class="metric-value">{{ windSpeed }} hPa</span>
           </div>
         </div>
         <div class="metric-item">
@@ -96,10 +96,10 @@ const displayTemp = computed(() => {
   return temp !== undefined && temp !== null ? Math.round(temp) : '--'
 })
 
-const feelsLike = computed(() => {
-  const fl = props.weather?.feelslike
-  return fl !== undefined && fl !== null ? Math.round(fl) : '--'
-})
+// const feelsLike = computed(() => {
+//   const fl = props.weather?.feelslike
+//   return fl !== undefined && fl !== null ? Math.round(fl) : '--'
+// })
 
 const weatherPrecipitation = computed(() => {
   const p = props.weather?.precipitation

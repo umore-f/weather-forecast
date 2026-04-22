@@ -42,6 +42,14 @@ export const fieldScoreOptions = [
   { label: '降水量', value: 'precip' },
   { label: '气压', value: 'pressure' }
 ]
+export const fieldScoreOptions2 = [
+  { label: '最高温度', value: 'temp_max' },
+  { label: '最低温度', value: 'temp_min' },
+  { label: '平均温度', value: 'temp' },
+  { label: '相对湿度', value: 'humidity' },
+  { label: '降水量', value: 'precip_total' },
+  { label: '气压', value: 'pressure' }
+]
 export const cityCoordinates = {
   '北京': [116.4074, 39.9042],
   '上海': [121.4737, 31.2304],
@@ -90,7 +98,7 @@ export const cityToProvince = {
 }
 // 辅助：根据字段值获取label
 export const getFieldLabel = (value) => {
-  const field = fieldOptions.find(f => f.value === value)
+  const field = fieldScoreOptions.find(f => f.value === value)
   return field ? field.label : value
 }
 

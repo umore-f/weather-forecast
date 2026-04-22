@@ -128,8 +128,8 @@ watch(loaded, (isLoaded) => {
     showSource.value = (firstSource === 'QWeather')   // true=和风, false=tomorrow.io
     emitter.emit('source', showSource.value)
   } else {
-    showSource.value = 'QWeather'
-    emitter.emit('source', 'QWeather')  // 未登录或无设置，开关置为未选中（或禁用）
+    showSource.value = true
+    emitter.emit('source', true)  // 未登录或无设置，开关置为未选中（或禁用）
   }
 }, { immediate: true })
 const handleSelect = (item) => {

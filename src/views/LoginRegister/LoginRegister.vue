@@ -64,11 +64,14 @@ import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { adminLogin } from '@/apis/admin'
 import { register, userLogin } from '@/apis/user'
-
+import { useRouter } from 'vue-router'
+import { emitter } from '@/utils/eventBus'
+const router = useRouter()
 const emit = defineEmits(['login-success'])
 const activeTab = ref('login')
 const loading = ref(false)
-
+import { useUserSettingsStore } from '@/store/userSettings'
+const settingsStore = useUserSettingsStore()
 // 登录表单
 const loginForm = reactive({
   role: 'user',
@@ -129,7 +132,11 @@ const registerRules = {
 const handleLogin = async () => {
   const valid = await loginFormRef.value.validate()
   if (!valid) return
-
+  // 清空旧数据
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  localStorage.removeItem('role')
+  settingsStore.reset()  // 重置 store
   loading.value = true
   try {
     let response
@@ -146,12 +153,21 @@ const handleLogin = async () => {
     }
 
     const { token, user, admin } = response.data
+    if (user&&!user.is_life) {
+      ElMessage.error('该账户已禁用!')
+      return
+    }
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(user || admin))
     localStorage.setItem('role', loginForm.role)
-
+    emitter.emit('userLoggedIn')
     ElMessage.success(response.data.message)
-    emit('login-success')
+
+    if (loginForm.role === 'admin') {
+      router.push('/admin/users')   // 跳转到管理员页面
+    } else {
+      router.push('/user')
+    }
   } catch (error) {
     ElMessage.error(error.response?.data?.message || '登录失败')
   } finally {

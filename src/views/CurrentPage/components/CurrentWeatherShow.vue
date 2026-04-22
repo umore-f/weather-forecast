@@ -43,7 +43,7 @@
 
 <script setup>
 import WeatherHoursCard from '../../../components/WeatherCard.vue'
-import { ref, computed, onMounted, onUnmounted, } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { weatherApi } from '../../../apis/weatherApi'
 import { errorScoreApi } from '../../../apis/score'
 import { emitter } from '../../../utils/eventBus'
@@ -51,7 +51,10 @@ import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { useUserPreferences } from '@/composables/useUserPreferences'
 
+// 用户设置
+const { defaultCities, defaultSources, loaded } = useUserPreferences()
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -239,9 +242,10 @@ const startPolling = () => {
   if (pollingTimer.value) return
 
   const poll = async () => {
+    // 如果城市为空，跳过本次刷新，等待下次轮询（或直接返回）
+    if (!selectedCity.value) return
     await refreshAllData()
-    // 递归调度，2小时后再次执行
-    pollingTimer.value = setTimeout(poll, 2 * 60 * 60 * 1000) // 7200000 ms
+    pollingTimer.value = setTimeout(poll, 2 * 60 * 60 * 1000)
   }
 
   // 立即执行第一次拉取（不再依赖 onMounted 中的手动调用）
@@ -258,11 +262,12 @@ const stopPolling = () => {
 // ---------- 事件处理 ----------
 // 城市切换事件（重置轮询）
 const handleCityChange = (cityName) => {
+
   if (!cityName) return
   // 停止旧轮询
   stopPolling()
   // 更新城市
-    selectedCity.value = cityName
+  selectedCity.value = cityName
   // 立即刷新新城市的数据
   refreshAllData()
   // 重新启动轮询（基于新城市）
@@ -275,7 +280,25 @@ const switchSource = (useHeFeng) => {
   daysList.value = useHeFeng ? hfdaysList.value : tidaysList.value
   currentScoreList.value = useHeFeng ? heFengScoreList.value : tiScoreList.value
 }
+// 监听用户设置加载完成，应用默认城市和数据源
+watch(loaded, (isLoaded) => {
+  if (!isLoaded) return
 
+  // 处理默认城市
+  if (defaultCities.value && defaultCities.value.length > 0) {
+    const defaultCity = defaultCities.value[0]
+    selectedCity.value = defaultCity
+  } else {
+    selectedCity.value = '北京'
+  }
+  // 处理默认数据源
+  if (defaultSources.value && defaultSources.value.length > 0) {
+    const firstSource = defaultSources.value[0]
+    currentSource.value = (firstSource === 'QWeather')   // true=和风, false=tomorrow.io
+  } else {
+    currentSource.value = true
+  }
+}, { immediate: true })
 // 生命周期
 onMounted(() => {
   emitter.on('cityName', handleCityChange)

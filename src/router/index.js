@@ -19,8 +19,19 @@ const routes = [
   {
     path: '/user',
     name: 'user',
-    component: () => import('@/views/UserPage/UserPage.vue'),
+    component: () => import('@/views/UserPage/UserSetting.vue'),
   },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/LoginRegister/LoginRegister.vue'),
+  },
+  {
+    path: '/admin/users',
+    name: 'AdminUsers',
+    component: () => import('@/views/AdminPage/AdminPage.vue'),
+    meta: { requiresAuth: true, role: 'admin' }  // 需要角色验证
+  }
 ]
 
 const router = createRouter({

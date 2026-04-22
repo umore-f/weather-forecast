@@ -1,6 +1,5 @@
 <template>
   <div class="controls-panel">
-
     <!-- 城市 -->
     <div class="control-group">
       <div class="control-header">
@@ -13,13 +12,8 @@
           {{ isCityExpanded ? '收起' : '展开' }}
         </el-button>
       </div>
-      <el-checkbox-group
-        v-if="!isHeatmap"
-        v-model="selectedCitiesModel"
-        :max="cityMaxSelection"
-        class="horizontal-checkbox-group"
-        :class="{ expanded: isCityExpanded }"
-      >
+      <el-checkbox-group v-if="!isHeatmap" v-model="selectedCitiesModel" :max="cityMaxSelection"
+        class="horizontal-checkbox-group" :class="{ expanded: isCityExpanded }">
         <el-checkbox v-for="city in cityOptions" :key="city.value" :value="city.value" :label="city.label" />
       </el-checkbox-group>
       <el-select v-else v-model="selectedCitiesModel" placeholder="请选择城市" style="width: 100%">
@@ -35,21 +29,16 @@
           <span v-if="isLineOrBarOrRadar">（最多选 {{ maxFields }} 个）</span>
           <span v-else-if="isHeatmap">（单选）</span>
         </label>
-        <el-button v-if="isLineOrBarOrRadar" type="text" @click="toggleFieldsExpand">
+        <!-- <el-button v-if="isLineOrBarOrRadar" type="text" @click="toggleFieldsExpand">
           {{ isFieldsExpanded ? '收起' : '展开' }}
-        </el-button>
+        </el-button> -->
       </div>
-      <el-checkbox-group
-        v-if="isLineOrBarOrRadar"
-        v-model="selectedFieldsModel"
-        :max="maxFields"
-        class="horizontal-checkbox-group"
-        :class="{ expanded: isFieldsExpanded }"
-      >
-        <el-checkbox v-for="field in fieldOptions" :key="field.value" :value="field.value" :label="field.label" />
+      <el-checkbox-group v-if="isLineOrBarOrRadar" v-model="selectedFieldsModel" :max="maxFields"
+        class="horizontal-checkbox-group" :class="{ expanded: isFieldsExpanded }">
+        <el-checkbox v-for="field in fieldScoreOptions" :key="field.value" :value="field.value" :label="field.label" />
       </el-checkbox-group>
       <el-select v-else-if="isHeatmap" v-model="selectedFieldsModel" placeholder="请选择字段" style="width: 100%">
-        <el-option v-for="field in fieldOptions" :key="field.value" :label="field.label" :value="field.value" />
+        <el-option v-for="field in fieldScoreOptions" :key="field.value" :label="field.label" :value="field.value" />
       </el-select>
     </div>
 
@@ -63,16 +52,8 @@
             <el-button size="small" @click="setQuickDate('7days')">最近7天</el-button>
             <el-button size="small" @click="setQuickDate('30days')">最近30天</el-button>
           </div>
-          <el-date-picker
-            v-model="dateRangeModel"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            value-format="YYYY-MM-DD"
-            style="width: 100%"
-            :disabled="isBarOrRadar"
-          />
+          <el-date-picker v-model="dateRangeModel" type="daterange" range-separator="至" start-placeholder="开始日期"
+            end-placeholder="结束日期" value-format="YYYY-MM-DD" style="width: 100%" :disabled="isBarOrRadar" />
         </div>
       </el-col>
       <el-col :span="8">
@@ -80,7 +61,8 @@
           <label>数据来源</label>
           <el-select v-model="selectedSourceModel" placeholder="请选择数据源" :multiple="!isHeatmap"
             :multiple-limit="isHeatmap ? undefined : 3" style="width: 100%">
-            <el-option v-for="source in sourceOptions" :key="source.value" :label="source.label" :value="source.value" />
+            <el-option v-for="source in sourceOptions" :key="source.value" :label="source.label"
+              :value="source.value" />
           </el-select>
         </div>
       </el-col>
@@ -118,7 +100,7 @@
           <div class="control-group">
             <label>X轴字段</label>
             <el-select v-model="scatterXModel" placeholder="选择字段" style="width: 100%">
-              <el-option v-for="field in fieldOptions" :key="field.value" :label="field.label" :value="field.value" />
+              <el-option v-for="field in fieldScoreOptions" :key="field.value" :label="field.label" :value="field.value" />
             </el-select>
           </div>
         </el-col>
@@ -126,7 +108,7 @@
           <div class="control-group">
             <label>Y轴字段</label>
             <el-select v-model="scatterYModel" placeholder="选择字段" style="width: 100%">
-              <el-option v-for="field in fieldOptions" :key="field.value" :label="field.label" :value="field.value" />
+              <el-option v-for="field in fieldScoreOptions" :key="field.value" :label="field.label" :value="field.value" />
             </el-select>
           </div>
         </el-col>
@@ -134,15 +116,12 @@
     </div>
 
     <!-- 雷达图手动范围配置 -->
-    <div v-if="localChartType === 'radar'" class="extra-controls">
+    <!-- <div v-if="localChartType === 'radar'" class="extra-controls">
       <el-row :gutter="20">
         <el-col :span="24">
           <div class="control-group">
             <div class="control-header">
               <label>雷达图轴范围（留空则自动计算）</label>
-              <el-button type="text" @click="toggleRadarRangeExpand">
-                {{ isRadarRangeExpanded ? '收起' : '展开' }}
-              </el-button>
             </div>
             <div v-if="isRadarRangeExpanded" class="radar-range-config">
               <div v-for="field in localSelectedFields" :key="field" class="range-item">
@@ -161,15 +140,23 @@
           </div>
         </el-col>
       </el-row>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { cityOptions, fieldOptions, sourceOptions, getFieldLabel } from '../../../constants/weatherOptions'
+import { cityOptions, fieldScoreOptions, sourceOptions,} from '../../../constants/weatherOptions'
 import dayjs from 'dayjs'
-
+import { useUserPreferences } from '@/composables/useUserPreferences'
+const {
+  defaultCities,
+  defaultFields,
+  defaultSources,
+  defaultDateStart,
+  defaultDateEnd,
+  loaded
+} = useUserPreferences()
 const props = defineProps({
   selectedCities: { type: Array, default: () => [] },
   selectedFields: { type: Array, default: () => [] },
@@ -241,9 +228,9 @@ const maxFields = computed(() => localChartType.value === 'radar' ? 6 : 2)
 
 // 展开状态
 const isCityExpanded = ref(false)
-const isFieldsExpanded = ref(false)
+const isFieldsExpanded = ref(true)
 const toggleCityExpand = () => { isCityExpanded.value = !isCityExpanded.value }
-const toggleFieldsExpand = () => { isFieldsExpanded.value = !isFieldsExpanded.value }
+// const toggleFieldsExpand = () => { isFieldsExpanded.value = !isFieldsExpanded.value }
 
 // 快捷日期
 const setQuickDate = (type) => {
@@ -269,7 +256,7 @@ const setQuickDate = (type) => {
 
 // 雷达图手动范围相关
 const radarRangeManual = ref({})
-const isRadarRangeExpanded = ref(false)
+// const isRadarRangeExpanded = ref(false)
 
 const initRadarRangeManual = () => {
   const newObj = {}
@@ -287,68 +274,78 @@ const initRadarRangeManual = () => {
 }
 watch(() => props.selectedFields, () => initRadarRangeManual(), { immediate: true })
 
-const applyRadarRanges = () => {
-  const validRanges = {}
-  Object.keys(radarRangeManual.value).forEach(field => {
-    const { min, max } = radarRangeManual.value[field]
-    if (min !== null && max !== null && !isNaN(min) && !isNaN(max)) {
-      validRanges[field] = { min, max }
+// const applyRadarRanges = () => {
+//   const validRanges = {}
+//   Object.keys(radarRangeManual.value).forEach(field => {
+//     const { min, max } = radarRangeManual.value[field]
+//     if (min !== null && max !== null && !isNaN(min) && !isNaN(max)) {
+//       validRanges[field] = { min, max }
+//     }
+//   })
+//   emit('update:radarRanges', validRanges)
+// }
+// const resetRadarRanges = () => {
+//   const newObj = {}
+//   props.selectedFields.forEach(field => {
+//     newObj[field] = { min: null, max: null }
+//   })
+//   radarRangeManual.value = newObj
+//   emit('update:radarRanges', {})
+// }
+// const toggleRadarRangeExpand = () => {
+//   isRadarRangeExpanded.value = !isRadarRangeExpanded.value
+// }
+
+watch([loaded, localChartType], ([isLoaded, newChartType]) => {
+
+  if (!isLoaded) return
+
+  // 城市设置
+  if (defaultCities.value && defaultCities.value.length > 0) {
+    if (newChartType == 'heatmap') {
+      selectedCitiesModel.value = defaultCities.value[0]
+    } else {
+      selectedCitiesModel.value = defaultCities.value.slice(0, 2)
     }
-  })
-  emit('update:radarRanges', validRanges)
-}
-const resetRadarRanges = () => {
-  const newObj = {}
-  props.selectedFields.forEach(field => {
-    newObj[field] = { min: null, max: null }
-  })
-  radarRangeManual.value = newObj
-  emit('update:radarRanges', {})
-}
-const toggleRadarRangeExpand = () => {
-  isRadarRangeExpanded.value = !isRadarRangeExpanded.value
-}
-
-// ----- 图表类型切换时的智能预设 -----
-watch(localChartType, (newType) => {
-  // 1. 预设字段
-  if (newType === 'line' || newType === 'bar') {
-    const defaultFields = fieldOptions.slice(0, 2).map(f => f.value)
-    selectedFieldsModel.value = defaultFields
-  } else if (newType === 'radar') {
-    const radarDefault = ['temp', 'humidity', 'precip', 'wind_spd']
-    const available = radarDefault.filter(v => fieldOptions.some(f => f.value === v))
-    selectedFieldsModel.value = available
-  } else if (newType === 'scatter') {
-    selectedFieldsModel.value = []
-  } else if (newType === 'heatmap') {
-    const tempField = fieldOptions.find(f => f.value === 'temp')
-    if (tempField) selectedFieldsModel.value = tempField.value
-  }
-
-  // 2. 预设城市
-  if (newType === 'heatmap') {
-    if (cityOptions.length) selectedCitiesModel.value = cityOptions[0].value
   } else {
     const defaultCities = cityOptions.slice(0, 2).map(c => c.value)
     selectedCitiesModel.value = defaultCities
   }
 
-  // 3. 预设数据源（全选）
-  if (sourceOptions.length) {
-    selectedSourceModel.value = sourceOptions.map(s => s.value)
+  // 字段设置
+  if (defaultFields.value && defaultFields.value.length > 0) {
+    if (newChartType == 'radar') {
+      selectedFieldsModel.value = defaultFields.value.slice(0, 6)
+    } else if (newChartType == 'scatter') {
+      scatterXModel.value = defaultFields.value[0]
+      scatterYModel.value = defaultFields.value[1] ? defaultFields.value[1] : defaultFields.value?.[0]
+    } else if (newChartType == 'heatmap') {
+      selectedFieldsModel.value = defaultFields.value[0]
+    } else {
+      selectedFieldsModel.value = defaultFields.value.slice(0, 2)
+    }
+
+  } else {
+    const defaultFields = fieldScoreOptions.slice(0, 2).map(f => f.value)
+    selectedFieldsModel.value = defaultFields
   }
 
-  // 4. 日期处理
-  if (newType === 'bar' || newType === 'radar') {
-    if (!barDateModel.value) {
-      barDateModel.value = dayjs().format('YYYY-MM-DD')
+  // 数据源设置
+  if (defaultSources.value && defaultSources.value.length > 0) {
+    if (newChartType == 'heatmap') {
+      selectedSourceModel.value = defaultSources.value[0]
+    } else {
+      selectedSourceModel.value = [...defaultSources.value]
+    }
+  }
+  // 日期设置（根据当前图表类型）
+  if (newChartType === 'bar' || newChartType === 'radar') {
+    if (defaultDateStart.value && defaultDateEnd.value) {
+      barDateModel.value = defaultDateStart.value
     }
   } else {
-    if (!dateRangeModel.value || dateRangeModel.value.length === 0) {
-      const end = dayjs()
-      const start = end.subtract(6, 'day')
-      dateRangeModel.value = [start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD')]
+    if (defaultDateStart.value && defaultDateEnd.value) {
+      dateRangeModel.value = [defaultDateStart.value, defaultDateEnd.value]
     }
   }
 }, { immediate: true })
@@ -556,20 +553,35 @@ watch(localChartType, (newType) => {
 
 /* 响应式 */
 @media (max-width: 1400px) {
-  .horizontal-checkbox-group { grid-template-columns: repeat(5, 1fr); }
+  .horizontal-checkbox-group {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }
 
 @media (max-width: 1200px) {
-  .horizontal-checkbox-group { grid-template-columns: repeat(4, 1fr); }
+  .horizontal-checkbox-group {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 @media (max-width: 992px) {
-  .horizontal-checkbox-group { grid-template-columns: repeat(3, 1fr); }
+  .horizontal-checkbox-group {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
-  .controls-panel { padding: 20px; }
-  .horizontal-checkbox-group { grid-template-columns: repeat(2, 1fr); }
-  .control-header { flex-direction: column; gap: 8px; }
+  .controls-panel {
+    padding: 20px;
+  }
+
+  .horizontal-checkbox-group {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .control-header {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 </style>

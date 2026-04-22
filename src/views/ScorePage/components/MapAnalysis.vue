@@ -506,14 +506,14 @@ watch(loaded, (isLoaded) => {
 }
 
 .map-analysis .stat-card .stat-label {
-  font-size: 13px;
+  font-size: 18px;
   color: #475569;
   letter-spacing: 0.3px;
   margin-bottom: 8px;
 }
 
 .map-analysis .stat-card .stat-value {
-  font-size: 28px;
+  font-size: 16px;
   font-weight: 700;
   color: #0f172a;
   line-height: 1.2;
