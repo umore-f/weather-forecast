@@ -155,7 +155,7 @@ export function useChartOptions(
       item => convertToLocalDate(item.forecast_time) === targetDate
     )
     if (!dataForDate.length) {
-      return { title: { text: `所选日期 ${targetDate} 无数据` } }
+      return { title: { text: `所选日期无数据` } }
     }
 
     const cities = [...new Set(dataForDate.map(d => d.city))]
@@ -167,8 +167,8 @@ export function useChartOptions(
     }
 
     const series = []
-    const colorPalette = ['#5470c6', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
-
+    // const colorPalette = ['#5470c6', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
+    const colorPalette = ['#5470c6', '#fac858', '#ee6666']
     for (const field of fields) {
       for (const source of sources) {
         const seriesName = `${getFieldLabel(field)} (${source})`
@@ -187,14 +187,15 @@ export function useChartOptions(
               { offset: 0, color: colorPalette[idx % colorPalette.length] },
               { offset: 1, color: '#fff' }
             ]),
+            // color: colorPalette[idx % colorPalette.length],
             shadowBlur: 4,
             shadowColor: 'rgba(0,0,0,0.1)'
           },
           label: {
             show: true,
-            position: 'top',
+            position: 'inside',
             fontWeight: 'bold',
-            fontSize: 11,
+            fontSize: 12,
             backgroundColor: 'rgba(0,0,0,0.6)',
             color: '#fff',
             borderRadius: 4,
@@ -270,7 +271,7 @@ export function useChartOptions(
       item => convertToLocalDate(item.forecast_time) === targetDate
     )
     if (!dataForDate.length) {
-      return { title: { text: `所选日期 ${targetDate} 无数据` } }
+      return { title: { text: `所选日期无数据` } }
     }
 
     const manualRanges = extraConfig.radarRanges?.value || {}
@@ -474,7 +475,7 @@ export function useChartOptions(
       d => d.city === city && d.source === source
     )
     if (!cityData.length) {
-      return { title: { text: `所选城市 ${city} 无数据` } }
+      return { title: { text: `所选城市无数据` } }
     }
 
     const data = cityData.map(item => [item.forecast_time, item[field]])

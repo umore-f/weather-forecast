@@ -267,7 +267,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled, Filter, Download, Refresh } from '@element-plus/icons-vue'
 import { errorScoreApi } from '@/apis/score'
@@ -962,6 +962,9 @@ const progressColor = (percentage) => {
   return '#F56C6C'
 }
 const tableRowClassName = ({ rowIndex }) => (rowIndex % 2 === 0 ? 'even-row' : '')
+onMounted(()=>{
+  refreshAllCharts()
+})
 </script>
 
 <style scoped>

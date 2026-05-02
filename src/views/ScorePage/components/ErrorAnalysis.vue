@@ -470,13 +470,16 @@ const fetchLineData = async () => {
 }
 
 const lineOptions = computed(() => {
+  const colorList = ['#5470c6', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452']
   if (!lineData.value.length) return {}
   const allDatesSet = new Set()
   lineData.value.forEach(series => series.data.forEach(point => allDatesSet.add(point.date)))
   const xAxisData = Array.from(allDatesSet).sort()
+  let idx = -1
   const series = lineData.value.map(series => {
     const valueMap = new Map(series.data.map(p => [p.date, p.value]))
     const data = xAxisData.map(date => valueMap.get(date) ?? null)
+    idx++
     return {
       name: series.source,
       type: 'line',
@@ -484,7 +487,7 @@ const lineOptions = computed(() => {
       smooth: true,
       symbol: 'circle',
       symbolSize: 6,
-      lineStyle: { width: 2.5 },
+      lineStyle: { width: 2.5,color: colorList[idx % colorList.length] },
       areaStyle: { opacity: 0.1 }
     }
   })
