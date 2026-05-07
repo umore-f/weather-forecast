@@ -1,6 +1,7 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
+  { path: '/', redirect: { name: 'home' } },
   {
     path: '/home',
     name: 'home',
