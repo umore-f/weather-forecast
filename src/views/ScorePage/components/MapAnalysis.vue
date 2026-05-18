@@ -412,7 +412,6 @@ watch([selectedSources, dateRange], () => {
 const resetFilters = () => {
   selectedSources.value = []
   dateRange.value = null
-  // 注意：重置后会在watch中自动调用fetchDataAndRender，清空数据
 }
 
 // 图表点击事件（下钻到城市）
@@ -457,7 +456,6 @@ const handleChartClick = async (params) => {
 }
 
 const handleChartRendered = () => {
-  // 可选：图表渲染完成后的回调
 }
 
 // 初始化默认值
